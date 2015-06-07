@@ -83,7 +83,7 @@ Compatibility with OpenBSD signify
 Signature written by minisign can be verified using OpenBSD's signify
 tool: public key files and signature files are compatible.
 
-However, minisign uses a slightly different format to store private keys.
+However, minisign uses a slightly different format to store secret keys.
 
 Minisign signatures include trusted comments in addition to untrusted
 comments. Trusted comments are signed, thus verified, before being
