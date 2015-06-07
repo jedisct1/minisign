@@ -56,11 +56,13 @@ Usage
     
     -G            generate a new key pair
     -S            sign a file
-    -V            verify that a signature is valid for a given file
+    -V            verify that a signature is valid for a given file    
     -m <file>     file to sign/verify
     -p <pubkey>   public key file (default: ./minisign.pub)
     -s <seckey>   secret key file (default: ./minisign.key)
-    -x <sigfile>  signature file (default: <file>.minisig)
+    -x <sigfile>  signature file (default: <file>.minisig)    
+    -c <comment>  add a one-line untrusted comment
+    -t <comment>  add a one-line trusted comment    
     -q            quiet mode, suppress output
 
 Trusted comments

@@ -42,7 +42,9 @@ usage(void)
          "-m <file>     file to sign/verify\n"
          "-p <pubkey>   public key file (default: ./minisign.pub)\n"
          "-s <seckey>   secret key file (default: ./minisign.key)\n"
-         "-x <sigfile>  signature file (default: <file>.minisig)\n"         
+         "-x <sigfile>  signature file (default: <file>.minisig)\n"
+         "-c <comment>  add a one-line untrusted comment\n"
+         "-t <comment>  add a one-line trusted comment\n"
          "-q            quiet mode, suppress output\n"         
         );
     exit(1);
