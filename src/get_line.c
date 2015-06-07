@@ -14,6 +14,8 @@
 # include <poll.h>
 # include <termios.h>
 # include <unistd.h>
+#elif defined(_WIN32)
+# include <windows.h>
 #endif
 
 #include "get_line.h"
@@ -28,34 +30,56 @@
 static void
 disable_echo(void)
 {
-# if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
-    struct termios p;
-
     fpurge(stdin);
     fflush(stdout);
     fflush(stderr);
-    if (!isatty(0) || tcgetattr(0, &p) != 0) {
-        return;
+
+# if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+    {
+        struct termios p;
+
+        if (!isatty(0) || tcgetattr(0, &p) != 0) {
+            return;
+        }
+        p.c_lflag &= ~ECHO;
+        tcsetattr(0, TCSAFLUSH, &p);
     }
-    p.c_lflag &= ~ECHO;
-    tcsetattr(0, TCSAFLUSH, &p);
+# elif defined(_WIN32)
+    {
+        HANDLE handle = GetStdHandle(STD_INPUT_HANDLE);
+        DWORD  mode = 0;
+
+        GetConsoleMode(handle, &mode);
+        SetConsoleMode(handle, mode & ~ENABLE_ECHO_INPUT);
+    }
 # endif
 }
 
 static void
 enable_echo(void)
 {
-# if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
-    struct termios p;
-
     fpurge(stdin);
     fflush(stdout);
     fflush(stderr);
-    if (!isatty(0) || tcgetattr(0, &p) != 0) {
-        return;
+
+# if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+    {
+        struct termios p;
+
+        if (!isatty(0) || tcgetattr(0, &p) != 0) {
+            return;
+        }
+        p.c_lflag |= ECHO;
+        tcsetattr(0, TCSAFLUSH, &p);
     }
-    p.c_lflag |= ECHO;
-    tcsetattr(0, TCSAFLUSH, &p);
+# elif defined(_WIN32)
+    {
+        HANDLE handle = GetStdHandle(STD_INPUT_HANDLE);
+        DWORD  mode = 0;
+
+        GetConsoleMode(handle, &mode);
+        SetConsoleMode(handle, mode | ENABLE_ECHO_INPUT);
+    }
 # endif
 }
 
