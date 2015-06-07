@@ -34,7 +34,17 @@ usage(void)
          "minisign -G -p pubkey -s seckey\n"
          "minisign -S -s seckey -m file [-x sigfile] [-c untrusted_comment] [-t trusted_comment]\n"
 #endif
-         "minisign -V -p pubkey -m file [-x sigfile] [-q]\n");
+         "minisign -V -p pubkey -m file [-x sigfile] [-q]\n"
+         "\n"
+         "-G            generate a new key pair\n"
+         "-S            sign a file\n"
+         "-V            verify that a signature is valid for a given file\n"
+         "-m <file>     file to sign/verify\n"
+         "-p <pubkey>   public key file (default: ./minisign.pub)\n"
+         "-s <seckey>   secret key file (default: ./minisign.key)\n"
+         "-x <sigfile>  signature file (default: <file>.minisig)\n"         
+         "-q            quiet mode, suppress output\n"         
+        );
     exit(1);
 }
 

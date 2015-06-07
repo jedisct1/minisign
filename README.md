@@ -45,14 +45,23 @@ Verifying a file
 This requires the signature `myfile.txt.minisig` to be present in the same
 directory.
 
-Options list
-------------
+Usage
+-----
 
-    $ minisign -G -p pubkey -s seckey
-    
-    $ minisign -S -s seckey -m file [-x sigfile] [-c untrusted_comment] [-t trusted_comment]
-    
+
+
+    $ minisign -G -p pubkey -s seckey    
+    $ minisign -S -s seckey -m file [-x sigfile] [-c untrusted_comment] [-t trusted_comment]    
     $ minisign -V -p pubkey -m file [-x sigfile] [-q]
+    
+    -G            generate a new key pair
+    -S            sign a file
+    -V            verify that a signature is valid for a given file
+    -m <file>     file to sign/verify
+    -p <pubkey>   public key file (default: ./minisign.pub)
+    -s <seckey>   secret key file (default: ./minisign.key)
+    -x <sigfile>  signature file (default: <file>.minisig)
+    -q            quiet mode, suppress output
 
 Trusted comments
 ----------------
