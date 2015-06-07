@@ -31,7 +31,7 @@ usage(void)
 {
     puts("Usage:\n"
 #ifndef VERIFY_ONLY
-         "minisign -G -p pubkey -s seckey\n"
+         "minisign -G -p pubkey -s seckey [-c untrusted_comment]\n"
          "minisign -S -s seckey -m file [-x sigfile] [-c untrusted_comment] [-t trusted_comment]\n"
 #endif
          "minisign -V -p pubkey -m file [-x sigfile] [-q]\n"
@@ -394,7 +394,7 @@ sign(const char *sk_file, const char *message_file, const char *sig_file,
 }
 
 static int
-generate(const char *pk_file, const char *sk_file)
+generate(const char *pk_file, const char *sk_file, const char *comment)
 {
     char          *pwd = xsodium_malloc(PASSWORDMAXBYTES);
     char          *pwd2 = xsodium_malloc(PASSWORDMAXBYTES);
@@ -444,7 +444,7 @@ generate(const char *pk_file, const char *sk_file)
     if ((fp = fopen_create_useronly(sk_file)) == NULL) {
         exit_err(sk_file);
     }
-    xfprintf(fp, COMMENT_PREFIX SECRETKEY_DEFAULT_COMMENT "\n");
+    xfprintf(fp, "%s%s\n", COMMENT_PREFIX, comment);
     xfput_b64(fp, (unsigned char *) (void *) seckey_struct,
               sizeof *seckey_struct);
     xfclose(fp);
@@ -555,7 +555,10 @@ main(int argc, char **argv)
     switch (action) {
 #ifndef VERIFY_ONLY
     case ACTION_GENERATE:
-        return generate(pk_file, sk_file) != 0;
+        if (comment == NULL || *comment == 0) {
+            comment = SECRETKEY_DEFAULT_COMMENT;
+        }
+        return generate(pk_file, sk_file, comment) != 0;
     case ACTION_SIGN:
         if (message_file == NULL) {
             usage();
