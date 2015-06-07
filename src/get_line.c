@@ -1,15 +1,20 @@
 
-#include <sys/types.h>
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+# include <sys/types.h>
+#endif
 
 #include <assert.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <limits.h>
-#include <poll.h>
 #include <stdio.h>
 #include <string.h>
-#include <termios.h>
-#include <unistd.h>
+
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+# include <fcntl.h>
+# include <poll.h>
+# include <termios.h>
+# include <unistd.h>
+#endif
 
 #include "get_line.h"
 #include "helpers.h"
@@ -23,6 +28,7 @@
 static void
 disable_echo(void)
 {
+# if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
     struct termios p;
 
     fpurge(stdin);
@@ -33,11 +39,13 @@ disable_echo(void)
     }
     p.c_lflag &= ~ECHO;
     tcsetattr(0, TCSAFLUSH, &p);
+# endif
 }
 
 static void
 enable_echo(void)
 {
+# if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
     struct termios p;
 
     fpurge(stdin);
@@ -48,6 +56,7 @@ enable_echo(void)
     }
     p.c_lflag |= ECHO;
     tcsetattr(0, TCSAFLUSH, &p);
+# endif
 }
 
 int
