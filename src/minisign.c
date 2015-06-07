@@ -432,7 +432,7 @@ generate(const char *pk_file, const char *sk_file)
     if ((fp = fopen_create_useronly(sk_file)) == NULL) {
         exit_err(sk_file);
     }
-    xfprintf(fp, "untrusted comment: minisign encrypted secret key\n");
+    xfprintf(fp, COMMENT_PREFIX SECRETKEY_DEFAULT_COMMENT "\n");
     xfput_b64(fp, (unsigned char *) (void *) seckey_struct,
               sizeof *seckey_struct);
     xfclose(fp);

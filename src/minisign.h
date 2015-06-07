@@ -11,6 +11,7 @@
 #define CHKALG "B2"
 #define COMMENT_PREFIX "untrusted comment: "
 #define DEFAULT_COMMENT "signature from minisign secret key"
+#define SECRETKEY_DEFAULT_COMMENT "minisign encrypted secret key"
 #define TRUSTED_COMMENT_PREFIX "trusted comment: "
 #define SIG_DEFAULT_PKFILE "minisign.pub";
 #define SIG_DEFAULT_SKFILE "minisign.key";
