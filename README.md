@@ -101,8 +101,8 @@ Signature format
     
 * `signature_algorithm`: `Ed`
 * `key_id`: 8 random bytes, matching the public key
-* `signature`: ed25519(<file data>)
-* `global_signature`: ed25519(<signature> || <trusted_comment>)
+* `signature`: `ed25519(<file data>)`
+* `global_signature`: `ed25519(<signature> || <trusted_comment>)`
 
 Public key format
 -----------------
