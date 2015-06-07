@@ -74,11 +74,11 @@ tool: public key files and signature files are compatible.
 
 However, minisign uses a slightly different format to store private keys.
 
-minisign signatures include trusted comments in addition to untrusted
+Minisign signatures include trusted comments in addition to untrusted
 comments. Trusted comments are signed, thus verified, before being
 displayed.
+
 This adds two lines to the signature files, that signify silently ignores.
-minisign has to be used in order to verify trusted comments.
 
 Signature format
 ----------------
