@@ -13,9 +13,12 @@ Dependencies:
 
 Compilation:
 
-    $ cmake .
+    $ mkdir build
+    $ cd build
+    $ cmake ..
     $ make
     # make install
+    $ cd ..
     
 Creating a key pair
 -------------------
