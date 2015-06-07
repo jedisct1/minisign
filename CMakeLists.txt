@@ -4,6 +4,10 @@ project(minisign C)
 
 include(CheckLibraryExists)
 
+IF(NOT CMAKE_BUILD_TYPE)
+  SET(CMAKE_BUILD_TYPE MinSizeRel CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
+ENDIF(NOT CMAKE_BUILD_TYPE)
+
 find_library(LIB_SODIUM NAMES sodium REQUIRED)
 
 add_executable(minisign

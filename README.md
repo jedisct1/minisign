@@ -18,7 +18,6 @@ Compilation:
     $ cmake ..
     $ make
     # make install
-    $ cd ..
     
 Creating a key pair
 -------------------
