@@ -75,7 +75,8 @@ They also include a second comment line, that cannot be modified
 without the secret key.
 
 Trusted comments can be used to add instructions or application-specific
-metadata (timestamps, version numbers, resource identifiers).
+metadata (intended file name, timestamps, resource identifiers,
+version numbers to prevent downgrade attacks).
 
 Compatibility with OpenBSD signify
 ----------------------------------
