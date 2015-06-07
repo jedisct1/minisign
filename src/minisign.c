@@ -453,7 +453,7 @@ generate(const char *pk_file, const char *sk_file, const char *comment)
     if ((fp = fopen(pk_file, "w")) == NULL) {
         exit_err(pk_file);
     }
-    xfprintf(fp, "untrusted comment: minisign public key %" PRIX64 "\n",
+    xfprintf(fp, COMMENT_PREFIX "minisign public key %" PRIX64 "\n",
              le64_load(pubkey_struct->keynum_pk.keynum));
     xfput_b64(fp, (unsigned char *) (void *) pubkey_struct,
               sizeof *pubkey_struct);
