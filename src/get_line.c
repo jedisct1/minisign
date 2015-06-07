@@ -30,7 +30,6 @@
 static void
 disable_echo(void)
 {
-    fpurge(stdin);
     fflush(stdout);
     fflush(stderr);
 
@@ -41,6 +40,7 @@ disable_echo(void)
         if (!isatty(0) || tcgetattr(0, &p) != 0) {
             return;
         }
+        fpurge(stdin);
         p.c_lflag &= ~ECHO;
         tcsetattr(0, TCSAFLUSH, &p);
     }
@@ -58,7 +58,6 @@ disable_echo(void)
 static void
 enable_echo(void)
 {
-    fpurge(stdin);
     fflush(stdout);
     fflush(stderr);
 
@@ -69,6 +68,7 @@ enable_echo(void)
         if (!isatty(0) || tcgetattr(0, &p) != 0) {
             return;
         }
+        fpurge(stdin);
         p.c_lflag |= ECHO;
         tcsetattr(0, TCSAFLUSH, &p);
     }
