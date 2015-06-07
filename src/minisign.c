@@ -30,22 +30,28 @@ static void
 usage(void)
 {
     puts("Usage:\n"
-#ifndef VERIFY_ONLY
          "minisign -G -p pubkey -s seckey [-c untrusted_comment]\n"
+#ifndef VERIFY_ONLY
          "minisign -S -s seckey -m file [-x sigfile] [-c untrusted_comment] [-t trusted_comment]\n"
-#endif
          "minisign -V -p pubkey -m file [-x sigfile] [-q]\n"
+#endif
          "\n"
+#ifndef VERIFY_ONLY
          "-G            generate a new key pair\n"
          "-S            sign a file\n"
+#endif
          "-V            verify that a signature is valid for a given file\n"
          "-m <file>     file to sign/verify\n"
          "-p <pubkey>   public key file (default: ./minisign.pub)\n"
+#ifndef VERIFY_ONLY
          "-s <seckey>   secret key file (default: ./minisign.key)\n"
+#endif
          "-x <sigfile>  signature file (default: <file>.minisig)\n"
+#ifndef VERIFY_ONLY
          "-c <comment>  add a one-line untrusted comment\n"
          "-t <comment>  add a one-line trusted comment\n"
-         "-q            quiet mode, suppress output\n"         
+#endif
+         "-q            quiet mode, suppress output\n"
         );
     exit(1);
 }

@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 project(minisign C)
 
+option(VERIFY_ONLY "verify-only" OFF)
+
 include(CheckLibraryExists)
 
 find_library(LIB_SODIUM NAMES sodium REQUIRED)
