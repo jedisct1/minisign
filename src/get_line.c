@@ -40,7 +40,6 @@ disable_echo(void)
         if (!isatty(0) || tcgetattr(0, &p) != 0) {
             return;
         }
-        fpurge(stdin);
         p.c_lflag &= ~ECHO;
         tcsetattr(0, TCSAFLUSH, &p);
     }
@@ -68,7 +67,6 @@ enable_echo(void)
         if (!isatty(0) || tcgetattr(0, &p) != 0) {
             return;
         }
-        fpurge(stdin);
         p.c_lflag |= ECHO;
         tcsetattr(0, TCSAFLUSH, &p);
     }
