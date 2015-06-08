@@ -272,6 +272,7 @@ seckey_load(const char *sk_file)
          le64_load(seckey_struct->kdf_memlimit_le)) != 0) {
         abort();
     }
+    sodium_free(pwd);
     xor_buf((unsigned char *) (void *) &seckey_struct->keynum_sk, stream,
             sizeof seckey_struct->keynum_sk);
     sodium_free(stream);
