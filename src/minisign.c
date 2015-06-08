@@ -19,9 +19,9 @@
 #include "minisign.h"
 
 #ifndef VERIFY_ONLY
-static const char *getopt_options = "GSVhc:m:p:qs:t:x:";
+static const char *getopt_options = "GSVhc:m:p:qs:t:vx:";
 #else
-static const char *getopt_options = "Vhm:p:qx:";
+static const char *getopt_options = "Vhm:p:qvx:";
 #endif
 
 static void usage(void) __attribute__((noreturn));
@@ -52,6 +52,7 @@ usage(void)
          "-t <comment>  add a one-line trusted comment\n"
 #endif
          "-q            quiet mode, suppress output\n"
+         "-v            display version number\n"
         );
     exit(1);
 }
@@ -564,6 +565,9 @@ main(int argc, char **argv)
         case 'x':
             sig_file = optarg;
             break;
+        case 'v':
+            puts(VERSION_STRING);
+            return 0;
         }
     }
     sodium_init();
