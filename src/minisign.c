@@ -500,7 +500,7 @@ default_trusted_comment(const char *message_file)
     char   *ret;
     time_t  ts = time(NULL);
 
-    if (asprintf(&ret, "timestamp: %lu file: %s",
+    if (asprintf(&ret, "timestamp:%lu\tfile:%s",
                  (unsigned long) ts, file_basename(message_file)) < 0 ||
         ret == NULL) {
         exit_err("asprintf()");
