@@ -5,6 +5,10 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#if !defined(__GNUC__) && !defined(__attribute__)
+# define __attribute__(X)
+#endif
+
 uint64_t le64_load(const unsigned char *p);
 
 void le64_store(unsigned char *p, uint64_t x);
