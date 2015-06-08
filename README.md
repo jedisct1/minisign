@@ -133,4 +133,4 @@ Secret key format
 * `keynum_sk`: `<kdf_output> ^ (<key_id> || secret_key> || <checksum>)`
 * `key_id`: 8 random bytes
 * `secret_key`: Ed25519 secret key
-* `checksum`: `Blake2b(<key_id> || <secret_key>)`, 32 bytes
+* `checksum`: `Blake2b(<signature_algorithm> || <key_id> || <secret_key>)`, 32 bytes

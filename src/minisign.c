@@ -202,6 +202,8 @@ seckey_chk(unsigned char chk[crypto_generichash_BYTES],
     crypto_generichash_state hs;
 
     crypto_generichash_init(&hs, NULL, 0U, sizeof seckey_struct->keynum_sk.chk);
+    crypto_generichash_update(&hs, seckey_struct->sig_alg,
+                              sizeof seckey_struct->sig_alg);
     crypto_generichash_update(&hs, seckey_struct->keynum_sk.keynum,
                               sizeof seckey_struct->keynum_sk.keynum);
     crypto_generichash_update(&hs, seckey_struct->keynum_sk.sk,
