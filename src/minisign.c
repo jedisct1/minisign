@@ -262,6 +262,8 @@ seckey_load(const char *sk_file)
     if (get_password(pwd, PASSWORDMAXBYTES, "Password: ") != 0) {
         exit_msg("get_password()");
     }
+    printf("Deriving a key from the password and decrypting the secret key... ");
+    fflush(stdout);
     stream = xsodium_malloc(sizeof seckey_struct->keynum_sk);
     if (crypto_pwhash_scryptsalsa208sha256
         (stream, sizeof seckey_struct->keynum_sk, pwd, strlen(pwd),
@@ -273,6 +275,7 @@ seckey_load(const char *sk_file)
     xor_buf((unsigned char *) (void *) &seckey_struct->keynum_sk, stream,
             sizeof seckey_struct->keynum_sk);
     sodium_free(stream);
+    puts("done");
     seckey_chk(chk, seckey_struct);
     if (memcmp(chk, seckey_struct->keynum_sk.chk, sizeof chk) != 0) {
         exit_msg("Wrong password for that key");
@@ -435,6 +438,8 @@ generate(const char *pk_file, const char *sk_file, const char *comment)
     if (strcmp(pwd, pwd2) != 0) {
         exit_msg("Passwords don't match");
     }
+    printf("Deriving a key from the password in order to encrypt the secret key... ");
+    fflush(stdout);
     stream = xsodium_malloc(sizeof seckey_struct->keynum_sk);
     if (crypto_pwhash_scryptsalsa208sha256
         (stream, sizeof seckey_struct->keynum_sk, pwd, strlen(pwd),
@@ -448,6 +453,7 @@ generate(const char *pk_file, const char *sk_file, const char *comment)
     xor_buf((unsigned char *) (void *) &seckey_struct->keynum_sk, stream,
             sizeof seckey_struct->keynum_sk);
     sodium_free(stream);
+    puts("done");
 
     if ((fp = fopen_create_useronly(sk_file)) == NULL) {
         exit_err(sk_file);
