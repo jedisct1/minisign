@@ -110,7 +110,7 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES],
         exit_msg("Untrusted signature comment should start with "
                  "\"" COMMENT_PREFIX "\"");
     }
-    sig_s_size = B64_MAX_LEN_FROM_BIN_LEN(sizeof *sig_struct) + 1U;
+    sig_s_size = B64_MAX_LEN_FROM_BIN_LEN(sizeof *sig_struct) + 2U;
     sig_s = xmalloc(sig_s_size);
     if (fgets(sig_s, (int) sig_s_size, fp) == NULL) {
         exit_err(sig_file);
@@ -128,7 +128,7 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES],
             trusted_comment + sizeof TRUSTED_COMMENT_PREFIX - 1U,
             strlen(trusted_comment + sizeof TRUSTED_COMMENT_PREFIX - 1U) + 1U);
     trim(trusted_comment);
-    global_sig_s_size = B64_MAX_LEN_FROM_BIN_LEN(crypto_sign_BYTES) + 1U;
+    global_sig_s_size = B64_MAX_LEN_FROM_BIN_LEN(crypto_sign_BYTES) + 2U;
     global_sig_s = xmalloc(global_sig_s_size);
     if (fgets(global_sig_s, (int) global_sig_s_size, fp) == NULL) {
         exit_err(sig_file);
@@ -173,7 +173,7 @@ pubkey_load(const char *pk_file)
     if (fgets(pk_comment, (int) sizeof pk_comment, fp) == NULL) {
         exit_err(pk_file);
     }
-    pubkey_s_size = B64_MAX_LEN_FROM_BIN_LEN(sizeof *pubkey_struct) + 1U;
+    pubkey_s_size = B64_MAX_LEN_FROM_BIN_LEN(sizeof *pubkey_struct) + 2U;
     pubkey_s = xmalloc(pubkey_s_size);
     if (fgets(pubkey_s, (int) pubkey_s_size, fp) == NULL) {
         exit_err(pk_file);
@@ -232,7 +232,7 @@ seckey_load(const char *sk_file)
         exit_err(sk_file);
     }
     sodium_memzero(sk_comment, sizeof sk_comment);
-    seckey_s_size = B64_MAX_LEN_FROM_BIN_LEN(sizeof *seckey_struct) + 1U;
+    seckey_s_size = B64_MAX_LEN_FROM_BIN_LEN(sizeof *seckey_struct) + 2U;
     seckey_s = xsodium_malloc(seckey_s_size);
     seckey_struct = xsodium_malloc(sizeof *seckey_struct);
     if (fgets(seckey_s, (int) seckey_s_size, fp) == NULL) {
