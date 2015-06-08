@@ -66,6 +66,7 @@ Usage
     -c <comment>  add a one-line untrusted comment
     -t <comment>  add a one-line trusted comment    
     -q            quiet mode, suppress output
+    -v            display version number
 
 Trusted comments
 ----------------
