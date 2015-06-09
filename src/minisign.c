@@ -531,7 +531,7 @@ default_trusted_comment(const char *message_file)
 int
 main(int argc, char **argv)
 {
-    const char *pk_file = SIG_DEFAULT_PKFILE;
+    const char *pk_file = NULL;
     const char *sk_file = SIG_DEFAULT_SKFILE;
     const char *sig_file = NULL;
     const char *message_file = NULL;
@@ -600,6 +600,9 @@ main(int argc, char **argv)
         if (comment == NULL || *comment == 0) {
             comment = SECRETKEY_DEFAULT_COMMENT;
         }
+        if (pk_file == NULL) {
+            pk_file = SIG_DEFAULT_PKFILE;
+        }
         return generate(pk_file, sk_file, comment) != 0;
     case ACTION_SIGN:
         if (message_file == NULL) {
@@ -623,6 +626,11 @@ main(int argc, char **argv)
         }
         if (sig_file == NULL || *sig_file == 0) {
             sig_file = append_sig_suffix(message_file);
+        }
+        if (pk_file == NULL && pubkey_s == NULL) {
+            pk_file = SIG_DEFAULT_PKFILE;
+        } else if (pk_file != NULL && pubkey_s == NULL) {
+            usage();
         }
         return verify(pubkey_load(pk_file, pubkey_s), message_file,
                       sig_file, quiet) != 0;
