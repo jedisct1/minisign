@@ -24,39 +24,38 @@ Creating a key pair
 
     $ minisign -G
 
-The public key is put into the `minisign.pub` file, and the secret key
-into the `minisign.key` file.
+The public key is printed and put into the `minisign.pub` file. The secret key
+is encrypted and saved as `minisign.key` file.
 
 Signing a file
 --------------
 
-    $ minisign -S -m myfile.txt
+    $ minisign -Sm myfile.txt
 
 Or to include a comment in the signature, that will be verified and
 displayed when verifying the file:
 
-    $ minisign -S -m myfile.txt -t 'This comment will be signed as well'
+    $ minisign -Sm myfile.txt -t 'This comment will be signed as well'
 
 The signature is put into `myfile.txt.minisig`.
 
 Verifying a file
 ----------------
 
-    $ minisign -V -P RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3 -m myfile.txt
+    $ minisign -Vm myfile.txt -P RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3
 
 or
 
-    $ minisign -V -p signature.pub -m myfile.txt
+    $ minisign -Vm myfile.txt -p signature.pub
 
 This requires the signature `myfile.txt.minisig` to be present in the same
 directory.
-The public key can either reside in a file (`./minisign.pub` by
-default) or can be directly specified on the command line.
+
+The public key can either reside in a file (`./minisign.pub` by default) or be
+directly specified on the command line.
 
 Usage
 -----
-
-
 
     $ minisign -G [-p pubkey] [-s seckey]
     $ minisign -S [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file
