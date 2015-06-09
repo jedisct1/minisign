@@ -19,9 +19,9 @@
 #include "minisign.h"
 
 #ifndef VERIFY_ONLY
-static const char *getopt_options = "GSVhc:m:p:qs:t:vx:";
+static const char *getopt_options = "GSVhc:m:P:p:qs:t:vx:";
 #else
-static const char *getopt_options = "Vhm:p:qvx:";
+static const char *getopt_options = "Vhm:P:p:qvx:";
 #endif
 
 static void usage(void) __attribute__((noreturn));
@@ -30,29 +30,30 @@ static void
 usage(void)
 {
     puts("Usage:\n"
-         "minisign -G -p pubkey -s seckey [-c untrusted_comment]\n"
 #ifndef VERIFY_ONLY
-         "minisign -S -s seckey -m file [-x sigfile] [-c untrusted_comment] [-t trusted_comment]\n"
-         "minisign -V -p pubkey -m file [-x sigfile] [-q]\n"
+         "minisign -G [-p pubkey] [-s seckey]\n"
+         "minisign -S [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file\n"
 #endif
+         "minisign -V [-x sigfile] [-p pubkeyfile | -P pubkey] [-q] -m file\n"
          "\n"
 #ifndef VERIFY_ONLY
-         "-G            generate a new key pair\n"
-         "-S            sign a file\n"
+         "-G                generate a new key pair\n"
+         "-S                sign a file\n"
 #endif
-         "-V            verify that a signature is valid for a given file\n"
-         "-m <file>     file to sign/verify\n"
-         "-p <pubkey>   public key file (default: ./minisign.pub)\n"
+         "-V                verify that a signature is valid for a given file\n"
+         "-m <file>         file to sign/verify\n"
+         "-p <pubkeyfile>   public key file (default: ./minisign.pub)\n"
+         "-P <pubkey>       public key, as a base64 string\n"
 #ifndef VERIFY_ONLY
-         "-s <seckey>   secret key file (default: ./minisign.key)\n"
+         "-s <seckey>       secret key file (default: ./minisign.key)\n"
 #endif
-         "-x <sigfile>  signature file (default: <file>.minisig)\n"
+         "-x <sigfile>      signature file (default: <file>.minisig)\n"
 #ifndef VERIFY_ONLY
-         "-c <comment>  add a one-line untrusted comment\n"
-         "-t <comment>  add a one-line trusted comment\n"
+         "-c <comment>      add a one-line untrusted comment\n"
+         "-t <comment>      add a one-line trusted comment\n"
 #endif
-         "-q            quiet mode, suppress output\n"
-         "-v            display version number\n"
+         "-q                quiet mode, suppress output\n"
+         "-v                display version number\n"
         );
     exit(1);
 }
@@ -159,14 +160,33 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES],
 }
 
 static PubkeyStruct *
-pubkey_load(const char *pk_file)
+pubkey_load_string(const char *pubkey_s)
+{
+    PubkeyStruct *pubkey_struct;
+    size_t        pubkey_struct_len;
+
+    pubkey_struct = xmalloc(sizeof *pubkey_struct);
+    if (b64_to_bin((unsigned char *) (void *) pubkey_struct, pubkey_s,
+                   sizeof *pubkey_struct, strlen(pubkey_s),
+                   &pubkey_struct_len) == NULL ||
+        pubkey_struct_len != sizeof *pubkey_struct) {
+        exit_msg("base64 conversion failed");
+    }
+    if (memcmp(pubkey_struct->sig_alg, SIGALG,
+               sizeof pubkey_struct->sig_alg) != 0) {
+        exit_msg("Unsupported signature algorithm");
+    }
+    return pubkey_struct;
+}
+
+static PubkeyStruct *
+pubkey_load_file(const char *pk_file)
 {
     char          pk_comment[COMMENTMAXBYTES];
     PubkeyStruct *pubkey_struct;
     FILE         *fp;
-    char         *pubkey_s;
+    char         *pubkey_s = NULL;
     size_t        pubkey_s_size;
-    size_t        pubkey_struct_len;
 
     if ((fp = fopen(pk_file, "r")) == NULL) {
         exit_err(pk_file);
@@ -181,19 +201,20 @@ pubkey_load(const char *pk_file)
     }
     trim(pubkey_s);
     xfclose(fp);
-    pubkey_struct = xmalloc(sizeof *pubkey_struct);
-    if (b64_to_bin((unsigned char *) (void *) pubkey_struct, pubkey_s,
-                   sizeof *pubkey_struct, strlen(pubkey_s),
-                   &pubkey_struct_len) == NULL ||
-        pubkey_struct_len != sizeof *pubkey_struct) {
-        exit_msg("base64 conversion failed");
-    }
+    pubkey_struct = pubkey_load_string(pubkey_s);
     free(pubkey_s);
-    if (memcmp(pubkey_struct->sig_alg, SIGALG,
-               sizeof pubkey_struct->sig_alg) != 0) {
-        exit_msg("Unsupported signature algorithm");
-    }
+
     return pubkey_struct;
+}
+
+static PubkeyStruct *
+pubkey_load(const char *pk_file, const char *pubkey_s)
+{
+    if (pubkey_s != NULL) {
+        return pubkey_load_string(pubkey_s);
+    } else {
+        return pubkey_load_file(pk_file);
+    }
 }
 
 static void
@@ -289,28 +310,26 @@ seckey_load(const char *sk_file)
 #endif
 
 static int
-verify(const char *pk_file, const char *message_file, const char *sig_file,
-       int quiet)
+verify(PubkeyStruct *pubkey_struct, const char *message_file,
+       const char *sig_file, int quiet)
 {
     char           trusted_comment[TRUSTEDCOMMENTMAXBYTES];
     unsigned char  global_sig[crypto_sign_BYTES];
     unsigned char *sig_and_trusted_comment;
     SigStruct     *sig_struct;
-    PubkeyStruct  *pubkey_struct;
     unsigned char *message;
     size_t         message_len;
     size_t         trusted_comment_len;
 
-    pubkey_struct = pubkey_load(pk_file);
     message = message_load(&message_len, message_file);
     sig_struct = sig_load(sig_file, global_sig,
                           trusted_comment, sizeof trusted_comment);
     if (memcmp(sig_struct->keynum, pubkey_struct->keynum_pk.keynum,
                sizeof sig_struct->keynum) != 0) {
         fprintf(stderr, "Signature key id in %s is %" PRIX64 "\n"
-                "but the key id in %s is %" PRIX64 "\n",
+                "but the key id in the public key is %" PRIX64 "\n",
                 sig_file, le64_load(sig_struct->keynum),
-                pk_file, le64_load(pubkey_struct->keynum_pk.keynum));
+                le64_load(pubkey_struct->keynum_pk.keynum));
         exit(1);
     }
     if (crypto_sign_verify_detached(sig_struct->sig, message, message_len,
@@ -517,6 +536,7 @@ main(int argc, char **argv)
     const char *sig_file = NULL;
     const char *message_file = NULL;
     const char *comment = NULL;
+    const char *pubkey_s = NULL;
     const char *trusted_comment = NULL;
     int         opt_flag;
     int         quiet = 0;
@@ -552,6 +572,9 @@ main(int argc, char **argv)
             break;
         case 'p':
             pk_file = optarg;
+            break;
+        case 'P':
+            pubkey_s = optarg;
             break;
         case 'q':
             quiet = 1;
@@ -601,7 +624,8 @@ main(int argc, char **argv)
         if (sig_file == NULL || *sig_file == 0) {
             sig_file = append_sig_suffix(message_file);
         }
-        return verify(pk_file, message_file, sig_file, quiet) != 0;
+        return verify(pubkey_load(pk_file, pubkey_s), message_file,
+                      sig_file, quiet) != 0;
     default:
         usage();
     }

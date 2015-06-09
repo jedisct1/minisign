@@ -18,12 +18,12 @@ Compilation:
     $ cmake ..
     $ make
     # make install
-    
+
 Creating a key pair
 -------------------
 
     $ minisign -G
-    
+
 The public key is put into the `minisign.pub` file, and the secret key
 into the `minisign.key` file.
 
@@ -31,42 +31,47 @@ Signing a file
 --------------
 
     $ minisign -S -m myfile.txt
-    
+
 Or to include a comment in the signature, that will be verified and
 displayed when verifying the file:
 
     $ minisign -S -m myfile.txt -t 'This comment will be signed as well'
-    
+
 The signature is put into `myfile.txt.minisig`.
 
 Verifying a file
 ----------------
 
-    $ minisign -V -m myfile.txt
-    
+    $ minisign -V -P RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3 -m myfile.txt
+or
+    $ minisign -V -p signature.pub -m myfile.txt
+
 This requires the signature `myfile.txt.minisig` to be present in the same
 directory.
+The public key can either reside in a file (`./minisign.pub` by
+default) or can be directly specified on the command line.
 
 Usage
 -----
 
 
 
-    $ minisign -G -p pubkey -s seckey    
-    $ minisign -S -s seckey -m file [-x sigfile] [-c untrusted_comment] [-t trusted_comment]    
-    $ minisign -V -p pubkey -m file [-x sigfile] [-q]
-    
-    -G            generate a new key pair
-    -S            sign a file
-    -V            verify that a signature is valid for a given file    
-    -m <file>     file to sign/verify
-    -p <pubkey>   public key file (default: ./minisign.pub)
-    -s <seckey>   secret key file (default: ./minisign.key)
-    -x <sigfile>  signature file (default: <file>.minisig)    
-    -c <comment>  add a one-line untrusted comment
-    -t <comment>  add a one-line trusted comment    
-    -q            quiet mode, suppress output
-    -v            display version number
+    $ minisign -G [-p pubkey] [-s seckey]
+    $ minisign -S [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file
+    $ minisign -V [-x sigfile] [-p pubkeyfile | -P pubkey] [-q] -m file
+
+    -G                generate a new key pair
+    -S                sign a file
+    -V                verify that a signature is valid for a given file
+    -m <file>         file to sign/verify
+    -p <pubkeyfile>   public key file (default: ./minisign.pub)
+    -P <pubkey>       public key, as a base64 string
+    -s <seckey>       secret key file (default: ./minisign.key)
+    -x <sigfile>      signature file (default: <file>.minisig)
+    -c <comment>      add a one-line untrusted comment
+    -t <comment>      add a one-line trusted comment
+    -q                quiet mode, suppress output
+    -v                display version number
 
 Trusted comments
 ----------------
@@ -102,7 +107,7 @@ Signature format
     base64(<signature_algorithm> || <key_id> || <signature>)
     trusted_comment: <arbitrary text>
     base64(<global_signature>)
-    
+
 * `signature_algorithm`: `Ed`
 * `key_id`: 8 random bytes, matching the public key
 * `signature`: `ed25519(<file data>)`
@@ -113,7 +118,7 @@ Public key format
 
     untrusted comment: <arbitrary text>
     base64(<signature_algorithm> || <key_id> || <public_key>)
-    
+
 * `signature_algorithm`: `Ed`
 * `key_id`: 8 random bytes
 * `public_key`: Ed25519 public key
