@@ -298,7 +298,7 @@ seckey_load(const char *sk_file)
     xor_buf((unsigned char *) (void *) &seckey_struct->keynum_sk, stream,
             sizeof seckey_struct->keynum_sk);
     sodium_free(stream);
-    puts("done");
+    puts("done\n");
     seckey_chk(chk, seckey_struct);
     if (memcmp(chk, seckey_struct->keynum_sk.chk, sizeof chk) != 0) {
         exit_msg("Wrong password for that key");
@@ -452,6 +452,7 @@ generate(const char *pk_file, const char *sk_file, const char *comment)
            sizeof pubkey_struct->keynum_pk.keynum);
     memcpy(pubkey_struct->sig_alg, SIGALG, sizeof pubkey_struct->sig_alg);
 
+    puts("Please enter a password to protect the secret key.\n");
     if (get_password(pwd, PASSWORDMAXBYTES, "Password: ") != 0 ||
         get_password(pwd2, PASSWORDMAXBYTES, "Password (one more time): ") != 0) {
         exit_msg("get_password()");
@@ -474,7 +475,7 @@ generate(const char *pk_file, const char *sk_file, const char *comment)
     xor_buf((unsigned char *) (void *) &seckey_struct->keynum_sk, stream,
             sizeof seckey_struct->keynum_sk);
     sodium_free(stream);
-    puts("done");
+    puts("done\n");
 
     if ((fp = fopen_create_useronly(sk_file)) == NULL) {
         exit_err(sk_file);
@@ -493,7 +494,16 @@ generate(const char *pk_file, const char *sk_file, const char *comment)
     xfput_b64(fp, (unsigned char *) (void *) pubkey_struct,
               sizeof *pubkey_struct);
     xfclose(fp);
-    sodium_free(pubkey_struct);
+    
+    printf("The secret key was saved as %s - Keep it secret!\n", sk_file);
+    printf("The public key was saved as %s - That one can be public.\n\n", pk_file);
+    puts("Files signed using this key pair can be verified with the following command:\n");
+    printf("minisign -Vm <file> -P ");
+    xfput_b64(stdout, (unsigned char *) (void *) pubkey_struct,
+              sizeof *pubkey_struct);
+    puts("");
+    
+    sodium_free(pubkey_struct);    
 
     return 0;
 }
