@@ -43,7 +43,9 @@ Verifying a file
 ----------------
 
     $ minisign -V -P RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3 -m myfile.txt
+
 or
+
     $ minisign -V -p signature.pub -m myfile.txt
 
 This requires the signature `myfile.txt.minisig` to be present in the same
