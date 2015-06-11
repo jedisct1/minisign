@@ -14,8 +14,8 @@
       <h1 class="project-name">Minisign</h1>
       <h2 class="project-tagline">A dead simple tool to sign files and verify signatures.</h2>
       <a href="https://github.com/jedisct1/minisign" class="btn">View on GitHub</a>
-      <a href="https://github.com/jedisct1/minisign/zipball/master" class="btn">Download .zip</a>
-      <a href="https://github.com/jedisct1/minisign/tarball/master" class="btn">Download .tar.gz</a>
+      <a href="https://github.com/jedisct1/minisign/tarball/master" class="btn">Download source code</a>
+      <a href="https://github.com/jedisct1/minisign/releases/download/0.3/minisign-win32.zip" class="btn">Download Windows executable</a>
     </section>
 
     <section class="main-content">
@@ -23,25 +23,6 @@
 <a id="minisign" class="anchor" href="#minisign" aria-hidden="true"><span class="octicon octicon-link"></span></a>Minisign</h1>
 
 <p>Minisign is a dead simple tool to sign files and verify signatures.</p>
-
-<h2>
-<a id="compilation--installation" class="anchor" href="#compilation--installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Compilation / installation</h2>
-
-<p>Dependencies:</p>
-
-<ul>
-<li><a href="http://doc.libsodium.org/">libsodium</a></li>
-<li>cmake</li>
-</ul>
-
-<p>Compilation:</p>
-
-<pre><code>$ mkdir build
-$ cd build
-$ cmake ..
-$ make
-# make install
-</code></pre>
 
 <h2>
 <a id="creating-a-key-pair" class="anchor" href="#creating-a-key-pair" aria-hidden="true"><span class="octicon octicon-link"></span></a>Creating a key pair</h2>
@@ -116,6 +97,25 @@ without the secret key.</p>
 <p>Trusted comments can be used to add instructions or application-specific
 metadata (intended file name, timestamps, resource identifiers,
 version numbers to prevent downgrade attacks).</p>
+
+<h2>
+<a id="compilation--installation" class="anchor" href="#compilation--installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Compilation / installation</h2>
+
+<p>Dependencies:</p>
+
+<ul>
+<li><a href="http://doc.libsodium.org/">libsodium</a></li>
+<li>cmake</li>
+</ul>
+
+<p>Compilation:</p>
+
+<pre><code>$ mkdir build
+$ cd build
+$ cmake ..
+$ make
+# make install
+</code></pre>
 
 <h2>
 <a id="compatibility-with-openbsd-signify" class="anchor" href="#compatibility-with-openbsd-signify" aria-hidden="true"><span class="octicon octicon-link"></span></a>Compatibility with OpenBSD signify</h2>
@@ -216,7 +216,6 @@ base64(&lt;signature_algorithm&gt; || &lt;kdf_algorithm&gt; || &lt;cksum_algorit
 
     </section>
 
-  
+
   </body>
 </html>
-
