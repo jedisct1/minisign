@@ -19,9 +19,9 @@
 #include "minisign.h"
 
 #ifndef VERIFY_ONLY
-static const char *getopt_options = "GSVhc:m:P:p:qs:t:vx:";
+static const char *getopt_options = "GSVhc:m:P:p:qQs:t:vx:";
 #else
-static const char *getopt_options = "Vhm:P:p:qvx:";
+static const char *getopt_options = "Vhm:P:p:qQvx:";
 #endif
 
 static void usage(void) __attribute__((noreturn));
@@ -53,6 +53,7 @@ usage(void)
          "-t <comment>      add a one-line trusted comment\n"
 #endif
          "-q                quiet mode, suppress output\n"
+         "-Q                pretty quiet mode, only print the trusted comment\n"
          "-v                display version number\n"
         );
     exit(1);
@@ -361,6 +362,8 @@ verify(PubkeyStruct *pubkey_struct, const char *message_file,
     if (quiet == 0) {
         puts("Signature and comment signature verified");
         printf("Trusted comment: %s\n", trusted_comment);
+    } else if (quiet == 2) {
+        puts(trusted_comment);
     }
     return 0;
 }
@@ -588,6 +591,9 @@ main(int argc, char **argv)
             break;
         case 'q':
             quiet = 1;
+            break;
+        case 'Q':
+            quiet = 2;
             break;
         case 's':
             sk_file = optarg;
