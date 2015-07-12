@@ -16,7 +16,7 @@
 #define SIG_DEFAULT_PKFILE "minisign.pub";
 #define SIG_DEFAULT_SKFILE "minisign.key";
 #define SIG_SUFFIX ".minisig"
-#define VERSION_STRING "minisign 0.3"
+#define VERSION_STRING "minisign 0.4"
 
 typedef struct KeynumSK_ {
     unsigned char keynum[KEYNUMBYTES];
