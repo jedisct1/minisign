@@ -27,3 +27,6 @@ Compilation:
     $ make
     # make install
 
+Minisign is also available in Homebrew:
+
+    $ brew install minisign
