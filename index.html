@@ -200,7 +200,7 @@ base64(&lt;signature_algorithm&gt; || &lt;kdf_algorithm&gt; || &lt;cksum_algorit
 <code>kdf_memlimit</code>: <code>crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE</code>
 </li>
 <li>
-<code>keynum_sk</code>: <code>&lt;kdf_output&gt; ^ (&lt;key_id&gt; || secret_key&gt; || &lt;checksum&gt;)</code>
+<code>keynum_sk</code>: <code>&lt;kdf_output&gt; ^ (&lt;key_id&gt; || &lt;secret_key&gt; || &lt;public_key&gt; || &lt;checksum&gt;)</code>, 104 bytes
 </li>
 <li>
 <code>key_id</code>: 8 random bytes</li>
