@@ -67,7 +67,7 @@ message_load(size_t *message_len, const char *message_file)
     off_t          message_len_;
 
     if ((fp = fopen(message_file, "rb")) == NULL ||
-        fseeko(fp, 0 , SEEK_END) != 0 ||
+        fseeko(fp, 0, SEEK_END) != 0 ||
         (message_len_ = ftello(fp)) == (off_t) -1) {
         exit_err(message_file);
     }
