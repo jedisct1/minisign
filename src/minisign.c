@@ -645,7 +645,7 @@ main(int argc, char **argv)
         }
         if (pk_file == NULL && pubkey_s == NULL) {
             pk_file = SIG_DEFAULT_PKFILE;
-        } else if (pk_file != NULL && pubkey_s == NULL) {
+        } else if (pk_file != NULL && pubkey_s != NULL) {
             usage();
         }
         return verify(pubkey_load(pk_file, pubkey_s), message_file,
