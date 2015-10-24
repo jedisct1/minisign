@@ -30,3 +30,7 @@ Compilation:
 Minisign is also available in Homebrew:
 
     $ brew install minisign
+
+Minisign is also available in Scoop on Windows:
+
+    $ scoop install minisign
