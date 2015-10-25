@@ -42,14 +42,14 @@ void
 exit_err(const char *msg)
 {
     perror(msg == NULL ? "" : msg);
-    exit(1);
+    exit(2);
 }
 
 void
 exit_msg(const char *msg)
 {
     fprintf(stderr, "%s\n", msg);
-    exit(1);
+    exit(2);
 }
 
 void *

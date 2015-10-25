@@ -56,7 +56,7 @@ usage(void)
          "-Q                pretty quiet mode, only print the trusted comment\n"
          "-v                display version number\n"
         );
-    exit(1);
+    exit(2);
 }
 
 static unsigned char *
