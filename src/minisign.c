@@ -19,9 +19,9 @@
 #include "minisign.h"
 
 #ifndef VERIFY_ONLY
-static const char *getopt_options = "GSVhc:m:P:p:qQs:t:vx:";
+static const char *getopt_options = "GSVhc:m:oP:p:qQs:t:vx:";
 #else
-static const char *getopt_options = "Vhm:P:p:qQvx:";
+static const char *getopt_options = "Vhm:oP:p:qQvx:";
 #endif
 
 static void usage(void) __attribute__((noreturn));
@@ -34,7 +34,7 @@ usage(void)
          "minisign -G [-p pubkey] [-s seckey]\n"
          "minisign -S [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file\n"
 #endif
-         "minisign -V [-x sigfile] [-p pubkeyfile | -P pubkey] [-q] -m file\n"
+         "minisign -V [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file\n"
          "\n"
 #ifndef VERIFY_ONLY
          "-G                generate a new key pair\n"
@@ -42,6 +42,7 @@ usage(void)
 #endif
          "-V                verify that a signature is valid for a given file\n"
          "-m <file>         file to sign/verify\n"
+         "-o                combined with -V, output the file content after verification\n"
          "-p <pubkeyfile>   public key file (default: ./minisign.pub)\n"
          "-P <pubkey>       public key, as a base64 string\n"
 #ifndef VERIFY_ONLY
@@ -86,6 +87,29 @@ message_load(size_t *message_len, const char *message_file)
     xfclose(fp);
 
     return message;
+}
+
+static int
+output_file(const char *message_file)
+{
+    unsigned char  buf[4096U];
+    FILE          *fp;
+    size_t         n;
+
+    if ((fp = fopen(message_file, "rb")) == NULL) {
+        exit_err(message_file);
+    }
+    while ((n = fread(buf, 1U, sizeof buf, fp)) > 0U) {
+        if (fwrite(buf, 1U, n, stdout) != n) {
+            exit_err(message_file);
+        }
+    }
+    if (!feof(fp) || fflush(stdout) != 0) {
+        exit_err(message_file);
+    }
+    xfclose(fp);
+
+    return 0;
 }
 
 static SigStruct *
@@ -312,16 +336,20 @@ seckey_load(const char *sk_file)
 
 static int
 verify(PubkeyStruct *pubkey_struct, const char *message_file,
-       const char *sig_file, int quiet)
+       const char *sig_file, int quiet, int output)
 {
     char           trusted_comment[TRUSTEDCOMMENTMAXBYTES];
     unsigned char  global_sig[crypto_sign_BYTES];
+    FILE          *info_fp = stdout;
     unsigned char *sig_and_trusted_comment;
     SigStruct     *sig_struct;
     unsigned char *message;
     size_t         message_len;
     size_t         trusted_comment_len;
 
+    if (output != 0) {
+        info_fp = stderr;
+    }
     message = message_load(&message_len, message_file);
     sig_struct = sig_load(sig_file, global_sig,
                           trusted_comment, sizeof trusted_comment);
@@ -336,7 +364,7 @@ verify(PubkeyStruct *pubkey_struct, const char *message_file,
     if (crypto_sign_verify_detached(sig_struct->sig, message, message_len,
                                     pubkey_struct->keynum_pk.pk) != 0) {
         if (quiet == 0) {
-            puts("Signature verification failed");
+            fprintf(stderr, "Signature verification failed\n");
         }
         exit(1);
     }
@@ -352,7 +380,7 @@ verify(PubkeyStruct *pubkey_struct, const char *message_file,
                                     (sizeof sig_struct->sig) + trusted_comment_len,
                                     pubkey_struct->keynum_pk.pk) != 0) {
         if (quiet == 0) {
-            puts("Comment signature verification failed");
+            fprintf(stderr, "Comment signature verification failed\n");
         }
         exit(1);
     }
@@ -360,10 +388,13 @@ verify(PubkeyStruct *pubkey_struct, const char *message_file,
     free(pubkey_struct);
     free(sig_struct);
     if (quiet == 0) {
-        puts("Signature and comment signature verified");
-        printf("Trusted comment: %s\n", trusted_comment);
+        fprintf(info_fp, "Signature and comment signature verified\n"
+                "Trusted comment: %s\n", trusted_comment);
     } else if (quiet == 2) {
-        puts(trusted_comment);
+        fprintf(info_fp, "%s\n", trusted_comment);
+    }
+    if (output != 0 && output_file(message_file) != 0) {
+        exit(2);
     }
     return 0;
 }
@@ -497,7 +528,7 @@ generate(const char *pk_file, const char *sk_file, const char *comment)
     xfput_b64(fp, (unsigned char *) (void *) pubkey_struct,
               sizeof *pubkey_struct);
     xfclose(fp);
-    
+
     printf("The secret key was saved as %s - Keep it secret!\n", sk_file);
     printf("The public key was saved as %s - That one can be public.\n\n", pk_file);
     puts("Files signed using this key pair can be verified with the following command:\n");
@@ -505,8 +536,7 @@ generate(const char *pk_file, const char *sk_file, const char *comment)
     xfput_b64(stdout, (unsigned char *) (void *) pubkey_struct,
               sizeof *pubkey_struct);
     puts("");
-    
-    sodium_free(pubkey_struct);    
+    sodium_free(pubkey_struct);
 
     return 0;
 }
@@ -553,6 +583,7 @@ main(int argc, char **argv)
     const char *trusted_comment = NULL;
     int         opt_flag;
     int         quiet = 0;
+    int         output = 0;
     Action      action = ACTION_NONE;
 
     while ((opt_flag = getopt(argc, argv, getopt_options)) != -1) {
@@ -583,6 +614,9 @@ main(int argc, char **argv)
         case 'm':
             message_file = optarg;
             break;
+        case 'o':
+            output = 1;
+            break;
         case 'p':
             pk_file = optarg;
             break;
@@ -609,7 +643,10 @@ main(int argc, char **argv)
             return 0;
         }
     }
-    sodium_init();
+    if (sodium_init() != 0) {
+        fprintf(stderr, "Unable to initialize the Sodium library\n");
+        return 2;
+    }
     switch (action) {
 #ifndef VERIFY_ONLY
     case ACTION_GENERATE:
@@ -649,7 +686,7 @@ main(int argc, char **argv)
             usage();
         }
         return verify(pubkey_load(pk_file, pubkey_s), message_file,
-                      sig_file, quiet) != 0;
+                      sig_file, quiet, output) != 0;
     default:
         usage();
     }
