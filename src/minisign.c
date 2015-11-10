@@ -19,7 +19,7 @@
 #include "minisign.h"
 
 #ifndef VERIFY_ONLY
-static const char *getopt_options = "GSVhc:m:oP:p:qQs:t:vx:";
+static const char *getopt_options = "GSVHhc:m:oP:p:qQs:t:vx:";
 #else
 static const char *getopt_options = "Vhm:oP:p:qQvx:";
 #endif
@@ -32,7 +32,7 @@ usage(void)
     puts("Usage:\n"
 #ifndef VERIFY_ONLY
          "minisign -G [-p pubkey] [-s seckey]\n"
-         "minisign -S [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file\n"
+         "minisign -S [-H] [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file\n"
 #endif
          "minisign -V [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file\n"
          "\n"
@@ -43,6 +43,7 @@ usage(void)
          "-V                verify that a signature is valid for a given file\n"
          "-m <file>         file to sign/verify\n"
          "-o                combined with -V, output the file content after verification\n"
+         "-H                combined with -S, pre-hash in order to sign large files\n"
          "-p <pubkeyfile>   public key file (default: ./minisign.pub)\n"
          "-P <pubkey>       public key, as a base64 string\n"
 #ifndef VERIFY_ONLY
@@ -61,12 +62,42 @@ usage(void)
 }
 
 static unsigned char *
-message_load(size_t *message_len, const char *message_file)
+message_load_hashed(size_t *message_len, const char *message_file)
+{
+    crypto_generichash_state  hs;
+    unsigned char             buf[4096U];
+    unsigned char            *message;
+    FILE                     *fp;
+    size_t                    n;
+
+    if ((fp = fopen(message_file, "rb")) == NULL) {
+        exit_err(message_file);
+    }
+    crypto_generichash_init(&hs, NULL, 0U, crypto_generichash_BYTES_MAX);
+    while ((n = fread(buf, 1U, sizeof buf, fp)) > 0U) {
+        crypto_generichash_update(&hs, buf, n);
+    }
+    if (!feof(fp)) {
+        exit_err(message_file);
+    }
+    xfclose(fp);
+    message = xmalloc(crypto_generichash_BYTES_MAX);
+    crypto_generichash_final(&hs, message, crypto_generichash_BYTES_MAX);
+    *message_len = crypto_generichash_BYTES_MAX;
+
+    return message;
+}
+
+static unsigned char *
+message_load(size_t *message_len, const char *message_file, int hashed)
 {
     FILE          *fp;
     unsigned char *message;
     off_t          message_len_;
 
+    if (hashed != 0) {
+        return message_load_hashed(message_len, message_file);
+    }
     if ((fp = fopen(message_file, "rb")) == NULL ||
         fseeko(fp, 0, SEEK_END) != 0 ||
         (message_len_ = ftello(fp)) == (off_t) -1) {
@@ -114,7 +145,7 @@ output_file(const char *message_file)
 
 static SigStruct *
 sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES],
-         char trusted_comment[TRUSTEDCOMMENTMAXBYTES],
+         int *hashed, char trusted_comment[TRUSTEDCOMMENTMAXBYTES],
          size_t trusted_comment_maxlen)
 {
     char       comment[COMMENTMAXBYTES];
@@ -171,7 +202,12 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES],
         exit_msg("base64 conversion failed");
     }
     free(sig_s);
-    if (memcmp(sig_struct->sig_alg, SIGALG, sizeof sig_struct->sig_alg) != 0) {
+    if (memcmp(sig_struct->sig_alg, SIGALG, sizeof sig_struct->sig_alg) == 0) {
+        *hashed = 0;
+    } else if (memcmp(sig_struct->sig_alg, SIGALG_HASHED,
+                      sizeof sig_struct->sig_alg) == 0) {
+        *hashed = 1;
+    } else {
         exit_msg("Unsupported signature algorithm");
     }
     if (b64_to_bin(global_sig, global_sig_s, crypto_sign_BYTES,
@@ -346,13 +382,14 @@ verify(PubkeyStruct *pubkey_struct, const char *message_file,
     unsigned char *message;
     size_t         message_len;
     size_t         trusted_comment_len;
+    int            hashed;
 
     if (output != 0) {
         info_fp = stderr;
     }
-    message = message_load(&message_len, message_file);
-    sig_struct = sig_load(sig_file, global_sig,
+    sig_struct = sig_load(sig_file, global_sig, &hashed,
                           trusted_comment, sizeof trusted_comment);
+    message = message_load(&message_len, message_file, hashed);
     if (memcmp(sig_struct->keynum, pubkey_struct->keynum_pk.keynum,
                sizeof sig_struct->keynum) != 0) {
         fprintf(stderr, "Signature key id in %s is %" PRIX64 "\n"
@@ -402,7 +439,7 @@ verify(PubkeyStruct *pubkey_struct, const char *message_file,
 #ifndef VERIFY_ONLY
 static int
 sign(const char *sk_file, const char *message_file, const char *sig_file,
-     const char *comment, const char *trusted_comment)
+     const char *comment, const char *trusted_comment, int hashed)
 {
     unsigned char  global_sig[crypto_sign_BYTES];
     SigStruct      sig_struct;
@@ -415,8 +452,12 @@ sign(const char *sk_file, const char *message_file, const char *sig_file,
     size_t         message_len;
 
     seckey_struct = seckey_load(sk_file);
-    message = message_load(&message_len, message_file);
-    memcpy(sig_struct.sig_alg, SIGALG, sizeof sig_struct.sig_alg);
+    message = message_load(&message_len, message_file, hashed);
+    if (hashed != 0) {
+        memcpy(sig_struct.sig_alg, SIGALG_HASHED, sizeof sig_struct.sig_alg);
+    } else {
+        memcpy(sig_struct.sig_alg, SIGALG, sizeof sig_struct.sig_alg);
+    }
     memcpy(sig_struct.keynum, seckey_struct->keynum_sk.keynum,
            sizeof sig_struct.keynum);
     crypto_sign_detached(sig_struct.sig, NULL, message, message_len,
@@ -582,6 +623,7 @@ main(int argc, char **argv)
     const char *pubkey_s = NULL;
     const char *trusted_comment = NULL;
     int         opt_flag;
+    int         hashed = 0;
     int         quiet = 0;
     int         output = 0;
     Action      action = ACTION_NONE;
@@ -611,6 +653,9 @@ main(int argc, char **argv)
             break;
         case 'h':
             usage();
+        case 'H':
+            hashed = 1;
+            break;
         case 'm':
             message_file = optarg;
             break;
@@ -671,7 +716,7 @@ main(int argc, char **argv)
             trusted_comment = default_trusted_comment(message_file);
         }
         return sign(sk_file, message_file, sig_file, comment,
-                    trusted_comment) != 0;
+                    trusted_comment, hashed) != 0;
 #endif
     case ACTION_VERIFY:
         if (message_file == NULL) {

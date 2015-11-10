@@ -7,6 +7,7 @@
 #define PASSWORDMAXBYTES 1024
 #define TRUSTEDCOMMENTMAXBYTES 8192
 #define SIGALG "Ed"
+#define SIGALG_HASHED "ED"
 #define KDFALG "Sc"
 #define CHKALG "B2"
 #define COMMENT_PREFIX "untrusted comment: "
