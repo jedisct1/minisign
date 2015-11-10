@@ -103,8 +103,8 @@ message_load(size_t *message_len, const char *message_file, int hashed)
         (message_len_ = ftello(fp)) == (off_t) -1) {
         exit_err(message_file);
     }
-    if (message_len_ > (off_t) 1L << 30) {
-        exit_msg("Data has to be smaller than 1 Gb");
+    if (hashed == 0 && message_len_ > (off_t) 1L << 30) {
+        exit_msg("Data has to be smaller than 1 Gb. Or use the -H option.");
     }
     if ((uintmax_t) message_len_ > (uintmax_t) SIZE_MAX ||
         message_len_ < (off_t) 0) {
