@@ -43,7 +43,9 @@ usage(void)
          "-V                verify that a signature is valid for a given file\n"
          "-m <file>         file to sign/verify\n"
          "-o                combined with -V, output the file content after verification\n"
+#ifndef VERIFY_ONLY
          "-H                combined with -S, pre-hash in order to sign large files\n"
+#endif
          "-p <pubkeyfile>   public key file (default: ./minisign.pub)\n"
          "-P <pubkey>       public key, as a base64 string\n"
 #ifndef VERIFY_ONLY
