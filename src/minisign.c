@@ -67,7 +67,7 @@ static unsigned char *
 message_load_hashed(size_t *message_len, const char *message_file)
 {
     crypto_generichash_state  hs;
-    unsigned char             buf[4096U];
+    unsigned char             buf[65536U];
     unsigned char            *message;
     FILE                     *fp;
     size_t                    n;
@@ -125,7 +125,7 @@ message_load(size_t *message_len, const char *message_file, int hashed)
 static int
 output_file(const char *message_file)
 {
-    unsigned char  buf[4096U];
+    unsigned char  buf[65536U];
     FILE          *fp;
     size_t         n;
 
