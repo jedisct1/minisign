@@ -15,7 +15,7 @@
       <h2 class="project-tagline">A dead simple tool to sign files and verify signatures.</h2>
       <a href="https://github.com/jedisct1/minisign" class="btn">View on GitHub</a>
       <a href="https://github.com/jedisct1/minisign/tarball/master" class="btn">Download source code</a>
-      <a href="https://github.com/jedisct1/minisign/releases/download/0.5/minisign-osx.zip" class="btn">Download OSX binary</a>
+      <a href="https://github.com/jedisct1/minisign/releases/download/0.6/minisign-osx.zip" class="btn">Download OSX binary</a>
       <a href="https://github.com/jedisct1/minisign/releases/download/0.5/minisign-win32.zip" class="btn">Download Windows binary</a>
     </section>
 
@@ -72,14 +72,15 @@ directly specified on the command line.</p>
 <a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
 
 <pre><code>$ minisign -G [-p pubkey] [-s seckey]
-$ minisign -S [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file
-$ minisign -V [-x sigfile] [-p pubkeyfile | -P pubkey] [-q] -m file
+$ minisign -S [-H] [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file
+$ minisign -V [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file
 
 -G                generate a new key pair
 -S                sign a file
 -V                verify that a signature is valid for a given file
 -m &lt;file&gt;         file to sign/verify
 -o                combined with -V, output the file content after verification
+-H                combined with -S, pre-hash in order to sign large files
 -p &lt;pubkeyfile&gt;   public key file (default: ./minisign.pub)
 -P &lt;pubkey&gt;       public key, as a base64 string
 -s &lt;seckey&gt;       secret key file (default: ./minisign.key)
@@ -138,6 +139,21 @@ displayed.</p>
 <p>This adds two lines to the signature files, that signify silently ignores.</p>
 
 <h2>
+<a id="signature-format" class="anchor" href="#signature-format" aria-hidden="true"><span class="octicon octicon-link"></span></a>Pre-hashing</h2>
+
+<p>By default, signing and verification require as much memory as the size of the file.</p>
+
+<p>Since Minisign 0.6, huge files can be signed and verified with very low memory requirements, by pre-hashing the content.</p>
+
+<p>The <code>-H</code> command-line switch, in combination with <code>-S</code>, generates a pre-hashed signature (HashEdDSA):</p>
+
+<pre><code>$ minisign -SHm myfile.txt</code></pre>
+
+<p>Verification of such a signature doesn't require any specific switch: the appropriate algorithm will automatically be detected.</p>
+
+<p>Signatures generated that way are not compatible with OpenBSD's signify tool and are not compatible with Minisign versions prior to 0.6</p>
+
+<h2>
 <a id="signature-format" class="anchor" href="#signature-format" aria-hidden="true"><span class="octicon octicon-link"></span></a>Signature format</h2>
 
 <pre><code>untrusted comment: &lt;arbitrary text&gt;
@@ -153,7 +169,10 @@ base64(&lt;global_signature&gt;)
 <li>
 <code>key_id</code>: 8 random bytes, matching the public key</li>
 <li>
-<code>signature</code>: <code>ed25519(&lt;file data&gt;)</code>
+<code>signature</code> (PureEdDSA): <code>ed25519(&lt;file data&gt;)</code>
+</li>
+<li>
+<code>signature</code> (HashedEdDSA): <code>ed25519(Blake2b-512(&lt;file data&gt;))</code>
 </li>
 <li>
 <code>global_signature</code>: <code>ed25519(&lt;signature&gt; || &lt;trusted_comment&gt;)</code>
@@ -213,7 +232,7 @@ base64(&lt;signature_algorithm&gt; || &lt;kdf_algorithm&gt; || &lt;cksum_algorit
 <li>
 <code>public_key</code>: Ed25519 public key</li>
 <li>
-<code>checksum</code>: <code>Blake2b(&lt;signature_algorithm&gt; || &lt;key_id&gt; || &lt;secret_key&gt;)</code>, 32 bytes</li>
+<code>checksum</code>: <code>Blake2b-256(&lt;signature_algorithm&gt; || &lt;key_id&gt; || &lt;secret_key&gt;)</code>, 32 bytes</li>
 </ul>
 
       <footer class="site-footer">
