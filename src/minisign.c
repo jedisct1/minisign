@@ -201,7 +201,7 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES],
                    sizeof *sig_struct, strlen(sig_s),
                    &sig_struct_len) == NULL ||
         sig_struct_len != sizeof *sig_struct) {
-        exit_msg("base64 conversion failed");
+        exit_msg("base64 conversion failed - was an actual signature given?");
     }
     free(sig_s);
     if (memcmp(sig_struct->sig_alg, SIGALG, sizeof sig_struct->sig_alg) == 0) {
@@ -215,7 +215,7 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES],
     if (b64_to_bin(global_sig, global_sig_s, crypto_sign_BYTES,
                    strlen(global_sig_s), &global_sig_len) == NULL ||
         global_sig_len != crypto_sign_BYTES) {
-        exit_msg("base64 conversion failed");
+        exit_msg("base64 conversion failed - was an actual signature given?");
     }
     free(global_sig_s);
 
@@ -233,7 +233,7 @@ pubkey_load_string(const char *pubkey_s)
                    sizeof *pubkey_struct, strlen(pubkey_s),
                    &pubkey_struct_len) == NULL ||
         pubkey_struct_len != sizeof *pubkey_struct) {
-        exit_msg("base64 conversion failed");
+        exit_msg("base64 conversion failed - was an actual public key given?");
     }
     if (memcmp(pubkey_struct->sig_alg, SIGALG,
                sizeof pubkey_struct->sig_alg) != 0) {
@@ -329,7 +329,7 @@ seckey_load(const char *sk_file)
                    sizeof *seckey_struct, strlen(seckey_s),
                    &seckey_struct_len) == NULL ||
         seckey_struct_len != sizeof *seckey_struct) {
-        exit_msg("base64 conversion failed");
+        exit_msg("base64 conversion failed - was an actual secret key given?");
     }
     sodium_free(seckey_s);
     if (memcmp(seckey_struct->sig_alg, SIGALG,
