@@ -34,3 +34,7 @@ Minisign is also available in Homebrew:
 Minisign is also available in Scoop on Windows:
 
     $ scoop install minisign
+
+Minisign is also available in chocolatey on Windows:
+
+    $ choco install minisign
