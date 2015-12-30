@@ -114,7 +114,8 @@ message_load(size_t *message_len, const char *message_file, int hashed)
     }
     message = xmalloc((*message_len = (size_t) message_len_));
     rewind(fp);
-    if (fread(message, *message_len, (size_t) 1U, fp) != 1U) {
+    if (*message_len > 0U &&
+        fread(message, *message_len, (size_t) 1U, fp) != 1U) {
         exit_err(message_file);
     }
     xfclose(fp);
