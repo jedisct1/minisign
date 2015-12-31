@@ -1,0 +1,196 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "MINISIGN" "1" "December 2015" "" ""
+.
+.SH "NAME"
+\fBminisign\fR \- A dead simple tool to sign files and verify signatures\.
+.
+.SH "SYNOPSIS"
+\fBminisign\fR \-G [\-p pubkey] [\-s seckey] \fBminisign\fR \-S [\-H] [\-x sigfile] [\-s seckey] [\-c untrusted_comment] [\-t trusted_comment] \-m <file> \fBminisign\fR \-V [\-x sigfile] [\-p pubkeyfile | \-P pubkey] [\-o] [\-q] \-m file
+.
+.SH "DESCRIPTION"
+\fBMinisign\fR is a dead simple tool to sign files and verify signatures\.
+.
+.P
+It is portable, lightweight, and uses the highly secure Ed25519 \fIhttp://ed25519\.cr\.yp\.to/\fR public\-key signature system\.
+.
+.SH "OPTIONS"
+These options control the actions of \fBminisign\fR\.
+.
+.TP
+\fB\-G\fR
+Generate a new key pair
+.
+.TP
+\fB\-S\fR
+Sign a file
+.
+.TP
+\fB\-V\fR
+Verify that a signature is valid for a given file
+.
+.TP
+\fB\-m <file>\fR
+File to sign/verify
+.
+.TP
+\fB\-o\fR
+Combined with \-V, output the file content after verification
+.
+.TP
+\fB\-H\fR
+Combined with \-S, pre\-hash in order to sign large files
+.
+.TP
+\fB\-p <pubkeyfile>\fR
+Public key file (default: \./minisign\.pub)
+.
+.TP
+\fB\-P <pubkey>\fR
+Public key, as a base64 string
+.
+.TP
+\fB\-s <seckey>\fR
+Secret key file (default: \./minisign\.key)
+.
+.TP
+\fB\-x <sigfile>\fR
+Signature file (default: <file>\.minisig)
+.
+.TP
+\fB\-c <comment>\fR
+Add a one\-line untrusted comment
+.
+.TP
+\fB\-t <comment>\fR
+Add a one\-line trusted comment
+.
+.TP
+\fB\-q\fR
+Quiet mode, suppress output
+.
+.TP
+\fB\-Q\fR
+Pretty quiet mode, only print the trusted comment
+.
+.TP
+\fB\-v\fR
+Display version number
+.
+.SH "EXAMPLES"
+Creating a key pair
+.
+.P
+\fBminisign\fR \-G
+.
+.P
+The public key is printed and put into the \fBminisign\.pub\fR file\. The secret key is encrypted and saved as a file named \fBminisign\.key\fR\.
+.
+.P
+Signing a file
+.
+.P
+$ \fBminisign\fR \-Sm myfile\.txt
+.
+.P
+Or to include a comment in the signature, that will be verified and displayed when verifying the file:
+.
+.P
+$ \fBminisign\fR \-Sm myfile\.txt \-t \'This comment will be signed as well\'
+.
+.P
+Verifying a file
+.
+.P
+$ \fBminisign\fR \-Vm myfile\.txt \-p <pubkey>
+.
+.P
+or
+.
+.P
+$ \fBminisign\fR \-Vm myfile\.txt \-p signature\.pub
+.
+.P
+This requires the signature \fBmyfile\.txt\.minisig\fR to be present in the same directory\.
+.
+.P
+The public key can either reside in a file (\fB\./minisign\.pub\fR by default) or be directly specified on the command line\.
+.
+.SH "Notes"
+\fBTrusted comments\fR
+.
+.P
+Signature files include an untrusted comment line that can be freely modified, even after signature creation\.
+.
+.P
+They also include a second comment line, that cannot be modified without the secret key\.
+.
+.P
+Trusted comments can be used to add instructions or application\-specific metadata (intended file name, timestamps, resource identifiers, version numbers to prevent downgrade attacks)\.
+.
+.P
+\fBCompatibility with OpenBSD signify\fR
+.
+.P
+Signatures written by \fBminisign\fR can be verified using OpenBSD\'s \fBsignify\fR tool: public key files and signature files are compatible\.
+.
+.P
+However, \fBminisign\fR uses a slightly different format to store secret keys\.
+.
+.P
+\fBMinisign\fR signatures include trusted comments in addition to untrusted comments\. Trusted comments are signed, thus verified, before being displayed\.
+.
+.P
+This adds two lines to the signature files, that signify silently ignores\.
+.
+.P
+\fBPre\-hashing\fR
+.
+.P
+By default, signing and verification require as much memory as the size of the file\.
+.
+.P
+Since \fBMinisign 0\.6\fR, huge files can be signed and verified with very low memory requirements, by pre\-hashing the content\.
+.
+.P
+The \-H command\-line switch, in combination with \-S, generates a pre\-hashed signature (HashEdDSA):
+.
+.P
+$ \fBminisign\fR \-SHm myfile\.txt
+.
+.P
+Verification of such a signature doesn\'t require any specific switch: the appropriate algorithm will automatically be detected\.
+.
+.P
+Signatures generated that way are not compatible with OpenBSD\'s \fBsignify\fR tool and are not compatible with \fBMinisign\fR versions prior to 0\.6
+.
+.P
+\fBSignature format\fR
+.
+.P
+untrusted comment: <arbitrary text> base64(<signature_algorithm> || <key_id> || <signature>) trusted_comment: <arbitrary text> base64(<global_signature>)
+.
+.P
+signature_algorithm: Ed key_id: 8 random bytes, matching the public key signature (PureEdDSA): ed25519(<file data>) signature (HashedEdDSA): ed25519(Blake2b\-512(<file data>)) global_signature: ed25519(<signature> || <trusted_comment>)
+.
+.P
+\fBPublic key format\fR
+.
+.P
+untrusted comment: <arbitrary text> base64(<signature_algorithm> || <key_id> || <public_key>)
+.
+.P
+signature_algorithm: Ed key_id: 8 random bytes public_key: Ed25519 public key
+.
+.P
+\fBSecret key format\fR
+.
+.P
+untrusted comment: <arbitrary text> base64(<signature_algorithm> || <kdf_algorithm> || <cksum_algorithm> || <kdf_salt> || <kdf_opslimit> || <kdf_memlimit> || <keynum_sk>)
+.
+.P
+signature_algorithm: Ed kdf_algorithm: Sc cksum_algorithm: B2 kdf_salt: 32 random bytes kdf_opslimit: crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE kdf_memlimit: crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE keynum_sk: <kdf_output> ^ (<key_id> || <secret_key> || <public_key> || <checksum>), 104 bytes key_id: 8 random bytes secret_key: Ed25519 secret key public_key: Ed25519 public key checksum: Blake2b\-256(<signature_algorithm> || <key_id> || <secret_key>), 32 bytes
+.
+.SH "AUTHOR"
+Frank Denis (github@pureftpd\.org) \fIhttps://00f\.net/\fR
