@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "MINISIGN" "1" "December 2015" "" ""
+.TH "MINISIGN" "1" "January 2016" "" ""
 .
 .SH "NAME"
 \fBminisign\fR \- A dead simple tool to sign files and verify signatures\.
@@ -193,4 +193,4 @@ untrusted comment: <arbitrary text> base64(<signature_algorithm> || <kdf_algorit
 signature_algorithm: Ed kdf_algorithm: Sc cksum_algorithm: B2 kdf_salt: 32 random bytes kdf_opslimit: crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE kdf_memlimit: crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE keynum_sk: <kdf_output> ^ (<key_id> || <secret_key> || <public_key> || <checksum>), 104 bytes key_id: 8 random bytes secret_key: Ed25519 secret key public_key: Ed25519 public key checksum: Blake2b\-256(<signature_algorithm> || <key_id> || <secret_key>), 32 bytes
 .
 .SH "AUTHOR"
-Frank Denis (github@pureftpd\.org) \fIhttps://00f\.net/\fR
+Frank Denis (github [at] pureftpd [dot] org)

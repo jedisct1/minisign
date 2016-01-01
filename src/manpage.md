@@ -157,4 +157,4 @@ base64(&lt;signature_algorithm&gt; || &lt;kdf_algorithm&gt; || &lt;cksum_algorit
 
 ## AUTHOR
 
-Frank Denis (github@pureftpd.org) <https://00f.net/>
+Frank Denis (github [at] pureftpd [dot] org)
