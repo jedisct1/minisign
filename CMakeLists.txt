@@ -20,6 +20,9 @@ endif(NOT CMAKE_BUILD_TYPE)
 include(CPack)
 include(CheckLibraryExists)
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_ALL_SOURCE -D_GNU_SOURCE")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64")
+
 find_library(LIB_SODIUM NAMES sodium REQUIRED)
 
 add_executable(minisign
