@@ -37,10 +37,10 @@ b64_to_bin(unsigned char * const bin, const char *b64,
         return NULL;
     }
     while (i-- > 0U) {
-        t0 = rev64chars[*b64++];
-        t1 = rev64chars[*b64++];
-        t2 = rev64chars[*b64++];
-        t3 = rev64chars[*b64++];
+        t0 = rev64chars[*b64_u++];
+        t1 = rev64chars[*b64_u++];
+        t2 = rev64chars[*b64_u++];
+        t3 = rev64chars[*b64_u++];
         t = t3 | ((uint32_t) t2 << 6) | ((uint32_t) t1 << 12) |
             ((uint32_t) t0 << 18);
         mask = t0 | t1 | t2 | t3;
