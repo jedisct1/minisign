@@ -37,7 +37,7 @@ These options control the actions of `minisign`.
   * `-P <pubkey>`:
     Public key, as a base64 string
   * `-s <seckey>`:
-    Secret key file (default: ./minisign.key)
+    Secret key file (default: ~/.minisign/minisign.key)
   * `-x <sigfile>`:
     Signature file (default: &lt;file&gt;.minisig)
   * `-c <comment>`:
@@ -60,6 +60,8 @@ Creating a key pair
 
 The public key is printed and put into the `minisign.pub` file. The secret key is encrypted and saved as a file named `minisign.key`.
 
+This secret key may then be moved to the default path: `~/.minisign/minisign.key`.
+
 Signing a file
 
 $ `minisign` -Sm myfile.txt
@@ -67,6 +69,8 @@ $ `minisign` -Sm myfile.txt
 Or to include a comment in the signature, that will be verified and displayed when verifying the file:
 
 $ `minisign` -Sm myfile.txt -t 'This comment will be signed as well'
+
+The secret key is loaded from `${MINISIGN_CONFIG_DIR}/minisign.key`, `~/.minisign/minisign.key`, or its path can be explicitly set with the `-s <path>` command-line switch.
 
 Verifying a file
 

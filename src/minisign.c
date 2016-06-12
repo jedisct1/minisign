@@ -49,7 +49,7 @@ usage(void)
          "-p <pubkeyfile>   public key file (default: ./minisign.pub)\n"
          "-P <pubkey>       public key, as a base64 string\n"
 #ifndef VERIFY_ONLY
-         "-s <seckey>       secret key file (default: ./minisign.key)\n"
+         "-s <seckey>       secret key file (default: ~/.minisign/minisign.key)\n"
 #endif
          "-x <sigfile>      signature file (default: <file>.minisig)\n"
 #ifndef VERIFY_ONLY
@@ -613,13 +613,55 @@ default_trusted_comment(const char *message_file)
     }
     return ret;
 }
+
+static char *
+sig_config_dir(void)
+{
+    const char *config_dir_env;
+    const char *home_dir_env;
+    char       *config_dir;
+
+    config_dir = NULL;
+    if ((config_dir_env = getenv(SIG_DEFAULT_CONFIG_DIR_ENV_VAR)) != NULL) {
+        if ((config_dir = strdup(config_dir_env)) == NULL) {
+            exit_err("strdup()");
+        }
+    } else if ((home_dir_env = getenv("HOME")) != NULL) {
+        if (asprintf(&config_dir, "%s/%s", home_dir_env,
+                     SIG_DEFAULT_CONFIG_DIR) < 0 || config_dir == NULL) {
+            exit_err("asprintf()");
+        }
+    }
+    return config_dir;
+}
+
+static char *
+sig_default_skfile(void)
+{
+    char       *config_dir;
+    char       *skfile;
+
+    if ((config_dir = sig_config_dir()) == NULL) {
+        if ((skfile = strdup(SIG_DEFAULT_SKFILE)) == NULL) {
+            exit_err("strdup()");
+        }
+        return skfile;
+    }
+    if (asprintf(&skfile, "%s/%s", config_dir, SIG_DEFAULT_SKFILE) < 0 ||
+        skfile == NULL) {
+        exit_err("asprintf()");
+    }
+    free(config_dir);
+
+    return skfile;
+}
 #endif
 
 int
 main(int argc, char **argv)
 {
     const char *pk_file = NULL;
-    const char *sk_file = SIG_DEFAULT_SKFILE;
+    char       *sk_file = sig_default_skfile();
     const char *sig_file = NULL;
     const char *message_file = NULL;
     const char *comment = NULL;
@@ -678,7 +720,10 @@ main(int argc, char **argv)
             quiet = 2;
             break;
         case 's':
-            sk_file = optarg;
+            free(sk_file);
+            if ((sk_file = strdup(optarg)) == NULL) {
+                exit_err("strdup()");
+            };
             break;
         case 't':
             trusted_comment = optarg;

@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "MINISIGN" "1" "January 2016" "" ""
+.TH "MINISIGN" "1" "June 2016" "" ""
 .
 .SH "NAME"
 \fBminisign\fR \- A dead simple tool to sign files and verify signatures\.
@@ -52,7 +52,7 @@ Public key, as a base64 string
 .
 .TP
 \fB\-s <seckey>\fR
-Secret key file (default: \./minisign\.key)
+Secret key file (default: ~/\.minisign/minisign\.key)
 .
 .TP
 \fB\-x <sigfile>\fR
@@ -88,6 +88,9 @@ Creating a key pair
 The public key is printed and put into the \fBminisign\.pub\fR file\. The secret key is encrypted and saved as a file named \fBminisign\.key\fR\.
 .
 .P
+This secret key may then be moved to the default path: \fB~/\.minisign/minisign\.key\fR\.
+.
+.P
 Signing a file
 .
 .P
@@ -98,6 +101,9 @@ Or to include a comment in the signature, that will be verified and displayed wh
 .
 .P
 $ \fBminisign\fR \-Sm myfile\.txt \-t \'This comment will be signed as well\'
+.
+.P
+The secret key is loaded from \fB${MINISIGN_CONFIG_DIR}/minisign\.key\fR, \fB~/\.minisign/minisign\.key\fR, or its path can be explicitly set with the \fB\-s <path>\fR command\-line switch\.
 .
 .P
 Verifying a file
