@@ -14,8 +14,11 @@
 #define DEFAULT_COMMENT "signature from minisign secret key"
 #define SECRETKEY_DEFAULT_COMMENT "minisign encrypted secret key"
 #define TRUSTED_COMMENT_PREFIX "trusted comment: "
+<<<<<<< HEAD
 #define SIG_DEFAULT_CONFIG_DIR ".minisign"
 #define SIG_DEFAULT_CONFIG_DIR_ENV_VAR "MINISIGN_CONFIG_DIR"
+=======
+>>>>>>> 546d7ee6316b1315f8a6bb9dcbb950210534002a
 #define SIG_DEFAULT_PKFILE "minisign.pub"
 #define SIG_DEFAULT_SKFILE "minisign.key"
 #define SIG_SUFFIX ".minisig"
