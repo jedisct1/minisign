@@ -118,7 +118,7 @@ $ `minisign` -SHm myfile.txt
 
 Verification of such a signature doesn't require any specific switch: the appropriate algorithm will automatically be detected.
 
-Signatures generated that way are not compatible with OpenBSD's `signify` tool and are not compatible with `Minisign` versions prior to 0.6
+Signatures generated that way are not compatible with OpenBSD's `signify` tool and are not compatible with `Minisign` versions prior to 0.6.
 
 
 ## AUTHOR
