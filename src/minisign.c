@@ -587,6 +587,9 @@ generate(const char *pk_file, const char *sk_file, const char *comment,
     puts("done\n");
 
     abort_on_existing_key_files(pk_file, sk_file, force);
+    if (basedir_create_useronly(sk_file) != 0) {
+        fprintf(stderr, "Warning: you may have to create the parent directory\n");
+    }
     if ((fp = fopen_create_useronly(sk_file)) == NULL) {
         exit_err(sk_file);
     }
@@ -650,19 +653,18 @@ static char *
 sig_config_dir(void)
 {
     const char *config_dir_env;
-    const char *home_dir_env;
     char       *config_dir;
+    char       *home_dir;
 
     config_dir = NULL;
     if ((config_dir_env = getenv(SIG_DEFAULT_CONFIG_DIR_ENV_VAR)) != NULL) {
-        if ((config_dir = strdup(config_dir_env)) == NULL) {
-            exit_err("strdup()");
-        }
-    } else if ((home_dir_env = getenv("HOME")) != NULL) {
-        if (asprintf(&config_dir, "%s/%s", home_dir_env,
+        config_dir = xstrdup(config_dir_env);
+    } else if ((home_dir = get_home_dir()) != NULL) {
+        if (asprintf(&config_dir, "%s/%s", home_dir,
                      SIG_DEFAULT_CONFIG_DIR) < 0 || config_dir == NULL) {
             exit_err("asprintf()");
         }
+        free(home_dir);
     }
     return config_dir;
 }
@@ -674,9 +676,7 @@ sig_default_skfile(void)
     char       *skfile;
 
     if ((config_dir = sig_config_dir()) == NULL) {
-        if ((skfile = strdup(SIG_DEFAULT_SKFILE)) == NULL) {
-            exit_err("strdup()");
-        }
+        skfile = xstrdup(SIG_DEFAULT_SKFILE);
         return skfile;
     }
     if (asprintf(&skfile, "%s/%s", config_dir, SIG_DEFAULT_SKFILE) < 0 ||
@@ -764,9 +764,7 @@ main(int argc, char **argv)
 #ifndef VERIFY_ONLY
         case 's':
             free(sk_file);
-            if ((sk_file = strdup(optarg)) == NULL) {
-                exit_err("strdup()");
-            };
+            sk_file = xstrdup(optarg);
             break;
         case 't':
             trusted_comment = optarg;

@@ -3,8 +3,11 @@
 # include <sys/types.h>
 # include <sys/fcntl.h>
 # include <sys/stat.h>
+#elif defined(_WIN32)
+# include <direct.h>
 #endif
 
+#include <errno.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -61,6 +64,17 @@ xmalloc(size_t size)
         exit_err("malloc()");
     }
     return pnt;
+}
+
+char *
+xstrdup(const char *str)
+{
+    char *clone;
+
+    if ((clone = strdup(str)) == NULL) {
+        exit_err("strdup()");
+    }
+    return clone;
 }
 
 void *
@@ -181,4 +195,58 @@ fopen_create_useronly(const char *file)
 #else
     return fopen(file, "w");
 #endif
+}
+
+int
+basedir_create_useronly(const char *file)
+{
+    const char *basename;
+    char       *dir;
+    int         ret = -1;
+
+    dir = xstrdup(file);
+    basename = file_basename(dir);
+    if (basename != dir) {
+        dir[basename - dir - 1] = 0;
+    }
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+    if (*dir == 0 || mkdir(dir, 0700) == 0 || errno == EEXIST) {
+        ret = 0;
+    }
+#elif defined(_WIN32)
+    if (*dir == 0 || _mkdir(dir) == 0 || errno == EEXIST) {
+        ret = 0;
+    }
+    free(dir);
+#endif
+    return ret;
+}
+
+char *get_home_dir(void)
+{
+    char       *dir;
+#ifdef _WIN32
+    const char *hd
+    const char *hp;
+#endif
+
+    if ((dir = getenv("HOME")) != NULL) {
+        return xstrdup(dir);
+    }
+#ifdef _WIN32
+    if ((dir = getenv("USERPROFILE")) != NULL) {
+        return xstrdup(dir);
+    }
+    if ((dir = getenv("USERPROFILE")) != NULL) {
+        return xstrdup(dir);
+    }
+    if ((hd = getenv("HOMEDRIVE")) != NULL &&
+        (hp = getenv("HOMEPATH")) != NULL) {
+        if (asprintf(&dir, "%s%s", hd, hp) < 0) {
+            exit_err("asprintf()");
+        }
+        return dir;
+    }
+#endif
+    return NULL;
 }

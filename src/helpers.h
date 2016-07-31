@@ -19,6 +19,8 @@ void exit_msg(const char *msg) __attribute__((noreturn));
 
 void * xmalloc(size_t size);
 
+char * xstrdup(const char *str);
+
 void * xsodium_malloc(size_t size);
 
 void xor_buf(unsigned char *dst, const unsigned char *src, size_t len);
@@ -34,5 +36,9 @@ void trim(char *str);
 const char * file_basename(const char *file);
 
 FILE * fopen_create_useronly(const char *file);
+
+int basedir_create_useronly(const char *file);
+
+char * get_home_dir(void);
 
 #endif
