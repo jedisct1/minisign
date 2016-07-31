@@ -31,3 +31,8 @@ add_executable(minisign
 target_link_libraries(minisign ${LIB_SODIUM})
 
 install(TARGETS minisign DESTINATION bin)
+
+include(GNUInstallDirs)
+
+install(FILES "share/man/man1/minisign.1"
+        DESTINATION "${CMAKE_INSTALL_MANDIR}/man1" COMPONENT doc)
