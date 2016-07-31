@@ -660,7 +660,7 @@ sig_config_dir(void)
     if ((config_dir_env = getenv(SIG_DEFAULT_CONFIG_DIR_ENV_VAR)) != NULL) {
         config_dir = xstrdup(config_dir_env);
     } else if ((home_dir = get_home_dir()) != NULL) {
-        if (asprintf(&config_dir, "%s/%s", home_dir,
+        if (asprintf(&config_dir, "%s%c%s", home_dir, DIR_SEP,
                      SIG_DEFAULT_CONFIG_DIR) < 0 || config_dir == NULL) {
             exit_err("asprintf()");
         }
@@ -679,7 +679,8 @@ sig_default_skfile(void)
         skfile = xstrdup(SIG_DEFAULT_SKFILE);
         return skfile;
     }
-    if (asprintf(&skfile, "%s/%s", config_dir, SIG_DEFAULT_SKFILE) < 0 ||
+    if (asprintf(&skfile, "%s%c%s", config_dir, DIR_SEP,
+                 SIG_DEFAULT_SKFILE) < 0 ||
         skfile == NULL) {
         exit_err("asprintf()");
     }

@@ -8,6 +8,11 @@
 #if !defined(__GNUC__) && !defined(__attribute__)
 # define __attribute__(X)
 #endif
+#ifdef _WIN32
+# define DIR_SEP '\\'
+#else
+# define DIR_SEP '/'
+#endif
 
 uint64_t le64_load(const unsigned char *p);
 
