@@ -15,8 +15,8 @@
       <h2 class="project-tagline">A dead simple tool to sign files and verify signatures.</h2>
       <a href="https://github.com/jedisct1/minisign" class="btn">View on GitHub</a>
       <a href="https://github.com/jedisct1/minisign/tarball/master" class="btn">Download source code</a>
-      <a href="https://github.com/jedisct1/minisign/releases/download/0.6/minisign-osx.zip" class="btn">Download OSX binary</a>
-      <a href="https://github.com/jedisct1/minisign/releases/download/0.6/minisign-win32.zip" class="btn">Download Windows binary</a>
+      <a href="https://github.com/jedisct1/minisign/releases/download/0.7/minisign-osx.zip" class="btn">Download OSX binary</a>
+      <a href="https://github.com/jedisct1/minisign/releases/download/0.7/minisign-win32.zip" class="btn">Download Windows binary</a>
     </section>
 
     <section class="main-content">
@@ -35,7 +35,7 @@
 </code></pre>
 
 <p>The public key is printed and put into the <code>minisign.pub</code> file. The secret key
-is encrypted and saved as a file named <code>minisign.key</code>.</p>
+is encrypted and saved as a file named <code>~/.minisign/minisign.key</code>.</p>
 
 <h2>
 <a id="signing-a-file" class="anchor" href="#signing-a-file" aria-hidden="true"><span class="octicon octicon-link"></span></a>Signing a file</h2>
@@ -83,7 +83,7 @@ $ minisign -V [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file
 -H                combined with -S, pre-hash in order to sign large files
 -p &lt;pubkeyfile&gt;   public key file (default: ./minisign.pub)
 -P &lt;pubkey&gt;       public key, as a base64 string
--s &lt;seckey&gt;       secret key file (default: ./minisign.key)
+-s &lt;seckey&gt;       secret key file (default: ~/.minisign/minisign.key)
 -x &lt;sigfile&gt;      signature file (default: &lt;file&gt;.minisig)
 -c &lt;comment&gt;      add a one-line untrusted comment
 -t &lt;comment&gt;      add a one-line trusted comment
