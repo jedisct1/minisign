@@ -226,7 +226,7 @@ char *get_home_dir(void)
 {
     char       *dir;
 #ifdef _WIN32
-    const char *hd
+    const char *hd;
     const char *hp;
 #endif
 
