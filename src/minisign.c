@@ -19,7 +19,7 @@
 #include "minisign.h"
 
 #ifndef VERIFY_ONLY
-static const char *getopt_options = "GSVHhc:m:oP:p:qQs:t:vx:";
+static const char *getopt_options = "GSVHhc:fm:oP:p:qQs:t:vx:";
 #else
 static const char *getopt_options = "Vhm:oP:p:qQvx:";
 #endif
@@ -58,6 +58,7 @@ usage(void)
 #endif
          "-q                quiet mode, suppress output\n"
          "-Q                pretty quiet mode, only print the trusted comment\n"
+         "-f                force. Combined with -G, overwrite a previous key pair\n"
          "-v                display version number\n"
         );
     exit(2);
@@ -503,8 +504,37 @@ sign(const char *sk_file, const char *message_file, const char *sig_file,
     return 0;
 }
 
+static void
+abort_on_existing_key_file(const char *file)
+{
+    FILE *fp;
+    int   exists = 0;
+
+    if ((fp = fopen(file, "r")) != NULL) {
+        exists = 1;
+        fclose(fp);
+    }
+    if (exists != 0) {
+        fprintf(stderr, "Key generation aborted, because %s already exists.\n"
+                "If you really want to overwrite the existing key pair, add the -f switch to \n"
+                "force this operation.\n", file);
+        exit(1);
+    }
+}
+
+static void
+abort_on_existing_key_files(const char *pk_file, const char *sk_file,
+                            int force)
+{
+    if (force == 0) {
+        abort_on_existing_key_file(pk_file);
+        abort_on_existing_key_file(sk_file);
+    }
+}
+
 static int
-generate(const char *pk_file, const char *sk_file, const char *comment)
+generate(const char *pk_file, const char *sk_file, const char *comment,
+         int force)
 {
     char          *pwd = xsodium_malloc(PASSWORDMAXBYTES);
     char          *pwd2 = xsodium_malloc(PASSWORDMAXBYTES);
@@ -513,6 +543,7 @@ generate(const char *pk_file, const char *sk_file, const char *comment)
     unsigned char *stream ;
     FILE          *fp;
 
+    abort_on_existing_key_files(pk_file, sk_file, force);
     randombytes_buf(seckey_struct->keynum_sk.keynum,
                     sizeof seckey_struct->keynum_sk.keynum);
     crypto_sign_keypair(pubkey_struct->keynum_pk.pk,
@@ -555,6 +586,7 @@ generate(const char *pk_file, const char *sk_file, const char *comment)
     sodium_free(stream);
     puts("done\n");
 
+    abort_on_existing_key_files(pk_file, sk_file, force);
     if ((fp = fopen_create_useronly(sk_file)) == NULL) {
         exit_err(sk_file);
     }
@@ -673,6 +705,7 @@ main(int argc, char **argv)
     int         hashed = 0;
     int         quiet = 0;
     int         output = 0;
+    int         force = 0;
     Action      action = ACTION_NONE;
 
     while ((opt_flag = getopt(argc, argv, getopt_options)) != -1) {
@@ -700,6 +733,9 @@ main(int argc, char **argv)
 #ifndef VERIFY_ONLY
         case 'c':
             comment = optarg;
+            break;
+        case 'f':
+            force = 1;
             break;
 #endif
         case 'h':
@@ -757,7 +793,7 @@ main(int argc, char **argv)
         if (pk_file == NULL) {
             pk_file = SIG_DEFAULT_PKFILE;
         }
-        return generate(pk_file, sk_file, comment) != 0;
+        return generate(pk_file, sk_file, comment, force) != 0;
     case ACTION_SIGN:
         if (message_file == NULL) {
             usage();
