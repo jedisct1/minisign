@@ -515,7 +515,8 @@ abort_on_existing_key_file(const char *file)
         fclose(fp);
     }
     if (exists != 0) {
-        fprintf(stderr, "Key generation aborted, because %s already exists.\n"
+        fprintf(stderr, "Key generation aborted:\n"
+                "%s already exists.\n\n"
                 "If you really want to overwrite the existing key pair, add the -f switch to \n"
                 "force this operation.\n", file);
         exit(1);
