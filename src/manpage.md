@@ -48,6 +48,8 @@ These options control the actions of `minisign`.
     Quiet mode, suppress output
   * `-Q`:
     Pretty quiet mode, only print the trusted comment
+  * `-f`:
+    Force. Combined with -G, overwrite a previous key pair
   * `-v`:
     Display version number
 
