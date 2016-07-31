@@ -175,32 +175,5 @@ Verification of such a signature doesn\'t require any specific switch: the appro
 .P
 Signatures generated that way are not compatible with OpenBSD\'s \fBsignify\fR tool and are not compatible with \fBMinisign\fR versions prior to 0\.6
 .
-.P
-\fBSignature format\fR
-.
-.P
-untrusted comment: <arbitrary text> base64(<signature_algorithm> || <key_id> || <signature>) trusted_comment: <arbitrary text> base64(<global_signature>)
-.
-.P
-signature_algorithm: Ed key_id: 8 random bytes, matching the public key signature (PureEdDSA): ed25519(<file data>) signature (HashedEdDSA): ed25519(Blake2b\-512(<file data>)) global_signature: ed25519(<signature> || <trusted_comment>)
-.
-.P
-\fBPublic key format\fR
-.
-.P
-untrusted comment: <arbitrary text> base64(<signature_algorithm> || <key_id> || <public_key>)
-.
-.P
-signature_algorithm: Ed key_id: 8 random bytes public_key: Ed25519 public key
-.
-.P
-\fBSecret key format\fR
-.
-.P
-untrusted comment: <arbitrary text> base64(<signature_algorithm> || <kdf_algorithm> || <cksum_algorithm> || <kdf_salt> || <kdf_opslimit> || <kdf_memlimit> || <keynum_sk>)
-.
-.P
-signature_algorithm: Ed kdf_algorithm: Sc cksum_algorithm: B2 kdf_salt: 32 random bytes kdf_opslimit: crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE kdf_memlimit: crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE keynum_sk: <kdf_output> ^ (<key_id> || <secret_key> || <public_key> || <checksum>), 104 bytes key_id: 8 random bytes secret_key: Ed25519 secret key public_key: Ed25519 public key checksum: Blake2b\-256(<signature_algorithm> || <key_id> || <secret_key>), 32 bytes
-.
 .SH "AUTHOR"
 Frank Denis (github [at] pureftpd [dot] org)

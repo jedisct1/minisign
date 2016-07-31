@@ -120,46 +120,6 @@ Verification of such a signature doesn't require any specific switch: the approp
 
 Signatures generated that way are not compatible with OpenBSD's `signify` tool and are not compatible with `Minisign` versions prior to 0.6
 
-**Signature format**
-
-untrusted comment: &lt;arbitrary text&gt;
-base64(&lt;signature_algorithm&gt; || &lt;key_id&gt; || &lt;signature&gt;)
-trusted_comment: &lt;arbitrary text&gt;
-base64(&lt;global_signature&gt;)
-
-   signature_algorithm: Ed
-   key_id: 8 random bytes, matching the public key
-   signature (PureEdDSA): ed25519(&lt;file data&gt;)
-   signature (HashedEdDSA): ed25519(Blake2b-512(&lt;file data&gt;))
-   global_signature: ed25519(&lt;signature&gt; || &lt;trusted_comment&gt;)
-
-**Public key format**
-
-untrusted comment: &lt;arbitrary text&gt;
-base64(&lt;signature_algorithm&gt; || &lt;key_id&gt; || &lt;public_key&gt;)
-
-   signature_algorithm: Ed
-   key_id: 8 random bytes
-   public_key: Ed25519 public key
-
-**Secret key format**
-
-untrusted comment: &lt;arbitrary text&gt;
-base64(&lt;signature_algorithm&gt; || &lt;kdf_algorithm&gt; || &lt;cksum_algorithm&gt; ||
-      &lt;kdf_salt&gt; || &lt;kdf_opslimit&gt; || &lt;kdf_memlimit&gt; || &lt;keynum_sk&gt;)
-
-   signature_algorithm: Ed
-   kdf_algorithm: Sc
-   cksum_algorithm: B2
-   kdf_salt: 32 random bytes
-   kdf_opslimit:   crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE
-   kdf_memlimit:   crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE
-   keynum_sk: &lt;kdf_output&gt; ^ (&lt;key_id&gt; || &lt;secret_key&gt; ||   &lt;public_key&gt; || &lt;checksum&gt;), 104 bytes
-   key_id: 8 random bytes
-   secret_key: Ed25519 secret key
-   public_key: Ed25519 public key
-   checksum: Blake2b-256(&lt;signature_algorithm&gt; || &lt;key_id&gt; ||   &lt;secret_key&gt;), 32 bytes
-
 
 ## AUTHOR
 
