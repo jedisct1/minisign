@@ -1,0 +1,25 @@
+sudo: required
+
+language: c
+
+os:
+ - linux
+
+compiler:
+ - gcc
+
+before_script:
+ - git clone https://github.com/jedisct1/libsodium.git --branch=stable
+ - cd libsodium
+ - sudo make install
+ - sudo ldconfig
+ - cd ..
+ - mkdir build
+ - cd build
+ - cmake ..
+
+script:
+ - make -j$(nproc)
+
+matrix:
+ - fast_finish: true
