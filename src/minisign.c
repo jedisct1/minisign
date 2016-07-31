@@ -677,6 +677,7 @@ main(int argc, char **argv)
 
     while ((opt_flag = getopt(argc, argv, getopt_options)) != -1) {
         switch(opt_flag) {
+#ifndef VERIFY_ONLY
         case 'G':
             if (action != ACTION_NONE && action != ACTION_GENERATE) {
                 usage();
@@ -689,15 +690,18 @@ main(int argc, char **argv)
             }
             action = ACTION_SIGN;
             break;
+#endif
         case 'V':
             if (action != ACTION_NONE && action != ACTION_VERIFY) {
                 usage();
             }
             action = ACTION_VERIFY;
             break;
+#ifndef VERIFY_ONLY
         case 'c':
             comment = optarg;
             break;
+#endif
         case 'h':
             usage();
         case 'H':
@@ -728,10 +732,10 @@ main(int argc, char **argv)
                 exit_err("strdup()");
             };
             break;
-#endif
         case 't':
             trusted_comment = optarg;
             break;
+#endif
         case 'x':
             sig_file = optarg;
             break;
