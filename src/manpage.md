@@ -60,9 +60,7 @@ Creating a key pair
 
 `minisign` -G
 
-The public key is printed and put into the `minisign.pub` file. The secret key is encrypted and saved as a file named `minisign.key`.
-
-This secret key may then be moved to the default path: `~/.minisign/minisign.key`.
+The public key is printed and put into the `minisign.pub` file. The secret key is encrypted and saved as a file named `~/.minisign/minisign.key`.
 
 Signing a file
 
