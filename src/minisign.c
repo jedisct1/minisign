@@ -661,7 +661,9 @@ int
 main(int argc, char **argv)
 {
     const char *pk_file = NULL;
+#ifndef VERIFY_ONLY
     char       *sk_file = sig_default_skfile();
+#endif
     const char *sig_file = NULL;
     const char *message_file = NULL;
     const char *comment = NULL;
@@ -719,12 +721,14 @@ main(int argc, char **argv)
         case 'Q':
             quiet = 2;
             break;
+#ifndef VERIFY_ONLY
         case 's':
             free(sk_file);
             if ((sk_file = strdup(optarg)) == NULL) {
                 exit_err("strdup()");
             };
             break;
+#endif
         case 't':
             trusted_comment = optarg;
             break;
