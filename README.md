@@ -38,3 +38,10 @@ Minisign is also available in Scoop on Windows:
 Minisign is also available in chocolatey on Windows:
 
     $ choco install minisign
+
+Additional tools
+----------------
+
+* [minisign-misc](https://github.com/JayBrown/minisign-misc) is a very
+nice set of workflows and scripts for macOS to verify and sign files
+with minisign.
