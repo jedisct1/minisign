@@ -276,6 +276,9 @@ pubkey_load_file(const char *pk_file)
 static PubkeyStruct *
 pubkey_load(const char *pk_file, const char *pubkey_s)
 {
+    if (pk_file != NULL && pubkey_s != NULL) {
+        exit_msg("A public key cannot be provided both inline and as a file");
+    }
     if (pubkey_s != NULL) {
         return pubkey_load_string(pubkey_s);
     } else if (pk_file != NULL) {
@@ -813,9 +816,6 @@ main(int argc, char **argv)
         if (sig_file == NULL || *sig_file == 0) {
             sig_file = append_sig_suffix(message_file);
         }
-        if (pk_file != NULL && pubkey_s != NULL) {
-            usage();
-        }
         if (comment == NULL || *comment == 0) {
             comment = DEFAULT_COMMENT;
         }
@@ -837,8 +837,6 @@ main(int argc, char **argv)
         }
         if (pk_file == NULL && pubkey_s == NULL) {
             pk_file = SIG_DEFAULT_PKFILE;
-        } else if (pk_file != NULL && pubkey_s != NULL) {
-            usage();
         }
         return verify(pubkey_load(pk_file, pubkey_s), message_file,
                       sig_file, quiet, output) != 0;
