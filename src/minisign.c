@@ -231,7 +231,7 @@ pubkey_load_string(const char *pubkey_s)
     PubkeyStruct *pubkey_struct;
     size_t        pubkey_struct_len;
 
-    pubkey_struct = xmalloc(sizeof *pubkey_struct);
+    pubkey_struct = xsodium_malloc(sizeof *pubkey_struct);
     if (b64_to_bin((unsigned char *) (void *) pubkey_struct, pubkey_s,
                    sizeof *pubkey_struct, strlen(pubkey_s),
                    &pubkey_struct_len) == NULL ||
@@ -278,9 +278,10 @@ pubkey_load(const char *pk_file, const char *pubkey_s)
 {
     if (pubkey_s != NULL) {
         return pubkey_load_string(pubkey_s);
-    } else {
+    } else if (pk_file != NULL) {
         return pubkey_load_file(pk_file);
     }
+    exit_msg("A public key is required");
 }
 
 static void
@@ -426,8 +427,8 @@ verify(PubkeyStruct *pubkey_struct, const char *message_file,
         }
         exit(1);
     }
+    sodium_free(pubkey_struct);
     free(sig_and_trusted_comment);
-    free(pubkey_struct);
     free(sig_struct);
     if (quiet == 0) {
         fprintf(info_fp, "Signature and comment signature verified\n"
@@ -443,20 +444,19 @@ verify(PubkeyStruct *pubkey_struct, const char *message_file,
 
 #ifndef VERIFY_ONLY
 static int
-sign(const char *sk_file, const char *message_file, const char *sig_file,
-     const char *comment, const char *trusted_comment, int hashed)
+sign(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct,
+     const char *message_file, const char *sig_file, const char *comment,
+     const char *trusted_comment, int hashed)
 {
     unsigned char  global_sig[crypto_sign_BYTES];
     SigStruct      sig_struct;
     FILE          *fp;
-    SeckeyStruct  *seckey_struct;
     unsigned char *message;
     unsigned char *sig_and_trusted_comment;
     size_t         comment_len;
     size_t         trusted_comment_len;
     size_t         message_len;
 
-    seckey_struct = seckey_load(sk_file);
     message = message_load(&message_len, message_file, hashed);
     if (hashed != 0) {
         memcpy(sig_struct.sig_alg, SIGALG_HASHED, sizeof sig_struct.sig_alg);
@@ -494,10 +494,21 @@ sign(const char *sk_file, const char *message_file, const char *sig_file,
     memcpy(sig_and_trusted_comment, sig_struct.sig, sizeof sig_struct.sig);
     memcpy(sig_and_trusted_comment + sizeof sig_struct.sig, trusted_comment,
            trusted_comment_len);
-    crypto_sign_detached(global_sig, NULL, sig_and_trusted_comment,
-                         (sizeof sig_struct.sig) + trusted_comment_len,
-                         seckey_struct->keynum_sk.sk);
+    if (crypto_sign_detached(global_sig, NULL, sig_and_trusted_comment,
+                             (sizeof sig_struct.sig) + trusted_comment_len,
+                             seckey_struct->keynum_sk.sk) != 0) {
+        exit_msg("Unable to compute a signature");
+    }
+    if (pubkey_struct != NULL &&
+        (memcmp(pubkey_struct->keynum_pk.keynum,
+                seckey_struct->keynum_sk.keynum, KEYNUMBYTES) != 0 ||
+            crypto_sign_verify_detached(global_sig, sig_and_trusted_comment,
+                (sizeof sig_struct.sig) + trusted_comment_len,
+                pubkey_struct->keynum_pk.pk) != 0)) {
+        exit_msg("Verification would fail with the given public key");
+    }
     sodium_free(seckey_struct);
+    sodium_free(pubkey_struct);
     xfput_b64(fp, (unsigned char *) (void *) &global_sig, sizeof global_sig);
     free(sig_and_trusted_comment);
     xfclose(fp);
@@ -802,14 +813,20 @@ main(int argc, char **argv)
         if (sig_file == NULL || *sig_file == 0) {
             sig_file = append_sig_suffix(message_file);
         }
+        if (pk_file != NULL && pubkey_s != NULL) {
+            usage();
+        }
         if (comment == NULL || *comment == 0) {
             comment = DEFAULT_COMMENT;
         }
         if (trusted_comment == NULL || *trusted_comment == 0) {
             trusted_comment = default_trusted_comment(message_file);
         }
-        return sign(sk_file, message_file, sig_file, comment,
-                    trusted_comment, hashed) != 0;
+        return sign(seckey_load(sk_file),
+                    ((pk_file != NULL || pubkey_s != NULL) ?
+                        pubkey_load(pk_file, pubkey_s) : NULL),
+                    message_file, sig_file, comment, trusted_comment,
+                    hashed) != 0;
 #endif
     case ACTION_VERIFY:
         if (message_file == NULL) {
