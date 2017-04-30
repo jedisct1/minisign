@@ -1,8 +1,8 @@
 
 #if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 # include <sys/types.h>
-# include <sys/fcntl.h>
 # include <sys/stat.h>
+# include <fcntl.h>
 #elif defined(_WIN32)
 # include <direct.h>
 #endif
