@@ -45,3 +45,9 @@ Additional tools
 * [minisign-misc](https://github.com/JayBrown/minisign-misc) is a very
 nice set of workflows and scripts for macOS to verify and sign files
 with minisign.
+
+Alternative implementations
+---------------------------
+
+* [rsign](https://bitbucket.org/danielrangel/rsign) is a minisign
+implementation written in Rust.
