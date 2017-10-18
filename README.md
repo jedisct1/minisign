@@ -51,3 +51,18 @@ Alternative implementations
 
 * [rsign](https://bitbucket.org/danielrangel/rsign) is a minisign
 implementation written in Rust.
+
+Faults injections
+-----------------
+
+Minisign uses the EdDSA signature system, and deterministic signature
+schemes are fragile against fault attacks. However, conducting these requires
+physical access or the attacker having access to the same physical host.
+
+More importantly, this requires a significant amount of time, and messages
+being signed endlessly while the attack is being conducted.
+
+If such a scenario ever happens to be part of your threat model,
+libsodium should be compiled with the `ED25519_NONDETERMINISTIC` macro
+defined. This will add random noise to the computation of EdDSA
+nonces.
