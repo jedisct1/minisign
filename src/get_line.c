@@ -95,7 +95,7 @@ get_line(char *line, size_t max_len, const char *prompt)
     }
     trim(line);
     if (strlen(line) >= max_len) {
-        fprintf(stderr, "(truncated to %u characters)\n", (int) max_len);
+        fprintf(stderr, "(truncated to %u characters)\n", (unsigned int) max_len);
     } else if (*line == 0) {
         fprintf(stderr, "(empty)\n");
     } else {
