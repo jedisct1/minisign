@@ -207,12 +207,11 @@ basedir_create_useronly(const char *file)
     dir = xstrdup(file);
     basename = file_basename(dir);
     if (basename == dir) {
-        // this is a plain file path relative to CWD
         free(dir);
         return 0;
-    } else {
-        dir[basename - dir - 1] = 0;
     }
+    dir[basename - dir - 1] = 0;
+
 #if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
     if (*dir == 0 || mkdir(dir, 0700) == 0 || errno == EEXIST) {
         ret = 0;
