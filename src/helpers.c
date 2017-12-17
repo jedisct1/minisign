@@ -1,5 +1,5 @@
 
-#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)) || defined(__HAIKU__)
 # include <sys/types.h>
 # include <sys/stat.h>
 # include <fcntl.h>
@@ -184,7 +184,7 @@ file_basename(const char *file)
 FILE *
 fopen_create_useronly(const char *file)
 {
-#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)) || defined(__HAIKU__)
     int fd;
 
     if ((fd = open(file, O_CREAT | O_TRUNC | O_WRONLY,
@@ -212,7 +212,7 @@ basedir_create_useronly(const char *file)
     }
     dir[basename - dir - 1] = 0;
 
-#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)) || defined(__HAIKU__)
     if (*dir == 0 || mkdir(dir, 0700) == 0 || errno == EEXIST) {
         ret = 0;
     }

@@ -1,5 +1,5 @@
 
-#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)) || defined(__HAIKU__)
 # include <sys/types.h>
 #endif
 
@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)) || defined(__HAIKU__)
 # include <fcntl.h>
 # include <poll.h>
 # include <termios.h>
@@ -33,7 +33,7 @@ disable_echo(void)
     fflush(stdout);
     fflush(stderr);
 
-# if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+# if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)) || defined(__HAIKU__)
     {
         struct termios p;
 
@@ -60,7 +60,7 @@ enable_echo(void)
     fflush(stdout);
     fflush(stderr);
 
-# if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+# if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)) || defined(__HAIKU__)
     {
         struct termios p;
 
