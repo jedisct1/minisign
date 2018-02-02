@@ -32,7 +32,7 @@ usage(void)
     puts("Usage:\n"
 #ifndef VERIFY_ONLY
          "minisign -G [-p pubkey] [-s seckey]\n"
-         "minisign -S [-H] [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file\n"
+         "minisign -S [-H] [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]\n"
 #endif
          "minisign -V [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file\n"
          "\n"
@@ -446,7 +446,34 @@ verify(PubkeyStruct *pubkey_struct, const char *message_file,
 }
 
 #ifndef VERIFY_ONLY
-static int
+static char *
+default_trusted_comment(const char *message_file)
+{
+    char   *ret;
+    time_t  ts = time(NULL);
+
+    if (asprintf(&ret, "timestamp:%lu\tfile:%s",
+                 (unsigned long) ts, file_basename(message_file)) < 0 ||
+        ret == NULL) {
+        exit_err("asprintf()");
+    }
+    return ret;
+}
+
+static char *
+append_sig_suffix(const char *message_file)
+{
+    char   *sig_file;
+    size_t  message_file_len = strlen(message_file);
+
+    sig_file = xmalloc(message_file_len + sizeof SIG_SUFFIX);
+    memcpy(sig_file, message_file, message_file_len);
+    memcpy(sig_file + message_file_len, SIG_SUFFIX, sizeof SIG_SUFFIX);
+
+    return sig_file;
+}
+
+static void
 sign(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct,
      const char *message_file, const char *sig_file, const char *comment,
      const char *trusted_comment, int hashed)
@@ -456,10 +483,15 @@ sign(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct,
     FILE          *fp;
     unsigned char *message;
     unsigned char *sig_and_trusted_comment;
+    char          *tmp_trusted_comment = NULL;
     size_t         comment_len;
     size_t         trusted_comment_len;
     size_t         message_len;
 
+    if (trusted_comment == NULL || *trusted_comment == 0) {
+        tmp_trusted_comment = default_trusted_comment(message_file);
+        trusted_comment = tmp_trusted_comment;
+    }
     message = message_load(&message_len, message_file, hashed);
     if (hashed != 0) {
         memcpy(sig_struct.sig_alg, SIGALG_HASHED, sizeof sig_struct.sig_alg);
@@ -510,11 +542,32 @@ sign(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct,
                 pubkey_struct->keynum_pk.pk) != 0)) {
         exit_msg("Verification would fail with the given public key");
     }
+    xfput_b64(fp, (unsigned char *) (void *) &global_sig, sizeof global_sig);
+    xfclose(fp);
+    free(sig_and_trusted_comment);
+    free(tmp_trusted_comment);
+}
+
+static int
+sign_all(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct,
+         const char *message_file, const char *additional_files[], int additional_count,
+         const char *sig_file, const char *comment, const char *trusted_comment,
+         int hashed)
+{
+    char *additional_sig_file;
+    char *additional_trusted_comment;
+    int   i;
+
+    sign(seckey_struct, pubkey_struct, message_file, sig_file, comment,
+         trusted_comment, hashed);
+    for (i = 0; i < additional_count; i++) {
+        additional_sig_file = append_sig_suffix(additional_files[i]);
+        sign(seckey_struct, pubkey_struct, additional_files[i],
+             additional_sig_file, comment, trusted_comment, hashed);
+        free(additional_sig_file);
+    }
     sodium_free(seckey_struct);
     sodium_free(pubkey_struct);
-    xfput_b64(fp, (unsigned char *) (void *) &global_sig, sizeof global_sig);
-    free(sig_and_trusted_comment);
-    xfclose(fp);
 
     return 0;
 }
@@ -637,34 +690,7 @@ generate(const char *pk_file, const char *sk_file, const char *comment,
 }
 #endif
 
-static char *
-append_sig_suffix(const char *message_file)
-{
-    char   *sig_file;
-    size_t  message_file_len = strlen(message_file);
-
-    sig_file = xmalloc(message_file_len + sizeof SIG_SUFFIX);
-    memcpy(sig_file, message_file, message_file_len);
-    memcpy(sig_file + message_file_len, SIG_SUFFIX, sizeof SIG_SUFFIX);
-
-    return sig_file;
-}
-
 #ifndef VERIFY_ONLY
-static char *
-default_trusted_comment(const char *message_file)
-{
-    char   *ret;
-    time_t  ts = time(NULL);
-
-    if (asprintf(&ret, "timestamp:%lu\tfile:%s",
-                 (unsigned long) ts, file_basename(message_file)) < 0 ||
-        ret == NULL) {
-        exit_err("asprintf()");
-    }
-    return ret;
-}
-
 static char *
 sig_config_dir(void)
 {
@@ -819,14 +845,11 @@ main(int argc, char **argv)
         if (comment == NULL || *comment == 0) {
             comment = DEFAULT_COMMENT;
         }
-        if (trusted_comment == NULL || *trusted_comment == 0) {
-            trusted_comment = default_trusted_comment(message_file);
-        }
-        return sign(seckey_load(sk_file),
-                    ((pk_file != NULL || pubkey_s != NULL) ?
-                        pubkey_load(pk_file, pubkey_s) : NULL),
-                    message_file, sig_file, comment, trusted_comment,
-                    hashed) != 0;
+        return sign_all(seckey_load(sk_file),
+                        ((pk_file != NULL || pubkey_s != NULL) ?
+                            pubkey_load(pk_file, pubkey_s) : NULL),
+                        message_file, (const char **) &argv[optind], argc - optind,
+                        sig_file, comment, trusted_comment, hashed) != 0;
 #endif
     case ACTION_VERIFY:
         if (message_file == NULL) {
