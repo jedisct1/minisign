@@ -38,7 +38,7 @@ usage(void)
          "\n"
 #ifndef VERIFY_ONLY
          "-G                generate a new key pair\n"
-         "-S                sign a file\n"
+         "-S                sign files\n"
 #endif
          "-V                verify that a signature is valid for a given file\n"
          "-m <file>         file to sign/verify\n"

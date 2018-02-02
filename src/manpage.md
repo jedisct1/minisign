@@ -2,12 +2,12 @@
 This man page can be generated using ronn - http://rtomayko.github.com/ronn/
 -->
 minisign(1) -- A dead simple tool to sign files and verify signatures.
-=============================================
+======================================================================
 
 ## SYNOPSIS
 
 `minisign` -G [-p pubkey] [-s seckey]
-`minisign` -S [-H] [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m &lt;file&gt;
+`minisign` -S [-H] [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]
 `minisign` -V [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file
 
 ## DESCRIPTION
@@ -23,7 +23,7 @@ These options control the actions of `minisign`.
   * `-G`:
     Generate a new key pair
   * `-S`:
-    Sign a file
+    Sign files
   * `-V`:
     Verify that a signature is valid for a given file
   * `-m <file>`:
@@ -62,9 +62,10 @@ Creating a key pair
 
 The public key is printed and put into the `minisign.pub` file. The secret key is encrypted and saved as a file named `~/.minisign/minisign.key`.
 
-Signing a file
+Signing files
 
 $ `minisign` -Sm myfile.txt
+$ `minisign` -Sm myfile.txt myfile2.txt *.c
 
 Or to include a comment in the signature, that will be verified and displayed when verifying the file:
 
