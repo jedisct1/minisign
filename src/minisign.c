@@ -555,7 +555,6 @@ sign_all(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct,
          int hashed)
 {
     char *additional_sig_file;
-    char *additional_trusted_comment;
     int   i;
 
     sign(seckey_struct, pubkey_struct, message_file, sig_file, comment,
