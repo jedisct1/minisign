@@ -170,14 +170,9 @@ file_basename(const char *file)
 {
     char *ptr;
 
-    if ((ptr = strrchr(file, '/')) != NULL) {
+    if ((ptr = strrchr(file, DIR_SEP)) != NULL) {
         return ptr + 1;
     }
-#ifdef _WIN32
-    if ((ptr = strrchr(file, '\\')) != NULL) {
-        return ptr + 1;
-    }
-#endif
     return file;
 }
 
