@@ -200,9 +200,10 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES],
     xfclose(fp);
 
     sig_struct = xmalloc(sizeof *sig_struct);
-    if (b64_to_bin((unsigned char *) (void *) sig_struct, sig_s,
-                   sizeof *sig_struct, strlen(sig_s),
-                   &sig_struct_len) == NULL ||
+    if (sodium_base642bin((unsigned char *) (void *) sig_struct, sizeof *sig_struct,
+                          sig_s, strlen(sig_s),
+                          NULL, &sig_struct_len,
+                          NULL, sodium_base64_VARIANT_ORIGINAL) != 0 ||
         sig_struct_len != sizeof *sig_struct) {
         exit_msg("base64 conversion failed - was an actual signature given?");
     }
@@ -215,8 +216,10 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES],
     } else {
         exit_msg("Unsupported signature algorithm");
     }
-    if (b64_to_bin(global_sig, global_sig_s, crypto_sign_BYTES,
-                   strlen(global_sig_s), &global_sig_len) == NULL ||
+    if (sodium_base642bin(global_sig, crypto_sign_BYTES,
+                          global_sig_s, strlen(global_sig_s),
+                          NULL, &global_sig_len,
+                          NULL, sodium_base64_VARIANT_ORIGINAL) != 0 ||
         global_sig_len != crypto_sign_BYTES) {
         exit_msg("base64 conversion failed - was an actual signature given?");
     }
@@ -232,9 +235,10 @@ pubkey_load_string(const char *pubkey_s)
     size_t        pubkey_struct_len;
 
     pubkey_struct = xsodium_malloc(sizeof *pubkey_struct);
-    if (b64_to_bin((unsigned char *) (void *) pubkey_struct, pubkey_s,
-                   sizeof *pubkey_struct, strlen(pubkey_s),
-                   &pubkey_struct_len) == NULL ||
+    if (sodium_base642bin((unsigned char *) pubkey_struct, sizeof *pubkey_struct,
+                          pubkey_s, strlen(pubkey_s),
+                          NULL, &pubkey_struct_len,
+                          NULL, sodium_base64_VARIANT_ORIGINAL) != 0 ||
         pubkey_struct_len != sizeof *pubkey_struct) {
         exit_msg("base64 conversion failed - was an actual public key given?");
     }
@@ -332,9 +336,10 @@ seckey_load(const char *sk_file)
     }
     trim(seckey_s);
     xfclose(fp);
-    if (b64_to_bin((unsigned char *) (void *) seckey_struct, seckey_s,
-                   sizeof *seckey_struct, strlen(seckey_s),
-                   &seckey_struct_len) == NULL ||
+    if (sodium_base642bin((unsigned char *) (void *) seckey_struct, sizeof *seckey_struct,
+                          seckey_s, strlen(seckey_s),
+                          NULL, &seckey_struct_len,
+                          NULL, sodium_base64_VARIANT_ORIGINAL) != 0 ||
         seckey_struct_len != sizeof *seckey_struct) {
         exit_msg("base64 conversion failed - was an actual secret key given?");
     }
