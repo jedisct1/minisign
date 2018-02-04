@@ -127,15 +127,11 @@ xfprintf(FILE *fp, const char *format, ...)
 int
 xfput_b64(FILE *fp, const unsigned char *bin, size_t bin_len)
 {
-    const size_t  b64_maxlen = (bin_len + 2) * 4 / 3 + 1;
+    const size_t  b64_maxlen = sodium_base64_encoded_len(bin_len, sodium_base64_VARIANT_ORIGINAL);
     char         *b64;
 
     b64 = xsodium_malloc(b64_maxlen);
-    if (bin_to_b64(b64, bin, b64_maxlen, bin_len) == NULL) {
-        sodium_free(b64);
-        abort();
-    }
-    xfprintf(fp, "%s\n", b64);
+    xfprintf(fp, "%s\n", sodium_bin2base64(b64, b64_maxlen, bin, bin_len, sodium_base64_VARIANT_ORIGINAL));
     sodium_free(b64);
 
     return 0;

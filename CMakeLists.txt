@@ -26,7 +26,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64")
 find_library(LIB_SODIUM NAMES sodium REQUIRED)
 
 add_executable(minisign
-               src/minisign.c src/base64.c src/helpers.c src/get_line.c)
+               src/minisign.c src/helpers.c src/get_line.c)
 
 target_link_libraries(minisign ${LIB_SODIUM})
 
