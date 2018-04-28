@@ -39,6 +39,10 @@ Minisign is also available in chocolatey on Windows:
 
     $ choco install minisign
 
+If you have a local build of libsodium replace the `cmake ..` above with:
+
+    $ CFLAGS=-I...path-to-libsodium.../src/libsodium/include cmake -DLIB_SODIUM=...path-to-libsodium.../src/libsodium/.libs/libsodium.a ..
+
 Additional tools
 ----------------
 
