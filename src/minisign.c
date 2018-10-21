@@ -118,7 +118,7 @@ message_load(size_t *message_len, const char *message_file, int hashed)
     rewind(fp);
     if (*message_len > 0U &&
         fread(message, *message_len, (size_t) 1U, fp) != 1U) {
-        exit_err(message_file);
+        exit_msg("Error while loading the message");
     }
     xfclose(fp);
 
@@ -167,7 +167,7 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES],
         exit_err(sig_file);
     }
     if (fgets(comment, (int) sizeof comment, fp) == NULL) {
-        exit_err(sig_file);
+        exit_msg("Error while reading the signature file");
     }
     if (strncmp(comment, COMMENT_PREFIX, (sizeof COMMENT_PREFIX) - 1U) != 0) {
         exit_msg("Untrusted signature comment should start with "
@@ -176,7 +176,7 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES],
     sig_s_size = B64_MAX_LEN_FROM_BIN_LEN(sizeof *sig_struct) + 2U;
     sig_s = xmalloc(sig_s_size);
     if (fgets(sig_s, (int) sig_s_size, fp) == NULL) {
-        exit_err(sig_file);
+        exit_msg("Error while reading the signature file");
     }
     trim(sig_s);
     if (fgets(trusted_comment, (int) trusted_comment_maxlen, fp) == NULL) {
@@ -194,7 +194,7 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES],
     global_sig_s_size = B64_MAX_LEN_FROM_BIN_LEN(crypto_sign_BYTES) + 2U;
     global_sig_s = xmalloc(global_sig_s_size);
     if (fgets(global_sig_s, (int) global_sig_s_size, fp) == NULL) {
-        exit_err(sig_file);
+        exit_msg("Error while reading the signature file");
     }
     trim(global_sig_s);
     xfclose(fp);
@@ -258,12 +258,12 @@ pubkey_load_file(const char *pk_file)
         exit_err(pk_file);
     }
     if (fgets(pk_comment, (int) sizeof pk_comment, fp) == NULL) {
-        exit_err(pk_file);
+        exit_msg("Error while loading the public key file");
     }
     pubkey_s_size = B64_MAX_LEN_FROM_BIN_LEN(sizeof *pubkey_struct) + 2U;
     pubkey_s = xmalloc(pubkey_s_size);
     if (fgets(pubkey_s, (int) pubkey_s_size, fp) == NULL) {
-        exit_err(pk_file);
+        exit_msg("Error while loading the public key file");
     }
     trim(pubkey_s);
     xfclose(fp);
@@ -321,14 +321,14 @@ seckey_load(const char *sk_file)
         exit_err(sk_file);
     }
     if (fgets(sk_comment, (int) sizeof sk_comment, fp) == NULL) {
-        exit_err(sk_file);
+        exit_msg("Error while loading the secret key file");
     }
     sodium_memzero(sk_comment, sizeof sk_comment);
     seckey_s_size = B64_MAX_LEN_FROM_BIN_LEN(sizeof *seckey_struct) + 2U;
     seckey_s = xsodium_malloc(seckey_s_size);
     seckey_struct = xsodium_malloc(sizeof *seckey_struct);
     if (fgets(seckey_s, (int) seckey_s_size, fp) == NULL) {
-        exit_err(sk_file);
+        exit_msg("Error while loading the secret key file");
     }
     trim(seckey_s);
     xfclose(fp);
