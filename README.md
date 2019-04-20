@@ -39,18 +39,22 @@ Minisign is also available in chocolatey on Windows:
 
     $ choco install minisign
 
-Additional tools
-----------------
+Additional tools, libraries and implementations
+-----------------------------------------------
 
 * [minisign-misc](https://github.com/JayBrown/minisign-misc) is a very
 nice set of workflows and scripts for macOS to verify and sign files
 with minisign.
-
-Alternative implementations
----------------------------
-
 * [rsign](https://bitbucket.org/danielrangel/rsign) is a minisign
 implementation written in Rust.
+* [minisign-go](https://github.com/jedisct1/minisign-go) is a small module
+in Go to verify Minisign signatures.
+* [minisign-verify](https://github.com/jedisct1/rust-minisign-verify) is
+a small Rust crate to verify Minisign signatures.
+* [minisign-net](https://github.com/bitbeans/minisign-net) is a .NET library
+to handle and create Minisign signatures.
+* [minisign-py](https://github.com/HacKanCuBa/minisign-py) is a pure Python
+port of Minisign.
 
 Faults injections
 -----------------
