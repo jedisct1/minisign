@@ -45,8 +45,8 @@ Additional tools, libraries and implementations
 * [minisign-misc](https://github.com/JayBrown/minisign-misc) is a very
 nice set of workflows and scripts for macOS to verify and sign files
 with minisign.
-* [rsign](https://bitbucket.org/danielrangel/rsign) is a minisign
-implementation written in Rust.
+* [rsign2](https://github.com/jedisct1/rsign2) is a Minisign implementation
+written in pure Rust.
 * [minisign-go](https://github.com/jedisct1/minisign-go) is a small module
 in Go to verify Minisign signatures.
 * [minisign-verify](https://github.com/jedisct1/rust-minisign-verify) is
