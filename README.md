@@ -45,10 +45,12 @@ Additional tools, libraries and implementations
 * [minisign-misc](https://github.com/JayBrown/minisign-misc) is a very
 nice set of workflows and scripts for macOS to verify and sign files
 with minisign.
-* [rsign2](https://github.com/jedisct1/rsign2) is a Minisign implementation
-written in pure Rust.
 * [minisign-go](https://github.com/jedisct1/minisign-go) is a small module
 in Go to verify Minisign signatures.
+* [rust-minisign](https://github.com/jedisct1/rust-minisign) is a Minisign
+library written in pure Rust, that can be embedded in other applications.
+* [rsign2](https://github.com/jedisct1/rsign2) is a reimplementation of
+the command-line tool in Rust.
 * [minisign-verify](https://github.com/jedisct1/rust-minisign-verify) is
 a small Rust crate to verify Minisign signatures.
 * [minisign-net](https://github.com/bitbeans/minisign-net) is a .NET library
