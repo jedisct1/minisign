@@ -28,8 +28,8 @@ b64_to_bin(unsigned char * const bin, const char *b64,
     const unsigned char *b64_u = (const unsigned char *) b64;
     unsigned char       *bin_w = bin;
     unsigned char        mask = 0U;
-    unsigned char        t0, t1, t2, t3;
-    uint32_t             t;
+    unsigned char        t0 = 0, t1 = 0 , t2 = 0, t3 = 0;
+    uint32_t             t = 0;
     size_t               i;
 
     if (b64_len % 4U != 0U || (i = b64_len / 4U) <= 0U || bin_maxlen < i * 3U -

@@ -57,6 +57,8 @@ a small Rust crate to verify Minisign signatures.
 to handle and create Minisign signatures.
 * [minisign-py](https://github.com/HacKanCuBa/minisign-py) is a pure Python
 port of Minisign.
+* [minisign](https://github.com/chm-diederichs/minisign) a Javascript
+implementation.
 
 Faults injections
 -----------------
