@@ -9,12 +9,24 @@ set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
 set(CPACK_PACKAGE_VERSION_MINOR "8")
 set(CPACK_PACKAGE_VERSION_PATCH "0")
-set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
-set(CPACK_SOURCE_IGNORE_FILES "/build/;minisign.key;minisign.pub;a.out;/.git/;~$;${CPACK_SOURCE_IGNORE_FILES}")
+set(
+  CPACK_SOURCE_PACKAGE_FILE_NAME
+  "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}"
+  )
+set(
+  CPACK_SOURCE_IGNORE_FILES
+  "/build/;minisign.key;minisign.pub;a.out;/.git/;~$;${CPACK_SOURCE_IGNORE_FILES}"
+  )
 set(CPACK_PACKAGE_EXECUTABLES "minisign" "minisign")
 
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE MinSizeRel CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
+  set(
+    CMAKE_BUILD_TYPE
+    MinSizeRel
+    CACHE
+      STRING
+      "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+      FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
 include(CPack)
@@ -26,7 +38,10 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64")
 find_library(LIB_SODIUM NAMES sodium REQUIRED)
 
 add_executable(minisign
-               src/minisign.c src/base64.c src/helpers.c src/get_line.c)
+               src/base64.c
+               src/get_line.c
+               src/helpers.c
+               src/minisign.c)
 
 target_link_libraries(minisign ${LIB_SODIUM})
 
@@ -35,4 +50,5 @@ install(TARGETS minisign DESTINATION bin)
 include(GNUInstallDirs)
 
 install(FILES "share/man/man1/minisign.1"
-        DESTINATION "${CMAKE_INSTALL_MANDIR}/man1" COMPONENT doc)
+        DESTINATION "${CMAKE_INSTALL_MANDIR}/man1"
+        COMPONENT doc)
