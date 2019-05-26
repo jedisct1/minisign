@@ -19,7 +19,7 @@
 #include "minisign.h"
 
 #ifndef VERIFY_ONLY
-static const char *getopt_options = "GSVHhc:fm:oP:p:qQs:t:vx:";
+static const char *getopt_options = "GSVRHhc:fm:oP:p:qQs:t:vx:";
 #else
 static const char *getopt_options = "Vhm:oP:p:qQvx:";
 #endif
@@ -58,6 +58,9 @@ usage(void)
 #endif
          "-q                quiet mode, suppress output\n"
          "-Q                pretty quiet mode, only print the trusted comment\n"
+#ifndef VERIFY_ONLY
+         "-R                recreate a public key file from a secret key file\n"
+#endif
          "-f                force. Combined with -G, overwrite a previous key pair\n"
          "-v                display version number\n"
         );
@@ -600,6 +603,21 @@ abort_on_existing_key_files(const char *pk_file, const char *sk_file,
     }
 }
 
+static void
+write_pk_file(const char *pk_file, const PubkeyStruct *pubkey_struct)
+{
+    FILE *fp;
+
+    if ((fp = fopen(pk_file, "w")) == NULL) {
+        exit_err(pk_file);
+    }
+    xfprintf(fp, COMMENT_PREFIX "minisign public key %" PRIX64 "\n",
+             le64_load(pubkey_struct->keynum_pk.keynum));
+    xfput_b64(fp, (unsigned char *) (void *) pubkey_struct,
+              sizeof *pubkey_struct);
+    xfclose(fp);
+}
+
 static int
 generate(const char *pk_file, const char *sk_file, const char *comment,
          int force)
@@ -667,14 +685,7 @@ generate(const char *pk_file, const char *sk_file, const char *comment,
     xfclose(fp);
     sodium_free(seckey_struct);
 
-    if ((fp = fopen(pk_file, "w")) == NULL) {
-        exit_err(pk_file);
-    }
-    xfprintf(fp, COMMENT_PREFIX "minisign public key %" PRIX64 "\n",
-             le64_load(pubkey_struct->keynum_pk.keynum));
-    xfput_b64(fp, (unsigned char *) (void *) pubkey_struct,
-              sizeof *pubkey_struct);
-    xfclose(fp);
+    write_pk_file(pk_file, pubkey_struct);
 
     printf("The secret key was saved as %s - Keep it secret!\n", sk_file);
     printf("The public key was saved as %s - That one can be public.\n\n", pk_file);
@@ -687,6 +698,34 @@ generate(const char *pk_file, const char *sk_file, const char *comment,
 
     return 0;
 }
+
+static int
+recreate_pk(const char *pk_file, const char *sk_file, int force)
+{
+    SeckeyStruct   *seckey_struct;
+    PubkeyStruct    pubkey_struct;
+
+    if (force == 0) {
+        abort_on_existing_key_file(pk_file);
+    }
+    if ((seckey_struct = seckey_load(sk_file)) == NULL) {
+        return -1;
+    }
+    memcpy(pubkey_struct.sig_alg, seckey_struct->sig_alg,
+           sizeof pubkey_struct.sig_alg);
+    memcpy(pubkey_struct.keynum_pk.keynum, seckey_struct->keynum_sk.keynum,
+           sizeof pubkey_struct.keynum_pk.keynum);
+    assert(sizeof seckey_struct->keynum_sk.sk > crypto_sign_PUBLICKEYBYTES);
+    memcpy(pubkey_struct.keynum_pk.pk, seckey_struct->keynum_sk.sk +
+           (sizeof seckey_struct->keynum_sk.sk) - crypto_sign_PUBLICKEYBYTES,
+           sizeof pubkey_struct.keynum_pk.pk);
+    sodium_free(seckey_struct);
+
+    write_pk_file(pk_file, &pubkey_struct);
+
+    return 0;
+}
+
 #endif
 
 #ifndef VERIFY_ONLY
@@ -764,6 +803,12 @@ main(int argc, char **argv)
                 usage();
             }
             action = ACTION_SIGN;
+            break;
+        case 'R':
+            if (action != ACTION_NONE && action != ACTION_RECREATE_PK) {
+                usage();
+            }
+            action = ACTION_RECREATE_PK;
             break;
 #endif
         case 'V':
@@ -849,6 +894,11 @@ main(int argc, char **argv)
                             pubkey_load(pk_file, pubkey_s) : NULL),
                         message_file, (const char **) &argv[optind], argc - optind,
                         sig_file, comment, trusted_comment, hashed) != 0;
+    case ACTION_RECREATE_PK:
+        if (pk_file == NULL) {
+            pk_file = SIG_DEFAULT_PKFILE;
+        }
+        return recreate_pk(pk_file, sk_file, force) != 0;
 #endif
     case ACTION_VERIFY:
         if (message_file == NULL) {
