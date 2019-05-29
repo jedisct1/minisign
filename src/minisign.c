@@ -365,7 +365,7 @@ seckey_load(const char *sk_file)
          seckey_struct->kdf_salt,
          le64_load(seckey_struct->kdf_opslimit_le),
          le64_load(seckey_struct->kdf_memlimit_le)) != 0) {
-        abort();
+        exit_err("Unable to complete key derivation");
     }
     sodium_free(pwd);
     xor_buf((unsigned char *) (void *) &seckey_struct->keynum_sk, stream,
