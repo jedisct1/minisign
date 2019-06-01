@@ -41,7 +41,7 @@ if(BUILD_STATIC_EXECUTABLES)
     set(CMAKE_EXE_LINKER_FLAGS -static)
   endif (NOT APPLE)
 endif(BUILD_STATIC_EXECUTABLES)
-find_package(Sodium REQUIRED)
+find_package(sodium REQUIRED)
 
 add_executable(minisign
                src/base64.c
