@@ -52,6 +52,10 @@ add_executable(minisign
                src/minisign.c)
 
 if(STATIC_LIBSODIUM)
+  if(BUILD_STATIC_EXECUTABLES)
+    set_target_properties(minisign PROPERTIES LINK_SEARCH_START_STATIC 1)
+    set_target_properties(minisign PROPERTIES LINK_SEARCH_END_STATIC 1)
+  endif()
   set(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
 endif()
 
