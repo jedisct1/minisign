@@ -54,6 +54,7 @@ add_executable(minisign
 target_include_directories(minisign PUBLIC ${sodium_INCLUDE_DIR})
 
 if(LIBSODIUM_STATIC)
+  set_target_properties(minisign PROPERTIES LINK_SEARCH_END_STATIC ON)
   target_compile_options(minisign PUBLIC ${LIBSODIUM_STATIC_CFLAGS} ${LIBSODIUM_CFLAGS_STATIC_OTHER})
   target_link_libraries(minisign ${LIBSODIUM_STATIC_LDFLAGS} ${LIBSODIUM_STATIC_LDFLAGS_OTHER})
 else(LIBSODIUM_STATIC)
