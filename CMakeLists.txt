@@ -43,7 +43,7 @@ if(BUILD_STATIC_EXECUTABLES)
 endif(BUILD_STATIC_EXECUTABLES)
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(LIBSODIUM REQUIRED libsodium)
+pkg_check_modules(LIBSODIUM libsodium)
 
 add_executable(minisign
                src/base64.c
@@ -51,16 +51,24 @@ add_executable(minisign
                src/helpers.c
                src/minisign.c)
 
-target_include_directories(minisign PUBLIC ${sodium_INCLUDE_DIR})
-
 if(LIBSODIUM_STATIC)
   set_target_properties(minisign PROPERTIES LINK_SEARCH_END_STATIC ON)
-  target_compile_options(minisign PUBLIC ${LIBSODIUM_STATIC_CFLAGS} ${LIBSODIUM_CFLAGS_STATIC_OTHER})
-  target_link_libraries(minisign ${LIBSODIUM_STATIC_LDFLAGS} ${LIBSODIUM_STATIC_LDFLAGS_OTHER})
-else(LIBSODIUM_STATIC)
-  target_compile_options(minisign PUBLIC ${LIBSODIUM_CFLAGS} ${LIBSODIUM_CFLAGS_OTHER})
-  target_link_libraries(minisign ${LIBSODIUM_LDFLAGS} ${LIBSODIUM_LDFLAGS_OTHER})
-endif(LIBSODIUM_STATIC)
+  set(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+endif()
+
+find_path(SODIUM_INCLUDE_DIR sodium.h HINTS ${LIBSODIUM_INCLUDE_DIRS} /usr/local/include /opt/local/include /opt/include)
+set(LIBSODIUM_CFLAGS -I${SODIUM_INCLUDE_DIR})
+
+find_library(SODIUM_LIBRARY NAMES sodium HINTS ${LIBSODIUM_LIBRARY_DIRS} /usr/local/lib /opt/local/lib /opt/lib)
+set(LIBSODIUM_LDFLAGS ${SODIUM_LIBRARY})
+
+if(LIBSODIUM_STATIC)
+  set(LIBSODIUM_CFLAGS_OTHER ${LIBSODIUM_STATIC_CFLAGS_OTHER})
+  set(LIBSODIUM_LDFLAGS_OTHER ${LIBSODIUM_STATIC_LDFLAGS_OTHER})
+endif()
+
+target_compile_options(minisign PUBLIC ${LIBSODIUM_CFLAGS} ${LIBSODIUM_CFLAGS_OTHER})
+target_link_libraries(minisign ${LIBSODIUM_LDFLAGS} ${LIBSODIUM_LDFLAGS_OTHER})
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
