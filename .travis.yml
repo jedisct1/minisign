@@ -28,14 +28,14 @@ script:
   - rm -fr build
   - mkdir build
   - cd build
-  - cmake .. -D STATIC_LIBSODIUM=1
+  - cmake -D STATIC_LIBSODIUM=1 ..
   - make -j$(nproc)
   - cd ..
 
   - rm -fr build
   - mkdir build
   - cd build
-  - cmake .. -D BUILD_STATIC_EXECUTABLES=1
+  - cmake -D BUILD_STATIC_EXECUTABLES=1 ..
   - make -j$(nproc)
   - cd ..
 
