@@ -16,6 +16,7 @@ Compilation / installation
 --------------------------
 
 Dependencies:
+
 * [libsodium](https://libsodium.org/)
 * cmake
 * pkg-config
@@ -27,6 +28,14 @@ Compilation:
     $ cmake ..
     $ make
     # make install
+
+Alternative configuration for static binaries:
+
+    $ cmake .. -D STATIC_LIBSODIUM=1
+
+or:
+
+    $ cmake .. -D BUILD_STATIC_EXECUTABLES=1
 
 Minisign is also available in Homebrew:
 
