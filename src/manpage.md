@@ -9,6 +9,7 @@ minisign(1) -- A dead simple tool to sign files and verify signatures.
 `minisign` -G [-p pubkey] [-s seckey]
 `minisign` -S [-H] [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]
 `minisign` -V [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file
+`minisign` -R -s seckey -p pubkeyfile
 
 ## DESCRIPTION
 
@@ -48,6 +49,8 @@ These options control the actions of `minisign`.
     Quiet mode, suppress output
   * `-Q`:
     Pretty quiet mode, only print the trusted comment
+  * `-R`:
+    Recreate a public key file from a secret key file
   * `-f`:
     Force. Combined with -G, overwrite a previous key pair
   * `-v`:

@@ -35,6 +35,9 @@ usage(void)
          "minisign -S [-H] [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]\n"
 #endif
          "minisign -V [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file\n"
+#ifndef VERIFY_ONLY
+         "minisign -R -s seckey -p pubkeyfile\n"
+#endif
          "\n"
 #ifndef VERIFY_ONLY
          "-G                generate a new key pair\n"
