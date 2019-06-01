@@ -30,12 +30,16 @@ if(NOT CMAKE_BUILD_TYPE)
 endif(NOT CMAKE_BUILD_TYPE)
 
 include(CPack)
-include(CheckLibraryExists)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_ALL_SOURCE -D_GNU_SOURCE")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64")
 
-find_library(LIB_SODIUM NAMES sodium REQUIRED)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+if(BUILD_STATIC_EXECUTABLES)
+  set(sodium_USE_STATIC_LIBS on)
+endif(BUILD_STATIC_EXECUTABLES)
+set(sodium_USE_STATIC_LIBS on)
+find_package(Sodium REQUIRED)
 
 add_executable(minisign
                src/base64.c
@@ -43,7 +47,18 @@ add_executable(minisign
                src/helpers.c
                src/minisign.c)
 
-target_link_libraries(minisign ${LIB_SODIUM})
+target_include_directories(minisign PUBLIC ${sodium_INCLUDE_DIR})
+
+if(BUILD_STATIC_EXECUTABLES)
+  target_link_libraries(minisign ${sodium_LIBRARY_RELEASE})
+else(BUILD_STATIC_EXECUTABLES)
+  target_link_libraries(minisign ${sodium_LIBRARY_RELEASE})
+endif(BUILD_STATIC_EXECUTABLES)
+
+if (DEFINED CMAKE_STRIP)
+  add_custom_command(TARGET minisign POST_BUILD
+    COMMAND ${CMAKE_STRIP} ${STRIP_FLAGS} $<TARGET_FILE:minisign>)
+endif(DEFINED CMAKE_STRIP)
 
 install(TARGETS minisign DESTINATION bin)
 
