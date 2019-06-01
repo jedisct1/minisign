@@ -3,24 +3,41 @@ sudo: required
 language: c
 
 os:
- - linux
+  - linux
 
 compiler:
- - gcc
+  - gcc
 
 before_script:
- - git clone https://github.com/jedisct1/libsodium.git --branch=stable
- - cd libsodium
- - env CPPFLAGS=-DED25519_NONDETERMINISTIC ./configure --disable-dependency-tracking
- - sudo make install
- - sudo ldconfig
- - cd ..
- - mkdir build
- - cd build
- - cmake ..
+  - git clone https://github.com/jedisct1/libsodium.git --branch=stable
+  - cd libsodium
+  - env CPPFLAGS=-DED25519_NONDETERMINISTIC ./configure --disable-dependency-tracking
+  - make -j$(nproc)
+  - sudo make install
+  - sudo ldconfig
+  - cd ..
 
 script:
- - make -j$(nproc)
+  - rm -fr build
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make -j$(nproc)
+  - cd ..
+
+  - rm -fr build
+  - mkdir build
+  - cd build
+  - cmake .. -D STATIC_LIBSODIUM=1
+  - make -j$(nproc)
+  - cd ..
+
+  - rm -fr build
+  - mkdir build
+  - cd build
+  - cmake .. -D BUILD_STATIC_EXECUTABLES=1
+  - make -j$(nproc)
+  - cd ..
 
 matrix:
- - fast_finish: true
+  - fast_finish: true
