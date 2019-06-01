@@ -16,8 +16,9 @@ Compilation / installation
 --------------------------
 
 Dependencies:
-* [libsodium](http://doc.libsodium.org/)
+* [libsodium](https://libsodium.org/)
 * cmake
+* pkg-config
 
 Compilation:
 
