@@ -36,7 +36,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 if(BUILD_STATIC_EXECUTABLES)
-  set(LIBSODIUM_STATIC on)
+  set(STATIC_LIBSODIUM on)
   if (NOT APPLE)
     set(CMAKE_EXE_LINKER_FLAGS -static)
   endif (NOT APPLE)
@@ -51,24 +51,22 @@ add_executable(minisign
                src/helpers.c
                src/minisign.c)
 
-if(LIBSODIUM_STATIC)
+if(STATIC_LIBSODIUM)
   set_target_properties(minisign PROPERTIES LINK_SEARCH_END_STATIC ON)
   set(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
 endif()
 
 find_path(SODIUM_INCLUDE_DIR sodium.h HINTS ${LIBSODIUM_INCLUDE_DIRS} /usr/local/include /opt/local/include /opt/include)
-set(LIBSODIUM_CFLAGS -I${SODIUM_INCLUDE_DIR})
-
 find_library(SODIUM_LIBRARY NAMES sodium HINTS ${LIBSODIUM_LIBRARY_DIRS} /usr/local/lib /opt/local/lib /opt/lib)
-set(LIBSODIUM_LDFLAGS ${SODIUM_LIBRARY})
 
-if(LIBSODIUM_STATIC)
+if(STATIC_LIBSODIUM)
   set(LIBSODIUM_CFLAGS_OTHER ${LIBSODIUM_STATIC_CFLAGS_OTHER})
   set(LIBSODIUM_LDFLAGS_OTHER ${LIBSODIUM_STATIC_LDFLAGS_OTHER})
 endif()
 
+target_include_directories(minisign PUBLIC ${SODIUM_INCLUDE_DIR})
 target_compile_options(minisign PUBLIC ${LIBSODIUM_CFLAGS} ${LIBSODIUM_CFLAGS_OTHER})
-target_link_libraries(minisign ${LIBSODIUM_LDFLAGS} ${LIBSODIUM_LDFLAGS_OTHER})
+target_link_libraries(minisign ${SODIUM_LIBRARY} ${LIBSODIUM_LDFLAGS_OTHER})
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
