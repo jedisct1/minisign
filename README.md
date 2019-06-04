@@ -49,6 +49,10 @@ Minisign is also available in chocolatey on Windows:
 
     $ choco install minisign
 
+Minisign is also available with docker:
+
+    $ docker run -i --rm minisign/minisign
+
 Additional tools, libraries and implementations
 -----------------------------------------------
 
