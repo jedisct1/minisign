@@ -69,6 +69,9 @@ to handle and create Minisign signatures.
 port of Minisign.
 * [minisign](https://github.com/chm-diederichs/minisign) a Javascript
 implementation.
+* WebAssembly implementations of [rsign2](https://wapm.io/package/jedisct1/rsign2)
+and [minisign-cli](https://wapm.io/package/jedisct1/minisign) are available on
+WAPM.
 
 Faults injections
 -----------------
