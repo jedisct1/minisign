@@ -42,14 +42,14 @@ if(BUILD_STATIC_EXECUTABLES)
   endif (NOT APPLE)
 endif(BUILD_STATIC_EXECUTABLES)
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(LIBSODIUM libsodium)
-
 add_executable(minisign
                src/base64.c
                src/get_line.c
                src/helpers.c
                src/minisign.c)
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LIBSODIUM libsodium)
 
 if(STATIC_LIBSODIUM)
   if(BUILD_STATIC_EXECUTABLES)
