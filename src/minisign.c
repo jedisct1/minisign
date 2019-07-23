@@ -186,7 +186,7 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES],
     }
     trim(sig_s);
     if (fgets(trusted_comment, (int) trusted_comment_maxlen, fp) == NULL) {
-        exit_err(sig_file);
+        exit_msg("Trusted comment not present");
     }
     if (strncmp(trusted_comment, TRUSTED_COMMENT_PREFIX,
                 (sizeof TRUSTED_COMMENT_PREFIX) - 1U) != 0) {
