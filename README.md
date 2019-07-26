@@ -65,8 +65,6 @@ the command-line tool in Rust.
 a small Rust crate to verify Minisign signatures.
 * [minisign-net](https://github.com/bitbeans/minisign-net) is a .NET library
 to handle and create Minisign signatures.
-* [minisign-py](https://github.com/HacKanCuBa/minisign-py) is a pure Python
-port of Minisign.
 * [minisign](https://github.com/chm-diederichs/minisign) a Javascript
 implementation.
 * WebAssembly implementations of [rsign2](https://wapm.io/package/jedisct1/rsign2)
