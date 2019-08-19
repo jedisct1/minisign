@@ -19,7 +19,7 @@
 #include "minisign.h"
 
 #ifndef VERIFY_ONLY
-static const char *getopt_options = "GSVRHhc:ifm:oP:p:qQs:t:vx:";
+static const char *getopt_options = "GSVRHhc:fm:oP:p:qQs:t:vx:";
 #else
 static const char *getopt_options = "Vhm:oP:p:qQvx:";
 #endif
@@ -65,7 +65,6 @@ usage(void)
          "-R                recreate a public key file from a secret key file\n"
 #endif
          "-f                force. Combined with -G, overwrite a previous key pair\n"
-         "-i                interactive. Uses less memory for key derivation\n"
          "-v                display version number\n"
         );
     exit(2);
@@ -625,7 +624,7 @@ write_pk_file(const char *pk_file, const PubkeyStruct *pubkey_struct)
 
 static int
 generate(const char *pk_file, const char *sk_file, const char *comment,
-         int force, int interactive)
+         int force)
 {
     char          *pwd = xsodium_malloc(PASSWORDMAXBYTES);
     char          *pwd2 = xsodium_malloc(PASSWORDMAXBYTES);
@@ -644,11 +643,9 @@ generate(const char *pk_file, const char *sk_file, const char *comment,
     memcpy(seckey_struct->chk_alg, CHKALG, sizeof seckey_struct->chk_alg);
     randombytes_buf(seckey_struct->kdf_salt, sizeof seckey_struct->kdf_salt);
     le64_store(seckey_struct->kdf_opslimit_le,
-               interactive ? crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE
-                           : crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE);
+               crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE);
     le64_store(seckey_struct->kdf_memlimit_le,
-               interactive ? crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE
-                           : crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE);
+               crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE);
     seckey_chk(seckey_struct->keynum_sk.chk, seckey_struct);
     memcpy(pubkey_struct->keynum_pk.keynum, seckey_struct->keynum_sk.keynum,
            sizeof pubkey_struct->keynum_pk.keynum);
@@ -665,13 +662,24 @@ generate(const char *pk_file, const char *sk_file, const char *comment,
     printf("Deriving a key from the password in order to encrypt the secret key... ");
     fflush(stdout);
     stream = xsodium_malloc(sizeof seckey_struct->keynum_sk);
+
     if (crypto_pwhash_scryptsalsa208sha256
         (stream, sizeof seckey_struct->keynum_sk, pwd, strlen(pwd),
          seckey_struct->kdf_salt,
          le64_load(seckey_struct->kdf_opslimit_le),
          le64_load(seckey_struct->kdf_memlimit_le)) != 0) {
-        puts("failed");
-        exit_err("Unable to complete key derivation");
+        
+        le64_store(seckey_struct->kdf_memlimit_le,
+                   crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE);
+
+        if (crypto_pwhash_scryptsalsa208sha256
+            (stream, sizeof seckey_struct->keynum_sk, pwd, strlen(pwd),
+             seckey_struct->kdf_salt,
+             le64_load(seckey_struct->kdf_opslimit_le),
+             le64_load(seckey_struct->kdf_memlimit_le)) != 0) {
+                puts("failed");
+                exit_err("Unable to complete key derivation");
+        }
     }
     sodium_free(pwd);
     sodium_free(pwd2);
@@ -679,6 +687,10 @@ generate(const char *pk_file, const char *sk_file, const char *comment,
             sizeof seckey_struct->keynum_sk);
     sodium_free(stream);
     puts("done\n");
+    
+    if (le64_load(seckey_struct->kdf_memlimit_le) == crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE) {
+        fprintf(stderr, "Warning: due to insufficient memory the KDF used less memory than the default\n");
+    }
 
     abort_on_existing_key_files(pk_file, sk_file, force);
     if (basedir_create_useronly(sk_file) != 0) {
@@ -795,7 +807,6 @@ main(int argc, char **argv)
     int         quiet = 0;
     int         output = 0;
     int         force = 0;
-    int         interactive = 0;
     Action      action = ACTION_NONE;
 
     while ((opt_flag = getopt(argc, argv, getopt_options)) != -1) {
@@ -832,9 +843,6 @@ main(int argc, char **argv)
             break;
         case 'f':
             force = 1;
-            break;
-        case 'i':
-            interactive = 1;
             break;
 #endif
         case 'h':
@@ -890,7 +898,7 @@ main(int argc, char **argv)
         if (pk_file == NULL) {
             pk_file = SIG_DEFAULT_PKFILE;
         }
-        return generate(pk_file, sk_file, comment, force, interactive) != 0;
+        return generate(pk_file, sk_file, comment, force) != 0;
     case ACTION_SIGN:
         if (message_file == NULL) {
             usage();
