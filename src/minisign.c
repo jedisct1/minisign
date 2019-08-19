@@ -369,7 +369,8 @@ seckey_load(const char *sk_file)
          seckey_struct->kdf_salt,
          le64_load(seckey_struct->kdf_opslimit_le),
          le64_load(seckey_struct->kdf_memlimit_le)) != 0) {
-        exit_err("Unable to complete key derivation - This probably means out of memory");
+        puts("failed");
+        exit_err("Unable to complete key derivation");
     }
     sodium_free(pwd);
     xor_buf((unsigned char *) (void *) &seckey_struct->keynum_sk, stream,
@@ -669,7 +670,8 @@ generate(const char *pk_file, const char *sk_file, const char *comment,
          seckey_struct->kdf_salt,
          le64_load(seckey_struct->kdf_opslimit_le),
          le64_load(seckey_struct->kdf_memlimit_le)) != 0) {
-        exit_err("Unable to complete key derivation - This probably means out of memory");
+        puts("failed");
+        exit_err("Unable to complete key derivation");
     }
     sodium_free(pwd);
     sodium_free(pwd2);
