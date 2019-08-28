@@ -368,7 +368,8 @@ seckey_load(const char *sk_file)
          seckey_struct->kdf_salt,
          le64_load(seckey_struct->kdf_opslimit_le),
          le64_load(seckey_struct->kdf_memlimit_le)) != 0) {
-        exit_err("Unable to complete key derivation - This probably means out of memory");
+        puts("failed");
+        exit_err("Unable to complete key derivation");
     }
     sodium_free(pwd);
     xor_buf((unsigned char *) (void *) &seckey_struct->keynum_sk, stream,
@@ -661,12 +662,24 @@ generate(const char *pk_file, const char *sk_file, const char *comment,
     printf("Deriving a key from the password in order to encrypt the secret key... ");
     fflush(stdout);
     stream = xsodium_malloc(sizeof seckey_struct->keynum_sk);
+
     if (crypto_pwhash_scryptsalsa208sha256
         (stream, sizeof seckey_struct->keynum_sk, pwd, strlen(pwd),
          seckey_struct->kdf_salt,
          le64_load(seckey_struct->kdf_opslimit_le),
          le64_load(seckey_struct->kdf_memlimit_le)) != 0) {
-        exit_err("Unable to complete key derivation - This probably means out of memory");
+        
+        le64_store(seckey_struct->kdf_memlimit_le,
+                   crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE);
+
+        if (crypto_pwhash_scryptsalsa208sha256
+            (stream, sizeof seckey_struct->keynum_sk, pwd, strlen(pwd),
+             seckey_struct->kdf_salt,
+             le64_load(seckey_struct->kdf_opslimit_le),
+             le64_load(seckey_struct->kdf_memlimit_le)) != 0) {
+                puts("failed");
+                exit_err("Unable to complete key derivation");
+        }
     }
     sodium_free(pwd);
     sodium_free(pwd2);
@@ -674,6 +687,10 @@ generate(const char *pk_file, const char *sk_file, const char *comment,
             sizeof seckey_struct->keynum_sk);
     sodium_free(stream);
     puts("done\n");
+    
+    if (le64_load(seckey_struct->kdf_memlimit_le) == crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE) {
+        fprintf(stderr, "Warning: due to insufficient memory the KDF used less memory than the default\n");
+    }
 
     abort_on_existing_key_files(pk_file, sk_file, force);
     if (basedir_create_useronly(sk_file) != 0) {
