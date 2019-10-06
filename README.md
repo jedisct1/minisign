@@ -49,6 +49,10 @@ Minisign is also available in chocolatey on Windows:
 
     $ choco install minisign
 
+Minisign is also available on Ubuntu as a PPA:
+
+    $ [sudo] add-apt-repository ppa:dysfunctionalprogramming/minisign
+
 Additional tools, libraries and implementations
 -----------------------------------------------
 
