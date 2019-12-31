@@ -80,10 +80,10 @@ if(CMAKE_THREAD_LIBS_INIT)
   target_link_libraries(minisign "${CMAKE_THREAD_LIBS_INIT}")
 endif(CMAKE_THREAD_LIBS_INIT)
 
-if (COMMAND CMAKE_STRIP)
+if (NOT MSVC AND CMAKE_STRIP)
   add_custom_command(TARGET minisign POST_BUILD
     COMMAND ${CMAKE_STRIP} ${STRIP_FLAGS} $<TARGET_FILE:minisign>)
-endif(COMMAND CMAKE_STRIP)
+endif(NOT MSVC AND CMAKE_STRIP)
 
 install(TARGETS minisign DESTINATION bin)
 
