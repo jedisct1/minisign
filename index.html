@@ -171,6 +171,7 @@ base64(&lt;global_signature&gt;)
 <ul>
 <li>
 <code>signature_algorithm</code>: <code>Ed</code>
+<code>signature_algorithm</code>: <code>Ed</code> (for PureEdDSA) or <code>ED</code> (for HashedEdDSA)
 </li>
 <li>
 <code>key_id</code>: 8 random bytes, matching the public key</li>
@@ -212,7 +213,7 @@ base64(&lt;signature_algorithm&gt; || &lt;kdf_algorithm&gt; || &lt;cksum_algorit
 
 <ul>
 <li>
-<code>signature_algorithm</code>: <code>Ed</code> (or <code>ED</code> for prehashed)
+<code>signature_algorithm</code>: <code>Ed</code>
 </li>
 <li>
 <code>kdf_algorithm</code>: <code>Sc</code>
