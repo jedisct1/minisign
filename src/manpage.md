@@ -7,8 +7,11 @@ minisign(1) -- A dead simple tool to sign files and verify signatures.
 ## SYNOPSIS
 
 `minisign` -G [-p pubkey] [-s seckey]
+
 `minisign` -S [-H] [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]
+
 `minisign` -V [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file
+
 `minisign` -R -s seckey -p pubkeyfile
 
 ## DESCRIPTION
@@ -121,7 +124,6 @@ $ `minisign` -SHm myfile.txt
 Verification of such a signature doesn't require any specific switch: the appropriate algorithm will automatically be detected.
 
 Signatures generated that way are not compatible with OpenBSD's `signify` tool and are not compatible with `Minisign` versions prior to 0.6.
-
 
 ## AUTHOR
 

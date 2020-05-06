@@ -1,13 +1,22 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "MINISIGN" "1" "August 2016" "" ""
+.TH "MINISIGN" "1" "May 2020" "" ""
 .
 .SH "NAME"
 \fBminisign\fR \- A dead simple tool to sign files and verify signatures\.
 .
 .SH "SYNOPSIS"
-\fBminisign\fR \-G [\-p pubkey] [\-s seckey] \fBminisign\fR \-S [\-H] [\-x sigfile] [\-s seckey] [\-c untrusted_comment] [\-t trusted_comment] \-m <file> \fBminisign\fR \-V [\-x sigfile] [\-p pubkeyfile | \-P pubkey] [\-o] [\-q] \-m file
+\fBminisign\fR \-G [\-p pubkey] [\-s seckey]
+.
+.P
+\fBminisign\fR \-S [\-H] [\-x sigfile] [\-s seckey] [\-c untrusted_comment] [\-t trusted_comment] \-m file [file \.\.\.]
+.
+.P
+\fBminisign\fR \-V [\-x sigfile] [\-p pubkeyfile | \-P pubkey] [\-o] [\-q] \-m file
+.
+.P
+\fBminisign\fR \-R \-s seckey \-p pubkeyfile
 .
 .SH "DESCRIPTION"
 \fBMinisign\fR is a dead simple tool to sign files and verify signatures\.
@@ -24,7 +33,7 @@ Generate a new key pair
 .
 .TP
 \fB\-S\fR
-Sign a file
+Sign files
 .
 .TP
 \fB\-V\fR
@@ -75,6 +84,10 @@ Quiet mode, suppress output
 Pretty quiet mode, only print the trusted comment
 .
 .TP
+\fB\-R\fR
+Recreate a public key file from a secret key file
+.
+.TP
 \fB\-f\fR
 Force\. Combined with \-G, overwrite a previous key pair
 .
@@ -92,10 +105,10 @@ Creating a key pair
 The public key is printed and put into the \fBminisign\.pub\fR file\. The secret key is encrypted and saved as a file named \fB~/\.minisign/minisign\.key\fR\.
 .
 .P
-Signing a file
+Signing files
 .
 .P
-$ \fBminisign\fR \-Sm myfile\.txt
+$ \fBminisign\fR \-Sm myfile\.txt $ \fBminisign\fR \-Sm myfile\.txt myfile2\.txt *\.c
 .
 .P
 Or to include a comment in the signature, that will be verified and displayed when verifying the file:
