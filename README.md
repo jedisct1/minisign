@@ -31,11 +31,11 @@ Compilation:
 
 Alternative configuration for static binaries:
 
-    $ cmake .. -D STATIC_LIBSODIUM=1
+    $ cmake -D STATIC_LIBSODIUM=1 ..
 
 or:
 
-    $ cmake .. -D BUILD_STATIC_EXECUTABLES=1
+    $ cmake -D BUILD_STATIC_EXECUTABLES=1 ..
 
 Minisign is also available in Homebrew:
 
