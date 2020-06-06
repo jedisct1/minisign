@@ -18,6 +18,11 @@
 #include "helpers.h"
 #include "minisign.h"
 
+#ifndef crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_MIN
+# define crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_MIN 32768U
+# define crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_MIN 16777216U
+#endif
+
 #ifndef VERIFY_ONLY
 static const char *getopt_options = "GSVRHhc:fm:oP:p:qQs:t:vx:";
 #else
@@ -186,7 +191,7 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES],
     }
     trim(sig_s);
     if (fgets(trusted_comment, (int) trusted_comment_maxlen, fp) == NULL) {
-        exit_err(sig_file);
+        exit_msg("Trusted comment not present");
     }
     if (strncmp(trusted_comment, TRUSTED_COMMENT_PREFIX,
                 (sizeof TRUSTED_COMMENT_PREFIX) - 1U) != 0) {
@@ -368,7 +373,7 @@ seckey_load(const char *sk_file)
          seckey_struct->kdf_salt,
          le64_load(seckey_struct->kdf_opslimit_le),
          le64_load(seckey_struct->kdf_memlimit_le)) != 0) {
-        exit_err("Unable to complete key derivation");
+        exit_err("Unable to complete key derivation - This probably means out of memory");
     }
     sodium_free(pwd);
     xor_buf((unsigned char *) (void *) &seckey_struct->keynum_sk, stream,
@@ -631,6 +636,8 @@ generate(const char *pk_file, const char *sk_file, const char *comment,
     PubkeyStruct  *pubkey_struct = xsodium_malloc(sizeof(PubkeyStruct));
     unsigned char *stream ;
     FILE          *fp;
+    unsigned long  kdf_memlimit;
+    unsigned long  kdf_opslimit;
 
     abort_on_existing_key_files(pk_file, sk_file, force);
     randombytes_buf(seckey_struct->keynum_sk.keynum,
@@ -640,12 +647,6 @@ generate(const char *pk_file, const char *sk_file, const char *comment,
     memcpy(seckey_struct->sig_alg, SIGALG, sizeof seckey_struct->sig_alg);
     memcpy(seckey_struct->kdf_alg, KDFALG, sizeof seckey_struct->kdf_alg);
     memcpy(seckey_struct->chk_alg, CHKALG, sizeof seckey_struct->chk_alg);
-    randombytes_buf(seckey_struct->kdf_salt, sizeof seckey_struct->kdf_salt);
-    le64_store(seckey_struct->kdf_opslimit_le,
-               crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE);
-    le64_store(seckey_struct->kdf_memlimit_le,
-               crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE);
-    seckey_chk(seckey_struct->keynum_sk.chk, seckey_struct);
     memcpy(pubkey_struct->keynum_pk.keynum, seckey_struct->keynum_sk.keynum,
            sizeof pubkey_struct->keynum_pk.keynum);
     memcpy(pubkey_struct->sig_alg, SIGALG, sizeof pubkey_struct->sig_alg);
@@ -661,15 +662,29 @@ generate(const char *pk_file, const char *sk_file, const char *comment,
     printf("Deriving a key from the password in order to encrypt the secret key... ");
     fflush(stdout);
     stream = xsodium_malloc(sizeof seckey_struct->keynum_sk);
-    if (crypto_pwhash_scryptsalsa208sha256
-        (stream, sizeof seckey_struct->keynum_sk, pwd, strlen(pwd),
-         seckey_struct->kdf_salt,
-         le64_load(seckey_struct->kdf_opslimit_le),
-         le64_load(seckey_struct->kdf_memlimit_le)) != 0) {
-        abort();
+    randombytes_buf(seckey_struct->kdf_salt, sizeof seckey_struct->kdf_salt);
+    kdf_opslimit = crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE;
+    kdf_memlimit = crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE;
+
+    while (crypto_pwhash_scryptsalsa208sha256
+           (stream, sizeof seckey_struct->keynum_sk, pwd, strlen(pwd),
+               seckey_struct->kdf_salt, kdf_opslimit, kdf_memlimit) != 0) {
+        kdf_opslimit /= 2;
+        kdf_memlimit /= 2;
+        if (kdf_opslimit < crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_MIN ||
+            kdf_memlimit < crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_MIN) {
+            exit_err("Unable to complete key derivation - More memory would be needed");
+        }
     }
     sodium_free(pwd);
     sodium_free(pwd2);
+    if (kdf_memlimit < crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE) {
+        fprintf(stderr, "Warning: due to limited memory the KDF used less "
+                "memory than the default\n");
+    }
+    le64_store(seckey_struct->kdf_opslimit_le, kdf_opslimit);
+    le64_store(seckey_struct->kdf_memlimit_le, kdf_memlimit);
+    seckey_chk(seckey_struct->keynum_sk.chk, seckey_struct);
     xor_buf((unsigned char *) (void *) &seckey_struct->keynum_sk, stream,
             sizeof seckey_struct->keynum_sk);
     sodium_free(stream);

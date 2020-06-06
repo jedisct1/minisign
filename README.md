@@ -31,11 +31,11 @@ Compilation:
 
 Alternative configuration for static binaries:
 
-    $ cmake .. -D STATIC_LIBSODIUM=1
+    $ cmake -D STATIC_LIBSODIUM=1 ..
 
 or:
 
-    $ cmake .. -D BUILD_STATIC_EXECUTABLES=1
+    $ cmake -D BUILD_STATIC_EXECUTABLES=1 ..
 
 Minisign is also available in Homebrew:
 
@@ -49,9 +49,13 @@ Minisign is also available in chocolatey on Windows:
 
     $ choco install minisign
 
+Minisign is also available on Ubuntu as a PPA:
+
+    $ [sudo] add-apt-repository ppa:dysfunctionalprogramming/minisign
+
 Minisign is also available with docker:
 
-    $ docker run -i --rm minisign/minisign
+    $ docker run -i --rm jedisct1/minisign
 
 Additional tools, libraries and implementations
 -----------------------------------------------
@@ -69,22 +73,19 @@ the command-line tool in Rust.
 a small Rust crate to verify Minisign signatures.
 * [minisign-net](https://github.com/bitbeans/minisign-net) is a .NET library
 to handle and create Minisign signatures.
-* [minisign-py](https://github.com/HacKanCuBa/minisign-py) is a pure Python
-port of Minisign.
 * [minisign](https://github.com/chm-diederichs/minisign) a Javascript
 implementation.
+* WebAssembly implementations of [rsign2](https://wapm.io/package/jedisct1/rsign2)
+and [minisign-cli](https://wapm.io/package/jedisct1/minisign) are available on
+WAPM.
 
-Faults injections
------------------
+Signature determinism
+---------------------
 
-Minisign uses the EdDSA signature system, and deterministic signature
-schemes are fragile against fault attacks. However, conducting these requires
-physical access or the attacker having access to the same physical host.
+This implementation uses deterministic signatures, unless libsodium
+was compiled with the `ED25519_NONDETERMINISTIC` macro defined. This
+adds random noise to the computation of EdDSA nonces.
 
-More importantly, this requires a significant amount of time, and messages
-being signed endlessly while the attack is being conducted.
-
-If such a scenario ever happens to be part of your threat model,
-libsodium should be compiled with the `ED25519_NONDETERMINISTIC` macro
-defined. This will add random noise to the computation of EdDSA
-nonces.
+Other implementations can choose to use non-deterministic signatures
+by default. They will remain fully interoperable with implementations
+using deterministic signatures.

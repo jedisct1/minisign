@@ -42,14 +42,14 @@ if(BUILD_STATIC_EXECUTABLES)
   endif (NOT APPLE)
 endif(BUILD_STATIC_EXECUTABLES)
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(LIBSODIUM libsodium)
-
 add_executable(minisign
                src/base64.c
                src/get_line.c
                src/helpers.c
                src/minisign.c)
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LIBSODIUM libsodium)
 
 if(STATIC_LIBSODIUM)
   if(BUILD_STATIC_EXECUTABLES)
@@ -80,10 +80,10 @@ if(CMAKE_THREAD_LIBS_INIT)
   target_link_libraries(minisign "${CMAKE_THREAD_LIBS_INIT}")
 endif(CMAKE_THREAD_LIBS_INIT)
 
-if (DEFINED CMAKE_STRIP)
+if (NOT MSVC AND CMAKE_STRIP)
   add_custom_command(TARGET minisign POST_BUILD
     COMMAND ${CMAKE_STRIP} ${STRIP_FLAGS} $<TARGET_FILE:minisign>)
-endif(DEFINED CMAKE_STRIP)
+endif(NOT MSVC AND CMAKE_STRIP)
 
 install(TARGETS minisign DESTINATION bin)
 
