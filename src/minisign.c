@@ -621,7 +621,7 @@ write_pk_file(const char *pk_file, const PubkeyStruct *pubkey_struct)
     }
     xfprintf(fp, COMMENT_PREFIX "minisign public key %" PRIX64 "\n",
              le64_load(pubkey_struct->keynum_pk.keynum));
-    xfput_b64(fp, (unsigned char *) (void *) pubkey_struct,
+    xfput_b64(fp, (const unsigned char *) (const void *) pubkey_struct,
               sizeof *pubkey_struct);
     xfclose(fp);
 }
