@@ -53,6 +53,10 @@ Minisign is also available on Ubuntu as a PPA:
 
     $ [sudo] add-apt-repository ppa:dysfunctionalprogramming/minisign
 
+Minisign is also available with docker:
+
+    $ docker run -i --rm jedisct1/minisign
+
 Additional tools, libraries and implementations
 -----------------------------------------------
 
