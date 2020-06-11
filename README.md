@@ -1,3 +1,4 @@
+![CodeQL scan](https://github.com/jedisct1/minisign/workflows/CodeQL%20scan/badge.svg)
 
 Minisign
 ========
