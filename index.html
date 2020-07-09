@@ -149,15 +149,13 @@ displayed.</p>
 
 <p>By default, signing and verification require as much memory as the size of the file.</p>
 
-<p>Since Minisign 0.6, huge files can be signed and verified with very low memory requirements, by pre-hashing the content.</p>
+<p>Huge files can be signed and verified with very low memory requirements, by pre-hashing the content.</p>
 
 <p>The <code>-H</code> command-line switch, in combination with <code>-S</code>, generates a pre-hashed signature (HashEdDSA):</p>
 
 <pre><code>$ minisign -SHm myfile.txt</code></pre>
 
 <p>Verification of such a signature doesn't require any specific switch: the appropriate algorithm will automatically be detected.</p>
-
-<p>Signatures generated that way are not compatible with OpenBSD's signify tool and are not compatible with Minisign versions prior to 0.6.</p>
 
 <h2>
 <a id="signature-format" class="anchor" href="#signature-format" aria-hidden="true"><span class="octicon octicon-link"></span></a>Signature format</h2>
