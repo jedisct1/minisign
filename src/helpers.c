@@ -116,7 +116,6 @@ xfprintf(FILE *fp, const char *format, ...)
     va_end(va);
     if (fwrite(out, (size_t) len, 1U, fp) != 1U) {
         sodium_free(out);
-        va_end(va);
         exit_err("fwrite()");
     }
     sodium_free(out);
