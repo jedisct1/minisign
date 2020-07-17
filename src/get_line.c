@@ -18,6 +18,8 @@
 # include <windows.h>
 #endif
 
+#include <sodium.h>
+
 #include "get_line.h"
 #include "helpers.h"
 
@@ -84,7 +86,7 @@ enable_echo(void)
 int
 get_line(char *line, size_t max_len, const char *prompt)
 {
-    memset(line, 0, max_len);
+    sodium_memzero(line, max_len);
     if (max_len < 2U || max_len > INT_MAX) {
         return -1;
     }
@@ -95,7 +97,7 @@ get_line(char *line, size_t max_len, const char *prompt)
     }
     trim(line);
     if (strlen(line) >= max_len) {
-        fprintf(stderr, "(truncated to %u characters)\n", (unsigned int) max_len);
+        fprintf(stderr, "(truncated to %zu characters)\n", max_len);
     } else if (*line == 0) {
         fprintf(stderr, "(empty)\n");
     } else {

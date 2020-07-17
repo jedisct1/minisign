@@ -70,10 +70,13 @@ char *
 xstrdup(const char *str)
 {
     char *clone;
+    size_t len;
 
-    if ((clone = strdup(str)) == NULL) {
-        exit_err("strdup()");
+    len = strlen(str);
+    if ((clone = xmalloc(len + 1)) == NULL) {
+        exit_err("xstrdup()");
     }
+    strcpy(clone, str);
     return clone;
 }
 
@@ -109,17 +112,18 @@ xfprintf(FILE *fp, const char *format, ...)
     va_start(va, format);
     out = xsodium_malloc(out_maxlen);
     len = vsnprintf(out, out_maxlen, format, va);
-    if (len < 0 || len >= (int) out_maxlen) {
-        va_end(va);
-        exit_msg("xfprintf() overflow");
-    }
-    va_end(va);
-    if (fwrite(out, (size_t) len, 1U, fp) != 1U) {
+    if (len < 0) {
         sodium_free(out);
         va_end(va);
-        exit_err("fwrite()");
+        exit_msg("xfprintf() output error");
+    }
+    if (fwrite(out, 1U, (size_t) len, fp) != len) {
+        sodium_free(out);
+        va_end(va);
+        exit_err("fwrite() write error");
     }
     sodium_free(out);
+    va_end(va);
 
     return 0;
 }
@@ -156,11 +160,13 @@ xfclose(FILE *fp)
 void
 trim(char *str)
 {
-    size_t i = strlen(str);
+    size_t len = strlen(str);
+    size_t i;
 
-    while (i-- > (size_t) 0U) {
+    for(i = (size_t) 0U; i < len; i++) {
         if (str[i] == '\n' || str[i] == '\r') {
-            str[i] = 0;
+	    sodium_memzero(&str[i], len - i);
+	    return;
         }
     }
 }
