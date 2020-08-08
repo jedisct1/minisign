@@ -79,6 +79,7 @@ implementation.
 * WebAssembly implementations of [rsign2](https://wapm.io/package/jedisct1/rsign2)
 and [minisign-cli](https://wapm.io/package/jedisct1/minisign) are available on
 WAPM.
+* [minisign-php](https://github.com/soatok/minisign-php) is a PHP implementation.
 
 Signature determinism
 ---------------------
