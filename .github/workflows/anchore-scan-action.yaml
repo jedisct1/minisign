@@ -1,0 +1,27 @@
+name: anchore-scan-action
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag localbuild/testimage:latest
+    # https://github.com/marketplace/actions/anchore-container-scan
+    - uses: anchore/scan-action@v1
+      with:
+        image-reference: "localbuild/testimage:latest"
+        dockerfile-path: "Dockerfile"
+        #fail-build: true
+        acs-report-enable: true
+        #debug: true
+        #acs-report-severity-cutoff: "Medium"
+        include-app-packages: true
+    #- name: anchore inline scan JSON results
+    #  run: for j in `ls ./anchore-reports/*.json`; do echo "---- ${j} ----"; cat ${j}; echo; done
+    - name: anchore action SARIF report
+      run: cat results.sarif
+    - name: upload Anchore scan SARIF report
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: results.sarifb
