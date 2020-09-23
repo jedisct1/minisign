@@ -1,0 +1,66 @@
+name: anchore-scan-action-cache
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set env GITHUB_SHA_7
+      #https://github.community/t/add-short-sha-to-github-context/16418
+      #run: echo "::set-env name=REPOSITORY_LOWER::$(echo $GITHUB_REPOSITORY | tr [:upper:] [:lower:])"
+      run: |
+       echo "::set-env name=GITHUB_SHA_7::$(echo ${GITHUB_SHA} | cut -c1-8)"
+       echo "GITHUB_SHA_7 ${{env.GITHUB_SHA_7}}"
+    - name: Set env REPOSITORY_LOWER
+      #run: echo "::set-env name=REPOSITORY_LOWER::$(echo $GITHUB_REPOSITORY | tr [:upper:] [:lower:])"
+      run: |
+       echo "::set-env name=REPOSITORY_LOWER::$(echo $GITHUB_REPOSITORY | tr [:upper:] [:lower:])"
+       echo "REPOSITORY_LOWER ${{env.REPOSITORY_LOWER}}"
+    - name: Set env REPOSITORY_LOWER_TAG
+      #run: echo "::set-env name=REPOSITORY_LOWER::$(echo $GITHUB_REPOSITORY | tr [:upper:] [:lower:])"
+      run: |
+       echo "::set-env name=REPOSITORY_LOWER_TAG::$(echo $GITHUB_REPOSITORY/ci | tr [:upper:] [:lower:])"
+       echo "REPOSITORY_LOWER ${{env.REPOSITORY_LOWER_TAG}}"
+    - name: do Docker login on https://docker.pkg.github.com
+      run: echo ${{ secrets.GITHUB_TOKEN }} | docker login https://docker.pkg.github.com -u $GITHUB_ACTOR --password-stdin
+    #- name: Build the Docker imageg
+    #  run: docker build . --file Dockerfile --tag localbuild/testimage:latest
+    - name: build docker with docker/build-push-action
+    # https://github.com/marketplace/actions/build-and-push-docker-images#tag_with_ref
+      uses: docker/build-push-action@v1
+      with:
+        #username: ${{ github.actor }}
+        #password: ${{ secrets.GITHUB_TOKEN }}
+        #registry: docker.pkg.github.com
+        #repository: ${{ github.repository }}
+        #repository: $repository_lower
+        #repository: "${{env.REPOSITORY_LOWER_TAG}}"
+        #repository: "${{env.REPOSITORY_LOWER}}/ci:${{ github.sha }}"
+        #repository: "${{env.REPOSITORY_LOWER}}/ci:${{env.GITHUB_SHA_7}}"
+        #repository: "${{env.REPOSITORY_LOWER}}/ci"
+        repository: "localbuild/testimage"
+        #tags: ${{env.GITHUB_SHA_7}}
+        tags: latest
+        push: false
+        #cache_froms: myorg/baseimage:latest
+        cache_froms: "docker.pkg.github.com/${{env.REPOSITORY_LOWER}}/ci,docker.pkg.github.com/${{env.REPOSITORY_LOWER}}/ci:${{env.GITHUB_SHA_7}},docker.pkg.github.com/${{env.REPOSITORY_LOWER}}/ci:last"
+        #tag_with_sha: true
+        #tag_with_ref: true      
+    # https://github.com/marketplace/actions/anchore-container-scan
+    - uses: anchore/scan-action@v1
+      with:
+        image-reference: "localbuild/testimage:latest"
+        dockerfile-path: "Dockerfile"
+        fail-build: true
+        acs-report-enable: true
+        debug: true
+        #acs-report-severity-cutoff: "Medium"
+        include-app-packages: true
+    #- name: anchore inline scan JSON results
+    #  run: for j in `ls ./anchore-reports/*.json`; do echo "---- ${j} ----"; cat ${j}; echo; done
+    - name: anchore action SARIF report
+      run: cat results.sarif
+    - name: upload Anchore scan SARIF report
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: results.sarif
