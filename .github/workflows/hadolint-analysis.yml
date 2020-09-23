@@ -1,0 +1,27 @@
+name: "Dockerfile-Linting"
+# see https://github.com/corona-warn-app/cwa-server/blob/master/.github/workflows/hadolint-analysis.yml
+# and https://github.com/hadolint/hadolint
+on: 
+  push:
+    paths:
+    - '**/Dockerfile'
+  pull_request:
+    paths:
+    - '**/Dockerfile'
+#on:
+#  pull_request:
+#    branches: 
+#    - master
+#    paths:
+#    - '**/Dockerfile'
+
+jobs:
+  hadolint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Pull HaDoLint image
+      run: docker pull hadolint/hadolint
+    - name: Lint Dockerfile
+      run: docker run --rm --interactive hadolint/hadolint < ./Dockerfile
+      
