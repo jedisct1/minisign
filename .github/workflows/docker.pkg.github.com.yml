@@ -1,0 +1,62 @@
+name: docker.pkg.github.com
+
+on: [push]
+
+jobs:
+
+  build:
+
+    name: Push Docker image to docker.pkg.github.com
+    runs-on: ubuntu-latest
+    steps:
+      #- name: Set selected color
+      #  run: echo '::set-env name=SELECTED_COLOR::green'
+        #echo "::set-env name={name}::{value}"
+      # https://github.com/actions/starter-workflows/issues/68
+        #run: echo "::set-env name=APP_NAME::$(cat Dockerfile | grep APP_NAME= | head -n 1 | grep -o '".*"' | sed 's/"//g')"
+      - name: Set env GITHUB_SHA_7
+        #https://github.community/t/add-short-sha-to-github-context/16418
+        #run: echo "::set-env name=REPOSITORY_LOWER::$(echo $GITHUB_REPOSITORY | tr [:upper:] [:lower:])"
+        run: |
+         echo "::set-env name=GITHUB_SHA_7::$(echo ${GITHUB_SHA} | cut -c1-8)"
+         echo "GITHUB_SHA_7 ${{env.GITHUB_SHA_7}}"
+      - name: Set env REPOSITORY_LOWER
+        #run: echo "::set-env name=REPOSITORY_LOWER::$(echo $GITHUB_REPOSITORY | tr [:upper:] [:lower:])"
+        run: |
+         echo "::set-env name=REPOSITORY_LOWER::$(echo $GITHUB_REPOSITORY | tr [:upper:] [:lower:])"
+         echo "REPOSITORY_LOWER ${{env.REPOSITORY_LOWER}}"
+      - name: Set env REPOSITORY_LOWER_TAG
+        #run: echo "::set-env name=REPOSITORY_LOWER::$(echo $GITHUB_REPOSITORY | tr [:upper:] [:lower:])"
+        run: |
+         echo "::set-env name=REPOSITORY_LOWER_TAG::$(echo $GITHUB_REPOSITORY/ci | tr [:upper:] [:lower:])"
+         echo "REPOSITORY_LOWER ${{env.REPOSITORY_LOWER_TAG}}"
+      #- name: Get color
+      #  run: echo 'The selected color is' $SELECTED_COLOR
+      #- name: tr to lowercase selected color
+      #  run: |
+      #   repository_lower2=$(echo '${{ github.repository }} | tr [:upper:] [:lower:]')
+      #   echo '::set-env name=REPOSITORY_LOWER2::$repository_lower2' 
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Push to docker.pkg.github.com
+      # https://github.com/marketplace/actions/build-and-push-docker-images#tag_with_ref
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          #repository: ${{ github.repository }}
+          #repository: $repository_lower
+          #repository: "${{env.REPOSITORY_LOWER_TAG}}"
+          #repository: "${{env.REPOSITORY_LOWER}}/ci:${{ github.sha }}"
+          #repository: "${{env.REPOSITORY_LOWER}}/ci:${{env.GITHUB_SHA_7}}"
+          repository: "${{env.REPOSITORY_LOWER}}/ci"
+          tags: ${{env.GITHUB_SHA_7}}
+          #tag_with_sha: true
+          #tag_with_ref: true
+
+
+#    steps:
+#    - uses: actions/checkout@v2
+#    - name: Build the Docker image
+#      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
