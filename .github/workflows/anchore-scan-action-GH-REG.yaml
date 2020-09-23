@@ -1,0 +1,70 @@
+name: anchore-scan-action-GH-REG
+#on: [push]
+#on:
+#  registry_package:
+#    #types: [published]
+#    types: [published, updated]
+#    # https://docs.github.com/en/actions/reference/events-that-trigger-workflows#registry_package
+#on: [registry_package]
+#on:
+#  registry_package:
+#    # Only use the types keyword to narrow down the activity types that will trigger your workflow.
+#    types: [published, updated]
+#on:
+#  workflow_run:
+#    workflows: ["Run Tests"]
+#    branches: [main]
+#    types: 
+#      - completed
+#      - requested
+on:
+  workflow_run:
+    workflows: ["docker.pkg.github.com"]
+    types: [completed]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set env GITHUB_SHA_7
+      #https://github.community/t/add-short-sha-to-github-context/16418
+      #run: echo "::set-env name=REPOSITORY_LOWER::$(echo $GITHUB_REPOSITORY | tr [:upper:] [:lower:])"
+      run: |
+       echo "::set-env name=GITHUB_SHA_7::$(echo ${GITHUB_SHA} | cut -c1-8)"
+       echo "GITHUB_SHA_7 ${{env.GITHUB_SHA_7}}"
+    - name: Set env REPOSITORY_LOWER
+      #run: echo "::set-env name=REPOSITORY_LOWER::$(echo $GITHUB_REPOSITORY | tr [:upper:] [:lower:])"
+      run: |
+       echo "::set-env name=REPOSITORY_LOWER::$(echo $GITHUB_REPOSITORY | tr [:upper:] [:lower:])"
+       echo "REPOSITORY_LOWER ${{env.REPOSITORY_LOWER}}"
+    - name: Set env REPOSITORY_LOWER_TAG
+      #run: echo "::set-env name=REPOSITORY_LOWER::$(echo $GITHUB_REPOSITORY | tr [:upper:] [:lower:])"
+      run: |
+       echo "::set-env name=REPOSITORY_LOWER_TAG::$(echo $GITHUB_REPOSITORY/ci | tr [:upper:] [:lower:])"
+       echo "REPOSITORY_LOWER ${{env.REPOSITORY_LOWER_TAG}}"
+    - uses: actions/checkout@v2
+    #- name: Build the Docker image
+    #  run: docker build . --file Dockerfile --tag localbuild/testimage:latest
+    # https://github.com/marketplace/actions/anchore-container-scan
+    - name: do Docker login on https://docker.pkg.github.com
+      run: echo ${{ secrets.GITHUB_TOKEN }} | docker login https://docker.pkg.github.com -u $GITHUB_ACTOR --password-stdin
+    - name: do Docker pull on https://docker.pkg.github.com
+      run: docker pull "docker.pkg.github.com/${{env.REPOSITORY_LOWER}}/ci:${{env.GITHUB_SHA_7}}"
+    - uses: anchore/scan-action@v1
+      with:
+        #image-reference: "localbuild/testimage:latest"
+        #image-reference: "docker.pkg.github.com/maxpeal/excavator/ci:latest"
+        image-reference: "docker.pkg.github.com/${{env.REPOSITORY_LOWER}}/ci:${{env.GITHUB_SHA_7}}"
+        dockerfile-path: "Dockerfile"
+        #fail-build: true
+        acs-report-enable: true
+        #debug: true
+        #acs-report-severity-cutoff: "Medium"
+        include-app-packages: true
+    - name: anchore inline scan JSON results
+      run: for j in `ls ./anchore-reports/*.json`; do echo "---- ${j} ----"; cat ${j}; echo; done
+    - name: anchore action SARIF report
+      run: cat results.sarif
+    - name: upload Anchore scan SARIF report
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: results.sarif
