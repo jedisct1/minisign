@@ -81,7 +81,7 @@ The secret key is loaded from `${MINISIGN_CONFIG_DIR}/minisign.key`, `~/.minisig
 
 Verifying a file
 
-$ `minisign` -Vm myfile.txt -p  &lt;pubkey&gt;
+$ `minisign` -Vm myfile.txt -P  &lt;pubkey&gt;
 
 or
 
