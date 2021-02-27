@@ -80,6 +80,8 @@ implementation.
 and [minisign-cli](https://wapm.io/package/jedisct1/minisign) are available on
 WAPM.
 * [minisign-php](https://github.com/soatok/minisign-php) is a PHP implementation.
+* [py-minisign](https://github.com/x13a/py-minisign) is a Python
+implementation.
 
 Signature determinism
 ---------------------
