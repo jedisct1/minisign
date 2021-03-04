@@ -70,8 +70,8 @@ in Go to verify Minisign signatures.
 library written in pure Rust, that can be embedded in other applications.
 * [rsign2](https://github.com/jedisct1/rsign2) is a reimplementation of
 the command-line tool in Rust.
-* [minisign (go)](https://github.com/aead/minisign) is a rewrite of the Minisign
-CLI in the Go language.
+* [minisign (go)](https://github.com/aead/minisign) is a rewrite of Minisign
+in the Go language. It reimplements the CLI but can also be used as a library.
 * [minisign-verify](https://github.com/jedisct1/rust-minisign-verify) is
 a small Rust crate to verify Minisign signatures.
 * [minisign-net](https://github.com/bitbeans/minisign-net) is a .NET library
