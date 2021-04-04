@@ -791,21 +791,22 @@ sig_default_skfile(void)
 int
 main(int argc, char **argv)
 {
-    const char *pk_file = NULL;
+    const char    *pk_file = NULL;
 #ifndef VERIFY_ONLY
-    char       *sk_file = sig_default_skfile();
+    char          *sk_file = sig_default_skfile();
 #endif
-    const char *sig_file = NULL;
-    const char *message_file = NULL;
-    const char *comment = NULL;
-    const char *pubkey_s = NULL;
-    const char *trusted_comment = NULL;
-    int         opt_flag;
-    int         hashed = 0;
-    int         quiet = 0;
-    int         output = 0;
-    int         force = 0;
-    Action      action = ACTION_NONE;
+    const char    *sig_file = NULL;
+    const char    *message_file = NULL;
+    const char    *comment = NULL;
+    const char    *pubkey_s = NULL;
+    const char    *trusted_comment = NULL;
+    unsigned char  opt_seen[16] = { 0 };
+    int            opt_flag;
+    int            hashed = 0;
+    int            quiet = 0;
+    int            output = 0;
+    int            force = 0;
+    Action         action = ACTION_NONE;
 
     while ((opt_flag = getopt(argc, argv, getopt_options)) != -1) {
         switch(opt_flag) {
@@ -881,6 +882,15 @@ main(int argc, char **argv)
         case 'v':
             puts(VERSION_STRING);
             return 0;
+        case '?':
+            usage();
+        }
+        if (opt_flag > 0 && opt_flag <= (int) sizeof opt_seen / 8) {
+            if ((opt_seen[opt_flag / 8] & (1U << (opt_flag & 7))) != 0) {
+                fprintf(stderr, "Duplicate option: -- %c\n\n", opt_flag);
+                usage();
+            }
+            opt_seen[opt_flag / 8] |= 1U << (opt_flag & 7);
         }
     }
     if (sodium_init() != 0) {
