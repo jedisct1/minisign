@@ -61,6 +61,8 @@ Minisign is also available with docker:
 Additional tools, libraries and implementations
 -----------------------------------------------
 
+* [minizign](https://github.com/jedisct1/zig-minisign) is a compact
+implementation in Zig, that can also use ssh-encoded keys.
 * [minisign-misc](https://github.com/JayBrown/minisign-misc) is a very
 nice set of workflows and scripts for macOS to verify and sign files
 with minisign.
