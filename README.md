@@ -16,11 +16,22 @@ public key:
 Compilation / installation
 --------------------------
 
+## Using [Zig](https://ziglang.org):
+
 Dependencies:
+
+* [libsodium](https://libsodium.org/)
+
+Compilation:
+
+    $ zig build -Drelease-small
+
+## Using cmake and gcc or clang:
 
 * [libsodium](https://libsodium.org/)
 * cmake
 * pkg-config
+* gcc or clang
 
 Compilation:
 
@@ -49,10 +60,6 @@ Minisign is also available in Scoop on Windows:
 Minisign is also available in chocolatey on Windows:
 
     $ choco install minisign
-
-Minisign is also available on Ubuntu as a PPA:
-
-    $ [sudo] add-apt-repository ppa:dysfunctionalprogramming/minisign
 
 Minisign is also available with docker:
 

@@ -1,6 +1,5 @@
 
 #include <assert.h>
-#include <getopt.h>
 #include <inttypes.h>
 #include <limits.h>
 #include <stddef.h>
@@ -10,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #include <sodium.h>
 
