@@ -18,11 +18,6 @@
 #include "helpers.h"
 #include "minisign.h"
 
-#ifndef crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_MIN
-# define crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_MIN 32768U
-# define crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_MIN 16777216U
-#endif
-
 #ifndef VERIFY_ONLY
 static const char *getopt_options = "GSVRHhc:fm:oP:p:qQs:t:vx:";
 #else
