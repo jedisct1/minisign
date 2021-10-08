@@ -1,6 +1,6 @@
 
 #if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)) || defined(__HAIKU__)
-# include <sys/types.h>
+#include <sys/types.h>
 #endif
 
 #include <assert.h>
@@ -10,19 +10,19 @@
 #include <string.h>
 
 #if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)) || defined(__HAIKU__)
-# include <fcntl.h>
-# include <poll.h>
-# include <termios.h>
-# include <unistd.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <termios.h>
+#include <unistd.h>
 #elif defined(_WIN32)
-# include <windows.h>
+#include <windows.h>
 #endif
 
 #include "get_line.h"
 #include "helpers.h"
 
 #ifndef TCSAFLUSH
-# define TCSAFLUSH 0
+#define TCSAFLUSH 0
 #endif
 
 #ifndef VERIFY_ONLY
@@ -33,7 +33,7 @@ disable_echo(void)
     fflush(stdout);
     fflush(stderr);
 
-# if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)) || defined(__HAIKU__)
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)) || defined(__HAIKU__)
     {
         struct termios p;
 
@@ -43,15 +43,15 @@ disable_echo(void)
         p.c_lflag &= ~ECHO;
         tcsetattr(0, TCSAFLUSH, &p);
     }
-# elif defined(_WIN32)
+#elif defined(_WIN32)
     {
         HANDLE handle = GetStdHandle(STD_INPUT_HANDLE);
-        DWORD  mode = 0;
+        DWORD  mode   = 0;
 
         GetConsoleMode(handle, &mode);
         SetConsoleMode(handle, mode & ~ENABLE_ECHO_INPUT);
     }
-# endif
+#endif
 }
 
 static void
@@ -60,7 +60,7 @@ enable_echo(void)
     fflush(stdout);
     fflush(stderr);
 
-# if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)) || defined(__HAIKU__)
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)) || defined(__HAIKU__)
     {
         struct termios p;
 
@@ -70,15 +70,15 @@ enable_echo(void)
         p.c_lflag |= ECHO;
         tcsetattr(0, TCSAFLUSH, &p);
     }
-# elif defined(_WIN32)
+#elif defined(_WIN32)
     {
         HANDLE handle = GetStdHandle(STD_INPUT_HANDLE);
-        DWORD  mode = 0;
+        DWORD  mode   = 0;
 
         GetConsoleMode(handle, &mode);
         SetConsoleMode(handle, mode | ENABLE_ECHO_INPUT);
     }
-# endif
+#endif
 }
 
 int

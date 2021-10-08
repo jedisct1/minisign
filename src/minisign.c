@@ -6,7 +6,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
@@ -29,56 +28,57 @@ static void usage(void) __attribute__((noreturn));
 static void
 usage(void)
 {
-    puts("Usage:\n"
+    puts(
+        "Usage:\n"
 #ifndef VERIFY_ONLY
-         "minisign -G [-p pubkey] [-s seckey]\n"
-         "minisign -S [-l] [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]\n"
+        "minisign -G [-p pubkey] [-s seckey]\n"
+        "minisign -S [-l] [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m "
+        "file [file ...]\n"
 #endif
-         "minisign -V [-H] [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file\n"
+        "minisign -V [-H] [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file\n"
 #ifndef VERIFY_ONLY
-         "minisign -R -s seckey -p pubkeyfile\n"
+        "minisign -R -s seckey -p pubkeyfile\n"
 #endif
-         "\n"
+        "\n"
 #ifndef VERIFY_ONLY
-         "-G                generate a new key pair\n"
+        "-G                generate a new key pair\n"
 #endif
-         "-H                require input to be prehashed\n"
+        "-H                require input to be prehashed\n"
 #ifndef VERIFY_ONLY
-         "-S                sign files\n"
+        "-S                sign files\n"
 #endif
-         "-V                verify that a signature is valid for a given file\n"
-         "-l                sign using the legacy format.\n"
-         "-m <file>         file to sign/verify\n"
-         "-o                combined with -V, output the file content after verification\n"
-         "-p <pubkeyfile>   public key file (default: ./minisign.pub)\n"
-         "-P <pubkey>       public key, as a base64 string\n"
+        "-V                verify that a signature is valid for a given file\n"
+        "-l                sign using the legacy format.\n"
+        "-m <file>         file to sign/verify\n"
+        "-o                combined with -V, output the file content after verification\n"
+        "-p <pubkeyfile>   public key file (default: ./minisign.pub)\n"
+        "-P <pubkey>       public key, as a base64 string\n"
 #ifndef VERIFY_ONLY
-         "-s <seckey>       secret key file (default: ~/.minisign/minisign.key)\n"
+        "-s <seckey>       secret key file (default: ~/.minisign/minisign.key)\n"
 #endif
-         "-x <sigfile>      signature file (default: <file>.minisig)\n"
+        "-x <sigfile>      signature file (default: <file>.minisig)\n"
 #ifndef VERIFY_ONLY
-         "-c <comment>      add a one-line untrusted comment\n"
-         "-t <comment>      add a one-line trusted comment\n"
+        "-c <comment>      add a one-line untrusted comment\n"
+        "-t <comment>      add a one-line trusted comment\n"
 #endif
-         "-q                quiet mode, suppress output\n"
-         "-Q                pretty quiet mode, only print the trusted comment\n"
+        "-q                quiet mode, suppress output\n"
+        "-Q                pretty quiet mode, only print the trusted comment\n"
 #ifndef VERIFY_ONLY
-         "-R                recreate a public key file from a secret key file\n"
+        "-R                recreate a public key file from a secret key file\n"
 #endif
-         "-f                force. Combined with -G, overwrite a previous key pair\n"
-         "-v                display version number\n"
-        );
+        "-f                force. Combined with -G, overwrite a previous key pair\n"
+        "-v                display version number\n");
     exit(2);
 }
 
 static unsigned char *
 message_load_hashed(size_t *message_len, const char *message_file)
 {
-    crypto_generichash_state  hs;
-    unsigned char             buf[65536U];
-    unsigned char            *message;
-    FILE                     *fp;
-    size_t                    n;
+    crypto_generichash_state hs;
+    unsigned char            buf[65536U];
+    unsigned char *          message;
+    FILE *                   fp;
+    size_t                   n;
 
     if ((fp = fopen(message_file, "rb")) == NULL) {
         exit_err(message_file);
@@ -101,27 +101,24 @@ message_load_hashed(size_t *message_len, const char *message_file)
 static unsigned char *
 message_load(size_t *message_len, const char *message_file, int hashed)
 {
-    FILE          *fp;
+    FILE *         fp;
     unsigned char *message;
     off_t          message_len_;
 
     if (hashed != 0) {
         return message_load_hashed(message_len, message_file);
     }
-    if ((fp = fopen(message_file, "rb")) == NULL ||
-        fseeko(fp, 0, SEEK_END) != 0 ||
+    if ((fp = fopen(message_file, "rb")) == NULL || fseeko(fp, 0, SEEK_END) != 0 ||
         (message_len_ = ftello(fp)) == (off_t) -1) {
         exit_err(message_file);
     }
     assert(hashed == 0);
-    if ((uintmax_t) message_len_ > (uintmax_t) SIZE_MAX ||
-        message_len_ < (off_t) 0) {
+    if ((uintmax_t) message_len_ > (uintmax_t) SIZE_MAX || message_len_ < (off_t) 0) {
         abort();
     }
     message = xmalloc((*message_len = (size_t) message_len_));
     rewind(fp);
-    if (*message_len > 0U &&
-        fread(message, *message_len, (size_t) 1U, fp) != 1U) {
+    if (*message_len > 0U && fread(message, *message_len, (size_t) 1U, fp) != 1U) {
         exit_msg("Error while loading the message");
     }
     xfclose(fp);
@@ -132,9 +129,9 @@ message_load(size_t *message_len, const char *message_file, int hashed)
 static int
 output_file(const char *message_file)
 {
-    unsigned char  buf[65536U];
-    FILE          *fp;
-    size_t         n;
+    unsigned char buf[65536U];
+    FILE *        fp;
+    size_t        n;
 
     if ((fp = fopen(message_file, "rb")) == NULL) {
         exit_err(message_file);
@@ -153,15 +150,14 @@ output_file(const char *message_file)
 }
 
 static SigStruct *
-sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES],
-         int *hashed, char trusted_comment[TRUSTEDCOMMENTMAXBYTES],
-         size_t trusted_comment_maxlen)
+sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES], int *hashed,
+         char trusted_comment[TRUSTEDCOMMENTMAXBYTES], size_t trusted_comment_maxlen)
 {
     char       comment[COMMENTMAXBYTES];
     SigStruct *sig_struct;
-    FILE      *fp;
-    char      *global_sig_s;
-    char      *sig_s;
+    FILE *     fp;
+    char *     global_sig_s;
+    char *     sig_s;
     size_t     global_sig_len;
     size_t     global_sig_s_size;
     size_t     sig_s_size;
@@ -174,11 +170,12 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES],
         exit_msg("Error while reading the signature file");
     }
     if (strncmp(comment, COMMENT_PREFIX, (sizeof COMMENT_PREFIX) - 1U) != 0) {
-        exit_msg("Untrusted signature comment should start with "
-                 "\"" COMMENT_PREFIX "\"");
+        exit_msg(
+            "Untrusted signature comment should start with "
+            "\"" COMMENT_PREFIX "\"");
     }
     sig_s_size = B64_MAX_LEN_FROM_BIN_LEN(sizeof *sig_struct) + 2U;
-    sig_s = xmalloc(sig_s_size);
+    sig_s      = xmalloc(sig_s_size);
     if (fgets(sig_s, (int) sig_s_size, fp) == NULL) {
         exit_msg("Error while reading the signature file");
     }
@@ -186,17 +183,18 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES],
     if (fgets(trusted_comment, (int) trusted_comment_maxlen, fp) == NULL) {
         exit_msg("Trusted comment not present");
     }
-    if (strncmp(trusted_comment, TRUSTED_COMMENT_PREFIX,
-                (sizeof TRUSTED_COMMENT_PREFIX) - 1U) != 0) {
-        exit_msg("Trusted signature comment should start with "
-                 "\"" TRUSTED_COMMENT_PREFIX "\"");
+    if (strncmp(trusted_comment, TRUSTED_COMMENT_PREFIX, (sizeof TRUSTED_COMMENT_PREFIX) - 1U) !=
+        0) {
+        exit_msg(
+            "Trusted signature comment should start with "
+            "\"" TRUSTED_COMMENT_PREFIX "\"");
     }
     memmove(trusted_comment,
             trusted_comment + sizeof TRUSTED_COMMENT_PREFIX - 1U,
             strlen(trusted_comment + sizeof TRUSTED_COMMENT_PREFIX - 1U) + 1U);
     trim(trusted_comment);
     global_sig_s_size = B64_MAX_LEN_FROM_BIN_LEN(crypto_sign_BYTES) + 2U;
-    global_sig_s = xmalloc(global_sig_s_size);
+    global_sig_s      = xmalloc(global_sig_s_size);
     if (fgets(global_sig_s, (int) global_sig_s_size, fp) == NULL) {
         exit_msg("Error while reading the signature file");
     }
@@ -204,8 +202,7 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES],
     xfclose(fp);
 
     sig_struct = xmalloc(sizeof *sig_struct);
-    if (b64_to_bin((unsigned char *) (void *) sig_struct, sig_s,
-                   sizeof *sig_struct, strlen(sig_s),
+    if (b64_to_bin((unsigned char *) (void *) sig_struct, sig_s, sizeof *sig_struct, strlen(sig_s),
                    &sig_struct_len) == NULL ||
         sig_struct_len != sizeof *sig_struct) {
         exit_msg("base64 conversion failed - was an actual signature given?");
@@ -213,14 +210,13 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES],
     free(sig_s);
     if (memcmp(sig_struct->sig_alg, SIGALG, sizeof sig_struct->sig_alg) == 0) {
         *hashed = 0;
-    } else if (memcmp(sig_struct->sig_alg, SIGALG_HASHED,
-                      sizeof sig_struct->sig_alg) == 0) {
+    } else if (memcmp(sig_struct->sig_alg, SIGALG_HASHED, sizeof sig_struct->sig_alg) == 0) {
         *hashed = 1;
     } else {
         exit_msg("Unsupported signature algorithm");
     }
-    if (b64_to_bin(global_sig, global_sig_s, crypto_sign_BYTES,
-                   strlen(global_sig_s), &global_sig_len) == NULL ||
+    if (b64_to_bin(global_sig, global_sig_s, crypto_sign_BYTES, strlen(global_sig_s),
+                   &global_sig_len) == NULL ||
         global_sig_len != crypto_sign_BYTES) {
         exit_msg("base64 conversion failed - was an actual signature given?");
     }
@@ -236,14 +232,12 @@ pubkey_load_string(const char *pubkey_s)
     size_t        pubkey_struct_len;
 
     pubkey_struct = xsodium_malloc(sizeof *pubkey_struct);
-    if (b64_to_bin((unsigned char *) (void *) pubkey_struct, pubkey_s,
-                   sizeof *pubkey_struct, strlen(pubkey_s),
-                   &pubkey_struct_len) == NULL ||
+    if (b64_to_bin((unsigned char *) (void *) pubkey_struct, pubkey_s, sizeof *pubkey_struct,
+                   strlen(pubkey_s), &pubkey_struct_len) == NULL ||
         pubkey_struct_len != sizeof *pubkey_struct) {
         exit_msg("base64 conversion failed - was an actual public key given?");
     }
-    if (memcmp(pubkey_struct->sig_alg, SIGALG,
-               sizeof pubkey_struct->sig_alg) != 0) {
+    if (memcmp(pubkey_struct->sig_alg, SIGALG, sizeof pubkey_struct->sig_alg) != 0) {
         exit_msg("Unsupported signature algorithm");
     }
     return pubkey_struct;
@@ -254,8 +248,8 @@ pubkey_load_file(const char *pk_file)
 {
     char          pk_comment[COMMENTMAXBYTES];
     PubkeyStruct *pubkey_struct;
-    FILE         *fp;
-    char         *pubkey_s = NULL;
+    FILE *        fp;
+    char *        pubkey_s = NULL;
     size_t        pubkey_s_size;
 
     if ((fp = fopen(pk_file, "r")) == NULL) {
@@ -265,7 +259,7 @@ pubkey_load_file(const char *pk_file)
         exit_msg("Error while loading the public key file");
     }
     pubkey_s_size = B64_MAX_LEN_FROM_BIN_LEN(sizeof *pubkey_struct) + 2U;
-    pubkey_s = xmalloc(pubkey_s_size);
+    pubkey_s      = xmalloc(pubkey_s_size);
     if (fgets(pubkey_s, (int) pubkey_s_size, fp) == NULL) {
         exit_msg("Error while loading the public key file");
     }
@@ -292,18 +286,15 @@ pubkey_load(const char *pk_file, const char *pubkey_s)
 }
 
 static void
-seckey_chk(unsigned char chk[crypto_generichash_BYTES],
-           const SeckeyStruct *seckey_struct)
+seckey_chk(unsigned char chk[crypto_generichash_BYTES], const SeckeyStruct *seckey_struct)
 {
     crypto_generichash_state hs;
 
     crypto_generichash_init(&hs, NULL, 0U, sizeof seckey_struct->keynum_sk.chk);
-    crypto_generichash_update(&hs, seckey_struct->sig_alg,
-                              sizeof seckey_struct->sig_alg);
+    crypto_generichash_update(&hs, seckey_struct->sig_alg, sizeof seckey_struct->sig_alg);
     crypto_generichash_update(&hs, seckey_struct->keynum_sk.keynum,
                               sizeof seckey_struct->keynum_sk.keynum);
-    crypto_generichash_update(&hs, seckey_struct->keynum_sk.sk,
-                              sizeof seckey_struct->keynum_sk.sk);
+    crypto_generichash_update(&hs, seckey_struct->keynum_sk.sk, sizeof seckey_struct->keynum_sk.sk);
     crypto_generichash_final(&hs, chk, sizeof seckey_struct->keynum_sk.chk);
 }
 
@@ -313,10 +304,10 @@ seckey_load(const char *sk_file)
 {
     char           sk_comment[COMMENTMAXBYTES];
     unsigned char  chk[crypto_generichash_BYTES];
-    SeckeyStruct  *seckey_struct;
-    FILE          *fp;
-    char          *pwd = xsodium_malloc(PASSWORDMAXBYTES);
-    char          *seckey_s;
+    SeckeyStruct * seckey_struct;
+    FILE *         fp;
+    char *         pwd = xsodium_malloc(PASSWORDMAXBYTES);
+    char *         seckey_s;
     unsigned char *stream;
     size_t         seckey_s_size;
     size_t         seckey_struct_len;
@@ -329,30 +320,26 @@ seckey_load(const char *sk_file)
     }
     sodium_memzero(sk_comment, sizeof sk_comment);
     seckey_s_size = B64_MAX_LEN_FROM_BIN_LEN(sizeof *seckey_struct) + 2U;
-    seckey_s = xsodium_malloc(seckey_s_size);
+    seckey_s      = xsodium_malloc(seckey_s_size);
     seckey_struct = xsodium_malloc(sizeof *seckey_struct);
     if (fgets(seckey_s, (int) seckey_s_size, fp) == NULL) {
         exit_msg("Error while loading the secret key file");
     }
     trim(seckey_s);
     xfclose(fp);
-    if (b64_to_bin((unsigned char *) (void *) seckey_struct, seckey_s,
-                   sizeof *seckey_struct, strlen(seckey_s),
-                   &seckey_struct_len) == NULL ||
+    if (b64_to_bin((unsigned char *) (void *) seckey_struct, seckey_s, sizeof *seckey_struct,
+                   strlen(seckey_s), &seckey_struct_len) == NULL ||
         seckey_struct_len != sizeof *seckey_struct) {
         exit_msg("base64 conversion failed - was an actual secret key given?");
     }
     sodium_free(seckey_s);
-    if (memcmp(seckey_struct->sig_alg, SIGALG,
-               sizeof seckey_struct->sig_alg) != 0) {
+    if (memcmp(seckey_struct->sig_alg, SIGALG, sizeof seckey_struct->sig_alg) != 0) {
         exit_msg("Unsupported signature algorithm");
     }
-    if (memcmp(seckey_struct->kdf_alg, KDFALG,
-               sizeof seckey_struct->kdf_alg) != 0) {
+    if (memcmp(seckey_struct->kdf_alg, KDFALG, sizeof seckey_struct->kdf_alg) != 0) {
         exit_msg("Unsupported key derivation function");
     }
-    if (memcmp(seckey_struct->chk_alg, CHKALG,
-               sizeof seckey_struct->chk_alg) != 0) {
+    if (memcmp(seckey_struct->chk_alg, CHKALG, sizeof seckey_struct->chk_alg) != 0) {
         exit_msg("Unsupported checksum function");
     }
     if (get_password(pwd, PASSWORDMAXBYTES, "Password: ") != 0) {
@@ -361,11 +348,10 @@ seckey_load(const char *sk_file)
     printf("Deriving a key from the password and decrypting the secret key... ");
     fflush(stdout);
     stream = xsodium_malloc(sizeof seckey_struct->keynum_sk);
-    if (crypto_pwhash_scryptsalsa208sha256
-        (stream, sizeof seckey_struct->keynum_sk, pwd, strlen(pwd),
-         seckey_struct->kdf_salt,
-         le64_load(seckey_struct->kdf_opslimit_le),
-         le64_load(seckey_struct->kdf_memlimit_le)) != 0) {
+    if (crypto_pwhash_scryptsalsa208sha256(stream, sizeof seckey_struct->keynum_sk, pwd,
+                                           strlen(pwd), seckey_struct->kdf_salt,
+                                           le64_load(seckey_struct->kdf_opslimit_le),
+                                           le64_load(seckey_struct->kdf_memlimit_le)) != 0) {
         exit_err("Unable to complete key derivation - This probably means out of memory");
     }
     sodium_free(pwd);
@@ -384,14 +370,14 @@ seckey_load(const char *sk_file)
 #endif
 
 static int
-verify(PubkeyStruct *pubkey_struct, const char *message_file,
-       const char *sig_file, int quiet, int output, int allow_legacy)
+verify(PubkeyStruct *pubkey_struct, const char *message_file, const char *sig_file, int quiet,
+       int output, int allow_legacy)
 {
     char           trusted_comment[TRUSTEDCOMMENTMAXBYTES];
     unsigned char  global_sig[crypto_sign_BYTES];
-    FILE          *info_fp = stdout;
+    FILE *         info_fp = stdout;
     unsigned char *sig_and_trusted_comment;
-    SigStruct     *sig_struct;
+    SigStruct *    sig_struct;
     unsigned char *message;
     size_t         message_len;
     size_t         trusted_comment_len;
@@ -400,8 +386,7 @@ verify(PubkeyStruct *pubkey_struct, const char *message_file,
     if (output != 0) {
         info_fp = stderr;
     }
-    sig_struct = sig_load(sig_file, global_sig, &hashed,
-                          trusted_comment, sizeof trusted_comment);
+    sig_struct = sig_load(sig_file, global_sig, &hashed, trusted_comment, sizeof trusted_comment);
     if (hashed == 0 && allow_legacy == 0) {
         if (quiet == 0) {
             fprintf(stderr, "Legacy (non-prehashed) signature found\n");
@@ -409,9 +394,11 @@ verify(PubkeyStruct *pubkey_struct, const char *message_file,
         exit(1);
     }
     message = message_load(&message_len, message_file, hashed);
-    if (memcmp(sig_struct->keynum, pubkey_struct->keynum_pk.keynum,
-               sizeof sig_struct->keynum) != 0) {
-        fprintf(stderr, "Signature key id in %s is %" PRIX64 "\n"
+    if (memcmp(sig_struct->keynum, pubkey_struct->keynum_pk.keynum, sizeof sig_struct->keynum) !=
+        0) {
+        fprintf(stderr,
+                "Signature key id in %s is %" PRIX64
+                "\n"
                 "but the key id in the public key is %" PRIX64 "\n",
                 sig_file, le64_load(sig_struct->keynum),
                 le64_load(pubkey_struct->keynum_pk.keynum));
@@ -426,12 +413,10 @@ verify(PubkeyStruct *pubkey_struct, const char *message_file,
     }
     free(message);
 
-    trusted_comment_len = strlen(trusted_comment);
-    sig_and_trusted_comment = xmalloc((sizeof sig_struct->sig) +
-                                      trusted_comment_len);
+    trusted_comment_len     = strlen(trusted_comment);
+    sig_and_trusted_comment = xmalloc((sizeof sig_struct->sig) + trusted_comment_len);
     memcpy(sig_and_trusted_comment, sig_struct->sig, sizeof sig_struct->sig);
-    memcpy(sig_and_trusted_comment + sizeof sig_struct->sig, trusted_comment,
-           trusted_comment_len);
+    memcpy(sig_and_trusted_comment + sizeof sig_struct->sig, trusted_comment, trusted_comment_len);
     if (crypto_sign_verify_detached(global_sig, sig_and_trusted_comment,
                                     (sizeof sig_struct->sig) + trusted_comment_len,
                                     pubkey_struct->keynum_pk.pk) != 0) {
@@ -444,8 +429,10 @@ verify(PubkeyStruct *pubkey_struct, const char *message_file,
     free(sig_and_trusted_comment);
     free(sig_struct);
     if (quiet == 0) {
-        fprintf(info_fp, "Signature and comment signature verified\n"
-                "Trusted comment: %s\n", trusted_comment);
+        fprintf(info_fp,
+                "Signature and comment signature verified\n"
+                "Trusted comment: %s\n",
+                trusted_comment);
     } else if (quiet == 2) {
         fprintf(info_fp, "%s\n", trusted_comment);
     }
@@ -458,8 +445,8 @@ verify(PubkeyStruct *pubkey_struct, const char *message_file,
 static char *
 append_sig_suffix(const char *message_file)
 {
-    char   *sig_file;
-    size_t  message_file_len = strlen(message_file);
+    char * sig_file;
+    size_t message_file_len = strlen(message_file);
 
     sig_file = xmalloc(message_file_len + sizeof SIG_SUFFIX);
     memcpy(sig_file, message_file, message_file_len);
@@ -470,13 +457,13 @@ append_sig_suffix(const char *message_file)
 
 #ifndef VERIFY_ONLY
 static char *
-default_trusted_comment(const char *message_file)
+default_trusted_comment(const char *message_file, int hashed)
 {
-    char   *ret;
-    time_t  ts = time(NULL);
+    char * ret;
+    time_t ts = time(NULL);
 
-    if (asprintf(&ret, "timestamp:%lu\tfile:%s\tprehashed",
-                 (unsigned long) ts, file_basename(message_file)) < 0 ||
+    if (asprintf(&ret, "timestamp:%lu\tfile:%s%s", (unsigned long) ts, file_basename(message_file),
+                 hashed == 0 ? "" : "\thashed") < 0 ||
         ret == NULL) {
         exit_err("asprintf()");
     }
@@ -484,35 +471,31 @@ default_trusted_comment(const char *message_file)
 }
 
 static void
-sign(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct,
-     const char *message_file, const char *sig_file, const char *comment,
-     const char *trusted_comment, int legacy)
+sign(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct, const char *message_file,
+     const char *sig_file, const char *comment, const char *trusted_comment, int legacy)
 {
     unsigned char  global_sig[crypto_sign_BYTES];
     SigStruct      sig_struct;
-    FILE          *fp;
+    FILE *         fp;
     unsigned char *message;
     unsigned char *sig_and_trusted_comment;
-    char          *tmp_trusted_comment = NULL;
+    char *         tmp_trusted_comment = NULL;
     size_t         comment_len;
     size_t         trusted_comment_len;
     size_t         message_len;
     int            hashed = 1;
 
-    if (trusted_comment == NULL || *trusted_comment == 0) {
-        tmp_trusted_comment = default_trusted_comment(message_file);
-        trusted_comment = tmp_trusted_comment;
-    }
     if (legacy != 0) {
         hashed = 0;
     }
+    if (trusted_comment == NULL || *trusted_comment == 0) {
+        tmp_trusted_comment = default_trusted_comment(message_file, hashed);
+        trusted_comment     = tmp_trusted_comment;
+    }
     message = message_load(&message_len, message_file, hashed);
-    memcpy(sig_struct.sig_alg, hashed ? SIGALG : SIGALG_HASHED,
-           sizeof sig_struct.sig_alg);
-    memcpy(sig_struct.keynum, seckey_struct->keynum_sk.keynum,
-           sizeof sig_struct.keynum);
-    crypto_sign_detached(sig_struct.sig, NULL, message, message_len,
-                         seckey_struct->keynum_sk.sk);
+    memcpy(sig_struct.sig_alg, hashed ? SIGALG_HASHED : SIGALG, sizeof sig_struct.sig_alg);
+    memcpy(sig_struct.keynum, seckey_struct->keynum_sk.keynum, sizeof sig_struct.keynum);
+    crypto_sign_detached(sig_struct.sig, NULL, message, message_len, seckey_struct->keynum_sk.sk);
     free(message);
     if ((fp = fopen(sig_file, "w")) == NULL) {
         exit_err(sig_file);
@@ -521,7 +504,8 @@ sign(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct,
     assert(strrchr(comment, '\r') == NULL && strrchr(comment, '\n') == NULL);
     assert(COMMENTMAXBYTES > sizeof COMMENT_PREFIX);
     if (comment_len >= COMMENTMAXBYTES - sizeof COMMENT_PREFIX) {
-        fprintf(stderr, "Warning: comment too long. "
+        fprintf(stderr,
+                "Warning: comment too long. "
                 "This breaks compatibility with signify.\n");
     }
     xfprintf(fp, "%s%s\n", COMMENT_PREFIX, comment);
@@ -529,28 +513,24 @@ sign(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct,
 
     xfprintf(fp, "%s%s\n", TRUSTED_COMMENT_PREFIX, trusted_comment);
     trusted_comment_len = strlen(trusted_comment);
-    assert(strrchr(trusted_comment, '\r') == NULL &&
-           strrchr(trusted_comment, '\n') == NULL);
-    if (trusted_comment_len >=
-        TRUSTEDCOMMENTMAXBYTES - sizeof TRUSTED_COMMENT_PREFIX) {
+    assert(strrchr(trusted_comment, '\r') == NULL && strrchr(trusted_comment, '\n') == NULL);
+    if (trusted_comment_len >= TRUSTEDCOMMENTMAXBYTES - sizeof TRUSTED_COMMENT_PREFIX) {
         exit_msg("Trusted comment too long");
     }
-    sig_and_trusted_comment = xmalloc((sizeof sig_struct.sig) +
-                                      trusted_comment_len);
+    sig_and_trusted_comment = xmalloc((sizeof sig_struct.sig) + trusted_comment_len);
     memcpy(sig_and_trusted_comment, sig_struct.sig, sizeof sig_struct.sig);
-    memcpy(sig_and_trusted_comment + sizeof sig_struct.sig, trusted_comment,
-           trusted_comment_len);
+    memcpy(sig_and_trusted_comment + sizeof sig_struct.sig, trusted_comment, trusted_comment_len);
     if (crypto_sign_detached(global_sig, NULL, sig_and_trusted_comment,
                              (sizeof sig_struct.sig) + trusted_comment_len,
                              seckey_struct->keynum_sk.sk) != 0) {
         exit_msg("Unable to compute a signature");
     }
     if (pubkey_struct != NULL &&
-        (memcmp(pubkey_struct->keynum_pk.keynum,
-                seckey_struct->keynum_sk.keynum, KEYNUMBYTES) != 0 ||
-            crypto_sign_verify_detached(global_sig, sig_and_trusted_comment,
-                (sizeof sig_struct.sig) + trusted_comment_len,
-                pubkey_struct->keynum_pk.pk) != 0)) {
+        (memcmp(pubkey_struct->keynum_pk.keynum, seckey_struct->keynum_sk.keynum, KEYNUMBYTES) !=
+             0 ||
+         crypto_sign_verify_detached(global_sig, sig_and_trusted_comment,
+                                     (sizeof sig_struct.sig) + trusted_comment_len,
+                                     pubkey_struct->keynum_pk.pk) != 0)) {
         exit_msg("Verification would fail with the given public key");
     }
     xfput_b64(fp, (unsigned char *) (void *) &global_sig, sizeof global_sig);
@@ -560,20 +540,18 @@ sign(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct,
 }
 
 static int
-sign_all(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct,
-         const char *message_file, const char *additional_files[], int additional_count,
-         const char *sig_file, const char *comment, const char *trusted_comment,
-         int legacy)
+sign_all(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct, const char *message_file,
+         const char *additional_files[], int additional_count, const char *sig_file,
+         const char *comment, const char *trusted_comment, int legacy)
 {
     char *additional_sig_file;
     int   i;
 
-    sign(seckey_struct, pubkey_struct, message_file, sig_file, comment,
-         trusted_comment, legacy);
+    sign(seckey_struct, pubkey_struct, message_file, sig_file, comment, trusted_comment, legacy);
     for (i = 0; i < additional_count; i++) {
         additional_sig_file = append_sig_suffix(additional_files[i]);
-        sign(seckey_struct, pubkey_struct, additional_files[i],
-             additional_sig_file, comment, trusted_comment, legacy);
+        sign(seckey_struct, pubkey_struct, additional_files[i], additional_sig_file, comment,
+             trusted_comment, legacy);
         free(additional_sig_file);
     }
     sodium_free(seckey_struct);
@@ -593,17 +571,18 @@ abort_on_existing_key_file(const char *file)
         fclose(fp);
     }
     if (exists != 0) {
-        fprintf(stderr, "Key generation aborted:\n"
+        fprintf(stderr,
+                "Key generation aborted:\n"
                 "%s already exists.\n\n"
                 "If you really want to overwrite the existing key pair, add the -f switch to \n"
-                "force this operation.\n", file);
+                "force this operation.\n",
+                file);
         exit(1);
     }
 }
 
 static void
-abort_on_existing_key_files(const char *pk_file, const char *sk_file,
-                            int force)
+abort_on_existing_key_files(const char *pk_file, const char *sk_file, int force)
 {
     if (force == 0) {
         abort_on_existing_key_file(pk_file);
@@ -621,29 +600,25 @@ write_pk_file(const char *pk_file, const PubkeyStruct *pubkey_struct)
     }
     xfprintf(fp, COMMENT_PREFIX "minisign public key %" PRIX64 "\n",
              le64_load(pubkey_struct->keynum_pk.keynum));
-    xfput_b64(fp, (const unsigned char *) (const void *) pubkey_struct,
-              sizeof *pubkey_struct);
+    xfput_b64(fp, (const unsigned char *) (const void *) pubkey_struct, sizeof *pubkey_struct);
     xfclose(fp);
 }
 
 static int
-generate(const char *pk_file, const char *sk_file, const char *comment,
-         int force)
+generate(const char *pk_file, const char *sk_file, const char *comment, int force)
 {
-    char          *pwd = xsodium_malloc(PASSWORDMAXBYTES);
-    char          *pwd2 = xsodium_malloc(PASSWORDMAXBYTES);
-    SeckeyStruct  *seckey_struct = xsodium_malloc(sizeof(SeckeyStruct));
-    PubkeyStruct  *pubkey_struct = xsodium_malloc(sizeof(PubkeyStruct));
-    unsigned char *stream ;
-    FILE          *fp;
+    char *         pwd           = xsodium_malloc(PASSWORDMAXBYTES);
+    char *         pwd2          = xsodium_malloc(PASSWORDMAXBYTES);
+    SeckeyStruct * seckey_struct = xsodium_malloc(sizeof(SeckeyStruct));
+    PubkeyStruct * pubkey_struct = xsodium_malloc(sizeof(PubkeyStruct));
+    unsigned char *stream;
+    FILE *         fp;
     unsigned long  kdf_memlimit;
     unsigned long  kdf_opslimit;
 
     abort_on_existing_key_files(pk_file, sk_file, force);
-    randombytes_buf(seckey_struct->keynum_sk.keynum,
-                    sizeof seckey_struct->keynum_sk.keynum);
-    crypto_sign_keypair(pubkey_struct->keynum_pk.pk,
-                        seckey_struct->keynum_sk.sk);
+    randombytes_buf(seckey_struct->keynum_sk.keynum, sizeof seckey_struct->keynum_sk.keynum);
+    crypto_sign_keypair(pubkey_struct->keynum_pk.pk, seckey_struct->keynum_sk.sk);
     memcpy(seckey_struct->sig_alg, SIGALG, sizeof seckey_struct->sig_alg);
     memcpy(seckey_struct->kdf_alg, KDFALG, sizeof seckey_struct->kdf_alg);
     memcpy(seckey_struct->chk_alg, CHKALG, sizeof seckey_struct->chk_alg);
@@ -666,9 +641,9 @@ generate(const char *pk_file, const char *sk_file, const char *comment,
     kdf_opslimit = crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE;
     kdf_memlimit = crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE;
 
-    while (crypto_pwhash_scryptsalsa208sha256
-           (stream, sizeof seckey_struct->keynum_sk, pwd, strlen(pwd),
-               seckey_struct->kdf_salt, kdf_opslimit, kdf_memlimit) != 0) {
+    while (crypto_pwhash_scryptsalsa208sha256(stream, sizeof seckey_struct->keynum_sk, pwd,
+                                              strlen(pwd), seckey_struct->kdf_salt, kdf_opslimit,
+                                              kdf_memlimit) != 0) {
         kdf_opslimit /= 2;
         kdf_memlimit /= 2;
         if (kdf_opslimit < crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_MIN ||
@@ -679,7 +654,8 @@ generate(const char *pk_file, const char *sk_file, const char *comment,
     sodium_free(pwd);
     sodium_free(pwd2);
     if (kdf_memlimit < crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE) {
-        fprintf(stderr, "Warning: due to limited memory the KDF used less "
+        fprintf(stderr,
+                "Warning: due to limited memory the KDF used less "
                 "memory than the default\n");
     }
     le64_store(seckey_struct->kdf_opslimit_le, kdf_opslimit);
@@ -698,8 +674,7 @@ generate(const char *pk_file, const char *sk_file, const char *comment,
         exit_err(sk_file);
     }
     xfprintf(fp, "%s%s\n", COMMENT_PREFIX, comment);
-    xfput_b64(fp, (unsigned char *) (void *) seckey_struct,
-              sizeof *seckey_struct);
+    xfput_b64(fp, (unsigned char *) (void *) seckey_struct, sizeof *seckey_struct);
     xfclose(fp);
     sodium_free(seckey_struct);
 
@@ -709,8 +684,7 @@ generate(const char *pk_file, const char *sk_file, const char *comment,
     printf("The public key was saved as %s - That one can be public.\n\n", pk_file);
     puts("Files signed using this key pair can be verified with the following command:\n");
     printf("minisign -Vm <file> -P ");
-    xfput_b64(stdout, (unsigned char *) (void *) pubkey_struct,
-              sizeof *pubkey_struct);
+    xfput_b64(stdout, (unsigned char *) (void *) pubkey_struct, sizeof *pubkey_struct);
     puts("");
     sodium_free(pubkey_struct);
 
@@ -720,8 +694,8 @@ generate(const char *pk_file, const char *sk_file, const char *comment,
 static int
 recreate_pk(const char *pk_file, const char *sk_file, int force)
 {
-    SeckeyStruct   *seckey_struct;
-    PubkeyStruct    pubkey_struct;
+    SeckeyStruct *seckey_struct;
+    PubkeyStruct  pubkey_struct;
 
     if (force == 0) {
         abort_on_existing_key_file(pk_file);
@@ -729,13 +703,13 @@ recreate_pk(const char *pk_file, const char *sk_file, int force)
     if ((seckey_struct = seckey_load(sk_file)) == NULL) {
         return -1;
     }
-    memcpy(pubkey_struct.sig_alg, seckey_struct->sig_alg,
-           sizeof pubkey_struct.sig_alg);
+    memcpy(pubkey_struct.sig_alg, seckey_struct->sig_alg, sizeof pubkey_struct.sig_alg);
     memcpy(pubkey_struct.keynum_pk.keynum, seckey_struct->keynum_sk.keynum,
            sizeof pubkey_struct.keynum_pk.keynum);
     assert(sizeof seckey_struct->keynum_sk.sk > crypto_sign_PUBLICKEYBYTES);
-    memcpy(pubkey_struct.keynum_pk.pk, seckey_struct->keynum_sk.sk +
-           (sizeof seckey_struct->keynum_sk.sk) - crypto_sign_PUBLICKEYBYTES,
+    memcpy(pubkey_struct.keynum_pk.pk,
+           seckey_struct->keynum_sk.sk + (sizeof seckey_struct->keynum_sk.sk) -
+               crypto_sign_PUBLICKEYBYTES,
            sizeof pubkey_struct.keynum_pk.pk);
     sodium_free(seckey_struct);
 
@@ -751,15 +725,15 @@ static char *
 sig_config_dir(void)
 {
     const char *config_dir_env;
-    char       *config_dir;
-    char       *home_dir;
+    char *      config_dir;
+    char *      home_dir;
 
     config_dir = NULL;
     if ((config_dir_env = getenv(SIG_DEFAULT_CONFIG_DIR_ENV_VAR)) != NULL) {
         config_dir = xstrdup(config_dir_env);
     } else if ((home_dir = get_home_dir()) != NULL) {
-        if (asprintf(&config_dir, "%s%c%s", home_dir, DIR_SEP,
-                     SIG_DEFAULT_CONFIG_DIR) < 0 || config_dir == NULL) {
+        if (asprintf(&config_dir, "%s%c%s", home_dir, DIR_SEP, SIG_DEFAULT_CONFIG_DIR) < 0 ||
+            config_dir == NULL) {
             exit_err("asprintf()");
         }
         free(home_dir);
@@ -770,15 +744,14 @@ sig_config_dir(void)
 static char *
 sig_default_skfile(void)
 {
-    char       *config_dir;
-    char       *skfile;
+    char *config_dir;
+    char *skfile;
 
     if ((config_dir = sig_config_dir()) == NULL) {
         skfile = xstrdup(SIG_DEFAULT_SKFILE);
         return skfile;
     }
-    if (asprintf(&skfile, "%s%c%s", config_dir, DIR_SEP,
-                 SIG_DEFAULT_SKFILE) < 0 ||
+    if (asprintf(&skfile, "%s%c%s", config_dir, DIR_SEP, SIG_DEFAULT_SKFILE) < 0 ||
         skfile == NULL) {
         exit_err("asprintf()");
     }
@@ -791,26 +764,26 @@ sig_default_skfile(void)
 int
 main(int argc, char **argv)
 {
-    const char    *pk_file = NULL;
+    const char *pk_file = NULL;
 #ifndef VERIFY_ONLY
-    char          *sk_file = sig_default_skfile();
+    char *sk_file = sig_default_skfile();
 #endif
-    const char    *sig_file = NULL;
-    const char    *message_file = NULL;
-    const char    *comment = NULL;
-    const char    *pubkey_s = NULL;
-    const char    *trusted_comment = NULL;
-    unsigned char  opt_seen[16] = { 0 };
-    int            opt_flag;
-    int            quiet = 0;
-    int            output = 0;
-    int            force = 0;
-    int            allow_legacy = 1;
-    int            sign_legacy = 0;
-    Action         action = ACTION_NONE;
+    const char *  sig_file        = NULL;
+    const char *  message_file    = NULL;
+    const char *  comment         = NULL;
+    const char *  pubkey_s        = NULL;
+    const char *  trusted_comment = NULL;
+    unsigned char opt_seen[16]    = { 0 };
+    int           opt_flag;
+    int           quiet        = 0;
+    int           output       = 0;
+    int           force        = 0;
+    int           allow_legacy = 1;
+    int           sign_legacy  = 0;
+    Action        action       = ACTION_NONE;
 
     while ((opt_flag = getopt(argc, argv, getopt_options)) != -1) {
-        switch(opt_flag) {
+        switch (opt_flag) {
 #ifndef VERIFY_ONLY
         case 'G':
             if (action != ACTION_NONE && action != ACTION_GENERATE) {
@@ -921,11 +894,11 @@ main(int argc, char **argv)
         if (comment == NULL || *comment == 0) {
             comment = DEFAULT_COMMENT;
         }
-        return sign_all(seckey_load(sk_file),
-                        ((pk_file != NULL || pubkey_s != NULL) ?
-                            pubkey_load(pk_file, pubkey_s) : NULL),
-                        message_file, (const char **) &argv[optind], argc - optind,
-                        sig_file, comment, trusted_comment, sign_legacy) != 0;
+        return sign_all(
+                   seckey_load(sk_file),
+                   ((pk_file != NULL || pubkey_s != NULL) ? pubkey_load(pk_file, pubkey_s) : NULL),
+                   message_file, (const char **) &argv[optind], argc - optind, sig_file, comment,
+                   trusted_comment, sign_legacy) != 0;
     case ACTION_RECREATE_PK:
         if (pk_file == NULL) {
             pk_file = SIG_DEFAULT_PKFILE;
@@ -942,8 +915,8 @@ main(int argc, char **argv)
         if (pk_file == NULL && pubkey_s == NULL) {
             pk_file = SIG_DEFAULT_PKFILE;
         }
-        return verify(pubkey_load(pk_file, pubkey_s), message_file,
-                      sig_file, quiet, output, allow_legacy);
+        return verify(pubkey_load(pk_file, pubkey_s), message_file, sig_file, quiet, output,
+                      allow_legacy);
     default:
         usage();
     }

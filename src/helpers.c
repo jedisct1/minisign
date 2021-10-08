@@ -1,10 +1,10 @@
 
 #if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)) || defined(__HAIKU__)
-# include <sys/types.h>
-# include <sys/stat.h>
-# include <fcntl.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #elif defined(_WIN32)
-# include <direct.h>
+#include <direct.h>
 #endif
 
 #include <errno.h>
@@ -22,10 +22,9 @@
 uint64_t
 le64_load(const unsigned char *p)
 {
-    return ((uint64_t)(p[0])) | ((uint64_t)(p[1]) << 8) |
-           ((uint64_t)(p[2]) << 16) | ((uint64_t)(p[3]) << 24) |
-           ((uint64_t)(p[4]) << 32) | ((uint64_t)(p[5]) << 40) |
-           ((uint64_t)(p[6]) << 48) | ((uint64_t)(p[7]) << 56);
+    return ((uint64_t) (p[0])) | ((uint64_t) (p[1]) << 8) | ((uint64_t) (p[2]) << 16) |
+           ((uint64_t) (p[3]) << 24) | ((uint64_t) (p[4]) << 32) | ((uint64_t) (p[5]) << 40) |
+           ((uint64_t) (p[6]) << 48) | ((uint64_t) (p[7]) << 56);
 }
 
 void
@@ -101,7 +100,7 @@ xor_buf(unsigned char *dst, const unsigned char *src, size_t len)
 int
 xfprintf(FILE *fp, const char *format, ...)
 {
-    char   *out;
+    char *  out;
     size_t  out_maxlen = 4096U;
     int     len;
     va_list va;
@@ -126,8 +125,8 @@ xfprintf(FILE *fp, const char *format, ...)
 int
 xfput_b64(FILE *fp, const unsigned char *bin, size_t bin_len)
 {
-    const size_t  b64_maxlen = (bin_len + 2) * 4 / 3 + 1;
-    char         *b64;
+    const size_t b64_maxlen = (bin_len + 2) * 4 / 3 + 1;
+    char *       b64;
 
     b64 = xsodium_malloc(b64_maxlen);
     if (bin_to_b64(b64, bin, b64_maxlen, bin_len) == NULL) {
@@ -181,8 +180,7 @@ fopen_create_useronly(const char *file)
 #if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)) || defined(__HAIKU__)
     int fd;
 
-    if ((fd = open(file, O_CREAT | O_TRUNC | O_WRONLY,
-                   (mode_t) 0600)) == -1) {
+    if ((fd = open(file, O_CREAT | O_TRUNC | O_WRONLY, (mode_t) 0600)) == -1) {
         return NULL;
     }
     return fdopen(fd, "w");
@@ -195,10 +193,10 @@ int
 basedir_create_useronly(const char *file)
 {
     const char *basename;
-    char       *dir;
+    char *      dir;
     int         ret = -1;
 
-    dir = xstrdup(file);
+    dir      = xstrdup(file);
     basename = file_basename(dir);
     if (basename == dir) {
         free(dir);
@@ -219,9 +217,10 @@ basedir_create_useronly(const char *file)
     return ret;
 }
 
-char *get_home_dir(void)
+char *
+get_home_dir(void)
 {
-    char       *dir;
+    char *dir;
 #ifdef _WIN32
     const char *hd;
     const char *hp;
@@ -237,8 +236,7 @@ char *get_home_dir(void)
     if ((dir = getenv("USERPROFILE")) != NULL) {
         return xstrdup(dir);
     }
-    if ((hd = getenv("HOMEDRIVE")) != NULL &&
-        (hp = getenv("HOMEPATH")) != NULL) {
+    if ((hd = getenv("HOMEDRIVE")) != NULL && (hp = getenv("HOMEPATH")) != NULL) {
         if (asprintf(&dir, "%s%s", hd, hp) < 0) {
             exit_err("asprintf()");
         }
