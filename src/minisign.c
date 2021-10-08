@@ -19,9 +19,9 @@
 #include "minisign.h"
 
 #ifndef VERIFY_ONLY
-static const char *getopt_options = "GSVRHhc:fm:oP:p:qQs:t:vx:";
+static const char *getopt_options = "GSVRHhc:flm:oP:p:qQs:t:vx:";
 #else
-static const char *getopt_options = "Vhm:oP:p:qQvx:";
+static const char *getopt_options = "VhHm:oP:p:qQvx:";
 #endif
 
 static void usage(void) __attribute__((noreturn));
@@ -32,21 +32,24 @@ usage(void)
     puts("Usage:\n"
 #ifndef VERIFY_ONLY
          "minisign -G [-p pubkey] [-s seckey]\n"
-         "minisign -S [-H] [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]\n"
+         "minisign -S [-l] [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]\n"
 #endif
-         "minisign -V [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file\n"
+         "minisign -V [-H] [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file\n"
 #ifndef VERIFY_ONLY
          "minisign -R -s seckey -p pubkeyfile\n"
 #endif
          "\n"
 #ifndef VERIFY_ONLY
          "-G                generate a new key pair\n"
+#endif
+         "-H                require input to be prehashed\n"
+#ifndef VERIFY_ONLY
          "-S                sign files\n"
 #endif
          "-V                verify that a signature is valid for a given file\n"
+         "-l                sign using the legacy format.\n"
          "-m <file>         file to sign/verify\n"
          "-o                combined with -V, output the file content after verification\n"
-         "-H                assume that the input is pre-hashed\n"
          "-p <pubkeyfile>   public key file (default: ./minisign.pub)\n"
          "-P <pubkey>       public key, as a base64 string\n"
 #ifndef VERIFY_ONLY
@@ -382,7 +385,7 @@ seckey_load(const char *sk_file)
 
 static int
 verify(PubkeyStruct *pubkey_struct, const char *message_file,
-       const char *sig_file, int quiet, int output, int *want_prehashed)
+       const char *sig_file, int quiet, int output, int allow_legacy)
 {
     char           trusted_comment[TRUSTEDCOMMENTMAXBYTES];
     unsigned char  global_sig[crypto_sign_BYTES];
@@ -399,9 +402,9 @@ verify(PubkeyStruct *pubkey_struct, const char *message_file,
     }
     sig_struct = sig_load(sig_file, global_sig, &hashed,
                           trusted_comment, sizeof trusted_comment);
-    if (want_prehashed != NULL && hashed != *want_prehashed) {
+    if (hashed == 0 && allow_legacy == 0) {
         if (quiet == 0) {
-            fprintf(stderr, "Prehashing mismatch\n");
+            fprintf(stderr, "Legacy (non-prehashed) signature found\n");
         }
         exit(1);
     }
@@ -483,7 +486,7 @@ default_trusted_comment(const char *message_file)
 static void
 sign(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct,
      const char *message_file, const char *sig_file, const char *comment,
-     const char *trusted_comment)
+     const char *trusted_comment, int legacy)
 {
     unsigned char  global_sig[crypto_sign_BYTES];
     SigStruct      sig_struct;
@@ -494,13 +497,18 @@ sign(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct,
     size_t         comment_len;
     size_t         trusted_comment_len;
     size_t         message_len;
+    int            hashed = 1;
 
     if (trusted_comment == NULL || *trusted_comment == 0) {
         tmp_trusted_comment = default_trusted_comment(message_file);
         trusted_comment = tmp_trusted_comment;
     }
-    message = message_load(&message_len, message_file, 1);
-    memcpy(sig_struct.sig_alg, SIGALG_HASHED, sizeof sig_struct.sig_alg);
+    if (legacy != 0) {
+        hashed = 0;
+    }
+    message = message_load(&message_len, message_file, hashed);
+    memcpy(sig_struct.sig_alg, hashed ? SIGALG : SIGALG_HASHED,
+           sizeof sig_struct.sig_alg);
     memcpy(sig_struct.keynum, seckey_struct->keynum_sk.keynum,
            sizeof sig_struct.keynum);
     crypto_sign_detached(sig_struct.sig, NULL, message, message_len,
@@ -554,17 +562,18 @@ sign(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct,
 static int
 sign_all(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct,
          const char *message_file, const char *additional_files[], int additional_count,
-         const char *sig_file, const char *comment, const char *trusted_comment)
+         const char *sig_file, const char *comment, const char *trusted_comment,
+         int legacy)
 {
     char *additional_sig_file;
     int   i;
 
     sign(seckey_struct, pubkey_struct, message_file, sig_file, comment,
-         trusted_comment);
+         trusted_comment, legacy);
     for (i = 0; i < additional_count; i++) {
         additional_sig_file = append_sig_suffix(additional_files[i]);
         sign(seckey_struct, pubkey_struct, additional_files[i],
-             additional_sig_file, comment, trusted_comment);
+             additional_sig_file, comment, trusted_comment, legacy);
         free(additional_sig_file);
     }
     sodium_free(seckey_struct);
@@ -793,10 +802,11 @@ main(int argc, char **argv)
     const char    *trusted_comment = NULL;
     unsigned char  opt_seen[16] = { 0 };
     int            opt_flag;
-    int            hashed = 0;
     int            quiet = 0;
     int            output = 0;
     int            force = 0;
+    int            allow_legacy = 1;
+    int            sign_legacy = 0;
     Action         action = ACTION_NONE;
 
     while ((opt_flag = getopt(argc, argv, getopt_options)) != -1) {
@@ -838,7 +848,10 @@ main(int argc, char **argv)
         case 'h':
             usage();
         case 'H':
-            hashed = 1;
+            allow_legacy = 0;
+            break;
+        case 'l':
+            sign_legacy = 1;
             break;
         case 'm':
             message_file = optarg;
@@ -912,7 +925,7 @@ main(int argc, char **argv)
                         ((pk_file != NULL || pubkey_s != NULL) ?
                             pubkey_load(pk_file, pubkey_s) : NULL),
                         message_file, (const char **) &argv[optind], argc - optind,
-                        sig_file, comment, trusted_comment) != 0;
+                        sig_file, comment, trusted_comment, sign_legacy) != 0;
     case ACTION_RECREATE_PK:
         if (pk_file == NULL) {
             pk_file = SIG_DEFAULT_PKFILE;
@@ -930,8 +943,7 @@ main(int argc, char **argv)
             pk_file = SIG_DEFAULT_PKFILE;
         }
         return verify(pubkey_load(pk_file, pubkey_s), message_file,
-                      sig_file, quiet, output,
-                      hashed != 0 ? &hashed : NULL) != 0;
+                      sig_file, quiet, output, allow_legacy);
     default:
         usage();
     }
