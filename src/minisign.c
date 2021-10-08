@@ -51,9 +51,7 @@ usage(void)
          "-V                verify that a signature is valid for a given file\n"
          "-m <file>         file to sign/verify\n"
          "-o                combined with -V, output the file content after verification\n"
-#ifndef VERIFY_ONLY
-         "-H                combined with -S, pre-hash in order to sign large files\n"
-#endif
+         "-H                assume that the input is pre-hashed\n"
          "-p <pubkeyfile>   public key file (default: ./minisign.pub)\n"
          "-P <pubkey>       public key, as a base64 string\n"
 #ifndef VERIFY_ONLY
@@ -118,9 +116,6 @@ message_load(size_t *message_len, const char *message_file, int hashed)
         exit_err(message_file);
     }
     assert(hashed == 0);
-    if (message_len_ > (off_t) 1L << 30) {
-        exit_msg("Data has to be smaller than 1 GB. Or use the -H option.");
-    }
     if ((uintmax_t) message_len_ > (uintmax_t) SIZE_MAX ||
         message_len_ < (off_t) 0) {
         abort();
@@ -392,7 +387,7 @@ seckey_load(const char *sk_file)
 
 static int
 verify(PubkeyStruct *pubkey_struct, const char *message_file,
-       const char *sig_file, int quiet, int output)
+       const char *sig_file, int quiet, int output, int *want_prehashed)
 {
     char           trusted_comment[TRUSTEDCOMMENTMAXBYTES];
     unsigned char  global_sig[crypto_sign_BYTES];
@@ -409,6 +404,12 @@ verify(PubkeyStruct *pubkey_struct, const char *message_file,
     }
     sig_struct = sig_load(sig_file, global_sig, &hashed,
                           trusted_comment, sizeof trusted_comment);
+    if (want_prehashed != NULL && hashed != *want_prehashed) {
+        if (quiet == 0) {
+            fprintf(stderr, "Prehashing mismatch\n");
+        }
+        exit(1);
+    }
     message = message_load(&message_len, message_file, hashed);
     if (memcmp(sig_struct->keynum, pubkey_struct->keynum_pk.keynum,
                sizeof sig_struct->keynum) != 0) {
@@ -463,7 +464,7 @@ default_trusted_comment(const char *message_file)
     char   *ret;
     time_t  ts = time(NULL);
 
-    if (asprintf(&ret, "timestamp:%lu\tfile:%s",
+    if (asprintf(&ret, "timestamp:%lu\tfile:%s\tprehashed",
                  (unsigned long) ts, file_basename(message_file)) < 0 ||
         ret == NULL) {
         exit_err("asprintf()");
@@ -487,7 +488,7 @@ append_sig_suffix(const char *message_file)
 static void
 sign(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct,
      const char *message_file, const char *sig_file, const char *comment,
-     const char *trusted_comment, int hashed)
+     const char *trusted_comment)
 {
     unsigned char  global_sig[crypto_sign_BYTES];
     SigStruct      sig_struct;
@@ -503,12 +504,8 @@ sign(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct,
         tmp_trusted_comment = default_trusted_comment(message_file);
         trusted_comment = tmp_trusted_comment;
     }
-    message = message_load(&message_len, message_file, hashed);
-    if (hashed != 0) {
-        memcpy(sig_struct.sig_alg, SIGALG_HASHED, sizeof sig_struct.sig_alg);
-    } else {
-        memcpy(sig_struct.sig_alg, SIGALG, sizeof sig_struct.sig_alg);
-    }
+    message = message_load(&message_len, message_file, 1);
+    memcpy(sig_struct.sig_alg, SIGALG_HASHED, sizeof sig_struct.sig_alg);
     memcpy(sig_struct.keynum, seckey_struct->keynum_sk.keynum,
            sizeof sig_struct.keynum);
     crypto_sign_detached(sig_struct.sig, NULL, message, message_len,
@@ -562,18 +559,17 @@ sign(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct,
 static int
 sign_all(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct,
          const char *message_file, const char *additional_files[], int additional_count,
-         const char *sig_file, const char *comment, const char *trusted_comment,
-         int hashed)
+         const char *sig_file, const char *comment, const char *trusted_comment)
 {
     char *additional_sig_file;
     int   i;
 
     sign(seckey_struct, pubkey_struct, message_file, sig_file, comment,
-         trusted_comment, hashed);
+         trusted_comment);
     for (i = 0; i < additional_count; i++) {
         additional_sig_file = append_sig_suffix(additional_files[i]);
         sign(seckey_struct, pubkey_struct, additional_files[i],
-             additional_sig_file, comment, trusted_comment, hashed);
+             additional_sig_file, comment, trusted_comment);
         free(additional_sig_file);
     }
     sodium_free(seckey_struct);
@@ -921,7 +917,7 @@ main(int argc, char **argv)
                         ((pk_file != NULL || pubkey_s != NULL) ?
                             pubkey_load(pk_file, pubkey_s) : NULL),
                         message_file, (const char **) &argv[optind], argc - optind,
-                        sig_file, comment, trusted_comment, hashed) != 0;
+                        sig_file, comment, trusted_comment) != 0;
     case ACTION_RECREATE_PK:
         if (pk_file == NULL) {
             pk_file = SIG_DEFAULT_PKFILE;
@@ -939,7 +935,8 @@ main(int argc, char **argv)
             pk_file = SIG_DEFAULT_PKFILE;
         }
         return verify(pubkey_load(pk_file, pubkey_s), message_file,
-                      sig_file, quiet, output) != 0;
+                      sig_file, quiet, output,
+                      hashed != 0 ? &hashed : NULL) != 0;
     default:
         usage();
     }
