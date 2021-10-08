@@ -457,6 +457,19 @@ verify(PubkeyStruct *pubkey_struct, const char *message_file,
     return 0;
 }
 
+static char *
+append_sig_suffix(const char *message_file)
+{
+    char   *sig_file;
+    size_t  message_file_len = strlen(message_file);
+
+    sig_file = xmalloc(message_file_len + sizeof SIG_SUFFIX);
+    memcpy(sig_file, message_file, message_file_len);
+    memcpy(sig_file + message_file_len, SIG_SUFFIX, sizeof SIG_SUFFIX);
+
+    return sig_file;
+}
+
 #ifndef VERIFY_ONLY
 static char *
 default_trusted_comment(const char *message_file)
@@ -470,19 +483,6 @@ default_trusted_comment(const char *message_file)
         exit_err("asprintf()");
     }
     return ret;
-}
-
-static char *
-append_sig_suffix(const char *message_file)
-{
-    char   *sig_file;
-    size_t  message_file_len = strlen(message_file);
-
-    sig_file = xmalloc(message_file_len + sizeof SIG_SUFFIX);
-    memcpy(sig_file, message_file, message_file_len);
-    memcpy(sig_file + message_file_len, SIG_SUFFIX, sizeof SIG_SUFFIX);
-
-    return sig_file;
 }
 
 static void
