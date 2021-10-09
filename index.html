@@ -17,9 +17,11 @@
     <h2 class="project-tagline">A dead simple tool to sign files and verify signatures.</h2>
     <a href="https://github.com/jedisct1/minisign" class="btn">View on GitHub</a>
     <a href="https://github.com/jedisct1/minisign/tarball/master" class="btn">Download source code</a>
-    <a href="https://github.com/jedisct1/minisign/releases/download/0.10/minisign-0.10-macos.zip" class="btn">Download OSX
+    <a href="https://github.com/jedisct1/minisign/releases/download/0.10/minisign-0.10-macos.zip" class="btn">Download
+      OSX
       binary</a>
-    <a href="https://github.com/jedisct1/minisign/releases/download/0.10/minisign-0.10-win64.zip" class="btn">Download Windows
+    <a href="https://github.com/jedisct1/minisign/releases/download/0.10/minisign-0.10-win64.zip" class="btn">Download
+      Windows
       binary</a>
   </section>
 
@@ -137,11 +139,23 @@ minisign -R -s seckey -p pubkeyfile
           class="octicon octicon-link"></span></a>Compilation / installation
     </h2>
 
+    <h3>Using Zig</h3>
     <p>Dependencies:</p>
+    <ul>
+      <li><a href="http://doc.libsodium.org/">libsodium</a></li>
+    </ul>
 
+    <p>Compilation:</p>
+    <pre><code>$ zig build -Drelease-safe</code></pre>
+
+    <h3>Using Cmake</h3>
+    <p>Dependencies</p>
     <ul>
       <li><a href="http://doc.libsodium.org/">libsodium</a></li>
       <li>cmake</li>
+      <li>make</li>
+      <li>pkg-config</li>
+      <li>a C compilation toolchain</li>
     </ul>
 
     <p>Compilation:</p>
@@ -150,8 +164,7 @@ minisign -R -s seckey -p pubkeyfile
 $ cd build
 $ cmake ..
 $ make
-# make install
-</code></pre>
+# make install</code></pre>
 
     <h2>
       <a id="signature-format" class="anchor" href="#signature-format" aria-hidden="true"><span
