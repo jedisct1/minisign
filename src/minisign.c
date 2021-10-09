@@ -31,7 +31,7 @@ usage(void)
     puts(
         "Usage:\n"
 #ifndef VERIFY_ONLY
-        "minisign -G [-p pubkey] [-s seckey]\n"
+        "minisign -G [-f] [-p pubkey] [-s seckey]\n"
         "minisign -S [-l] [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m "
         "file [file ...]\n"
 #endif
