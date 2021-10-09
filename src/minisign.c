@@ -48,7 +48,7 @@ usage(void)
         "-S                sign files\n"
 #endif
         "-V                verify that a signature is valid for a given file\n"
-        "-l                sign using the legacy format.\n"
+        "-l                sign using the legacy format\n"
         "-m <file>         file to sign/verify\n"
         "-o                combined with -V, output the file content after verification\n"
         "-p <pubkeyfile>   public key file (default: ./minisign.pub)\n"
