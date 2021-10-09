@@ -13,5 +13,6 @@ pub fn build(b: *std.build.Builder) !void {
 
     minisign.addIncludeDir("src");
     minisign.addSystemIncludeDir("/usr/local/include");
+    minisign.defineCMacro("_GNU_SOURCE", "1");
     minisign.addCSourceFiles(&.{ "src/base64.c", "src/get_line.c", "src/helpers.c", "src/minisign.c" }, &.{});
 }
