@@ -90,26 +90,31 @@
       <a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage
     </h2>
 
-    <pre><code>$ minisign -G [-p pubkey] [-s seckey]
-$ minisign -S [-H] [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file
-$ minisign -V [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file
+    <pre><code>
+Usage:
+minisign -G [-p pubkey] [-s seckey]
+minisign -S [-l] [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]
+minisign -V [-H] [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file
+minisign -R -s seckey -p pubkeyfile
 
--G                generate a new key pair
--S                sign a file
--V                verify that a signature is valid for a given file
--m &lt;file&gt;         file to sign/verify
--o                combined with -V, output the file content after verification
--H                combined with -S, pre-hash in order to sign large files
--p &lt;pubkeyfile&gt;   public key file (default: ./minisign.pub)
--P &lt;pubkey&gt;       public key, as a base64 string
--s &lt;seckey&gt;       secret key file (default: ~/.minisign/minisign.key)
--x &lt;sigfile&gt;      signature file (default: &lt;file&gt;.minisig)
--c &lt;comment&gt;      add a one-line untrusted comment
--t &lt;comment&gt;      add a one-line trusted comment
--q                quiet mode, suppress output
--Q                pretty quiet mode, only print the trusted comment
--f                force. Combined with -G, overwrite a previous key pair
--v                display version number
+-G generate a new key pair
+-H require input to be prehashed
+-S sign files
+-V verify that a signature is valid for a given file
+-l sign using the legacy format
+-m &lt;file&gt; file to sign/verify
+-o combined with -V, output the file content after verification
+-p &lt;pubkeyfile&gt; public key file (default: ./minisign.pub)
+-P &lt;pubkey&gt; public key, as a base64 string
+-s &lt;seckey&gt; secret key file (default: ~/.minisign/minisign.key)
+-x &lt;sigfile&gt; signature file (default: &lt;file&gt;.minisig)
+-c &lt;comment&gt; add a one-line untrusted comment
+-t &lt;comment&gt; add a one-line trusted comment
+-q quiet mode, suppress output
+-Q pretty quiet mode, only print the trusted comment
+-R recreate a public key file from a secret key file
+-f force. Combined with -G, overwrite a previous key pair
+-v display version number
 </code></pre>
 
     <h2>
@@ -153,17 +158,10 @@ $ make
           class="octicon octicon-link"></span></a>Pre-hashing
     </h2>
 
-    <p>By default, signing and verification require as much memory as the size of the file.</p>
+    <p>By default, files are signed and verified with very low memory requirements, by pre-hashing the content.</p>
 
-    <p>Huge files can be signed and verified with very low memory requirements, by pre-hashing the content.</p>
-
-    <p>The <code>-H</code> command-line switch, in combination with <code>-S</code>, generates a pre-hashed signature
-      (HashEdDSA):</p>
-
-    <pre><code>$ minisign -SHm myfile.txt</code></pre>
-
-    <p>Verification of such a signature doesn't require any specific switch: the appropriate algorithm will
-      automatically be detected.</p>
+    <p>Signatures that are not pre-hashed can be rejected with the -H switch. Support for these legacy signatures will
+      eventually be removed.</p>
 
     <h2>
       <a id="signature-format" class="anchor" href="#signature-format" aria-hidden="true"><span
