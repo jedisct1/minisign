@@ -34,8 +34,6 @@ These options control the actions of `minisign`.
     File to sign/verify
   * `-o`:
     Combined with -V, output the file content after verification
-  * `-H`:
-    Combined with -S, pre-hash in order to sign large files
   * `-p <pubkeyfile>`:
     Public key file (default: ./minisign.pub)
   * `-P <pubkey>`:
@@ -48,8 +46,12 @@ These options control the actions of `minisign`.
     Add a one-line untrusted comment
   * `-t <comment>`:
     Add a one-line trusted comment
+  * `-l`:
+    Sign using the legacy format
   * `-q`:
     Quiet mode, suppress output
+  * `-H`:
+    Requires the input to be prehashed
   * `-Q`:
     Pretty quiet mode, only print the trusted comment
   * `-R`:
@@ -93,37 +95,11 @@ The public key can either reside in a file (`./minisign.pub` by default) or be d
 
 ## Notes
 
-**Trusted comments**
-
 Signature files include an untrusted comment line that can be freely modified, even after signature creation.
 
 They also include a second comment line, that cannot be modified without the secret key.
 
 Trusted comments can be used to add instructions or application-specific metadata (intended file name, timestamps, resource identifiers, version numbers to prevent downgrade attacks).
-
-**Compatibility with OpenBSD signify**
-
-Signatures written by `minisign` can be verified using OpenBSD's `signify` tool: public key files and signature files are compatible.
-
-However, `minisign` uses a slightly different format to store secret keys.
-
-`Minisign` signatures include trusted comments in addition to untrusted comments. Trusted comments are signed, thus verified, before being displayed.
-
-This adds two lines to the signature files, that signify silently ignores.
-
-**Pre-hashing**
-
-By default, signing and verification require as much memory as the size of the file.
-
-Since `Minisign 0.6`, huge files can be signed and verified with very low memory requirements, by pre-hashing the content.
-
-The -H command-line switch, in combination with -S, generates a pre-hashed signature (HashEdDSA):
-
-$ `minisign` -SHm myfile.txt
-
-Verification of such a signature doesn't require any specific switch: the appropriate algorithm will automatically be detected.
-
-Signatures generated that way are not compatible with OpenBSD's `signify` tool and are not compatible with `Minisign` versions prior to 0.6.
 
 ## AUTHOR
 
