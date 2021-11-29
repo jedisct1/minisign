@@ -18,7 +18,7 @@
 #include "minisign.h"
 
 #ifndef VERIFY_ONLY
-static const char *getopt_options = "GSVRHhc:flm:oP:p:qQs:t:vx:";
+static const char *getopt_options = "GSCVRHhc:flm:oP:p:qQs:t:vx:";
 #else
 static const char *getopt_options = "VhHm:oP:p:qQvx:";
 #endif
@@ -37,6 +37,7 @@ usage(void)
 #endif
         "minisign -V [-H] [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file\n"
 #ifndef VERIFY_ONLY
+        "minisign -C [-s seckey]\n"
         "minisign -R -s seckey -p pubkeyfile\n"
 #endif
         "\n"
@@ -64,6 +65,7 @@ usage(void)
         "-q                quiet mode, suppress output\n"
         "-Q                pretty quiet mode, only print the trusted comment\n"
 #ifndef VERIFY_ONLY
+        "-C                change the password of an existing secret key\n"
         "-R                recreate a public key file from a secret key file\n"
 #endif
         "-f                force. Combined with -G, overwrite a previous key pair\n"
@@ -604,27 +606,14 @@ write_pk_file(const char *pk_file, const PubkeyStruct *pubkey_struct)
     xfclose(fp);
 }
 
-static int
-generate(const char *pk_file, const char *sk_file, const char *comment, int force)
+static void
+crypt_sk(SeckeyStruct* seckey_struct)
 {
     char *         pwd           = xsodium_malloc(PASSWORDMAXBYTES);
     char *         pwd2          = xsodium_malloc(PASSWORDMAXBYTES);
-    SeckeyStruct * seckey_struct = xsodium_malloc(sizeof(SeckeyStruct));
-    PubkeyStruct * pubkey_struct = xsodium_malloc(sizeof(PubkeyStruct));
     unsigned char *stream;
-    FILE *         fp;
     unsigned long  kdf_memlimit;
     unsigned long  kdf_opslimit;
-
-    abort_on_existing_key_files(pk_file, sk_file, force);
-    randombytes_buf(seckey_struct->keynum_sk.keynum, sizeof seckey_struct->keynum_sk.keynum);
-    crypto_sign_keypair(pubkey_struct->keynum_pk.pk, seckey_struct->keynum_sk.sk);
-    memcpy(seckey_struct->sig_alg, SIGALG, sizeof seckey_struct->sig_alg);
-    memcpy(seckey_struct->kdf_alg, KDFALG, sizeof seckey_struct->kdf_alg);
-    memcpy(seckey_struct->chk_alg, CHKALG, sizeof seckey_struct->chk_alg);
-    memcpy(pubkey_struct->keynum_pk.keynum, seckey_struct->keynum_sk.keynum,
-           sizeof pubkey_struct->keynum_pk.keynum);
-    memcpy(pubkey_struct->sig_alg, SIGALG, sizeof pubkey_struct->sig_alg);
 
     puts("Please enter a password to protect the secret key.\n");
     if (get_password(pwd, PASSWORDMAXBYTES, "Password: ") != 0 ||
@@ -665,6 +654,26 @@ generate(const char *pk_file, const char *sk_file, const char *comment, int forc
             sizeof seckey_struct->keynum_sk);
     sodium_free(stream);
     puts("done\n");
+}
+
+static int
+generate(const char *pk_file, const char *sk_file, const char *comment, int force)
+{
+    SeckeyStruct * seckey_struct = xsodium_malloc(sizeof(SeckeyStruct));
+    PubkeyStruct * pubkey_struct = xsodium_malloc(sizeof(PubkeyStruct));
+    FILE *         fp;
+
+    abort_on_existing_key_files(pk_file, sk_file, force);
+    randombytes_buf(seckey_struct->keynum_sk.keynum, sizeof seckey_struct->keynum_sk.keynum);
+    crypto_sign_keypair(pubkey_struct->keynum_pk.pk, seckey_struct->keynum_sk.sk);
+    memcpy(seckey_struct->sig_alg, SIGALG, sizeof seckey_struct->sig_alg);
+    memcpy(seckey_struct->kdf_alg, KDFALG, sizeof seckey_struct->kdf_alg);
+    memcpy(seckey_struct->chk_alg, CHKALG, sizeof seckey_struct->chk_alg);
+    memcpy(pubkey_struct->keynum_pk.keynum, seckey_struct->keynum_sk.keynum,
+           sizeof pubkey_struct->keynum_pk.keynum);
+    memcpy(pubkey_struct->sig_alg, SIGALG, sizeof pubkey_struct->sig_alg);
+
+    crypt_sk(seckey_struct);
 
     abort_on_existing_key_files(pk_file, sk_file, force);
     if (basedir_create_useronly(sk_file) != 0) {
@@ -687,6 +696,40 @@ generate(const char *pk_file, const char *sk_file, const char *comment, int forc
     xfput_b64(stdout, (unsigned char *) (void *) pubkey_struct, sizeof *pubkey_struct);
     puts("");
     sodium_free(pubkey_struct);
+
+    return 0;
+}
+
+static int
+change_pw(const char *sk_file)
+{
+    char           sk_comment[COMMENTMAXBYTES];
+    SeckeyStruct * seckey_struct;
+    FILE *         fp;
+
+    if ((fp = fopen(sk_file, "r")) == NULL) {
+        exit_err(sk_file);
+    }
+
+    if (fgets(sk_comment, (int) sizeof sk_comment, fp) == NULL) {
+        exit_msg("Error while loading the secret key file");
+    }
+
+    xfclose(fp);
+
+    if ((seckey_struct = seckey_load(sk_file)) == NULL) {
+        return -1;
+    }
+
+    crypt_sk(seckey_struct);
+
+    if ((fp = fopen_create_useronly(sk_file)) == NULL) {
+        exit_err(sk_file);
+    }
+    xfprintf(fp, "%s", sk_comment);
+    xfput_b64(fp, (unsigned char *) (void *) seckey_struct, sizeof *seckey_struct);
+    xfclose(fp);
+    sodium_free(seckey_struct);
 
     return 0;
 }
@@ -797,6 +840,12 @@ main(int argc, char **argv)
             }
             action = ACTION_SIGN;
             break;
+        case 'C':
+            if (action != ACTION_NONE && action != ACTION_CHANGE_PW) {
+                usage();
+            }
+            action = ACTION_CHANGE_PW;
+            break;
         case 'R':
             if (action != ACTION_NONE && action != ACTION_RECREATE_PK) {
                 usage();
@@ -899,6 +948,8 @@ main(int argc, char **argv)
                    ((pk_file != NULL || pubkey_s != NULL) ? pubkey_load(pk_file, pubkey_s) : NULL),
                    message_file, (const char **) &argv[optind], argc - optind, sig_file, comment,
                    trusted_comment, sign_legacy) != 0;
+    case ACTION_CHANGE_PW:
+        return change_pw(sk_file) != 0;
     case ACTION_RECREATE_PK:
         if (pk_file == NULL) {
             pk_file = SIG_DEFAULT_PKFILE;

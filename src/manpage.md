@@ -1,5 +1,5 @@
 <!---
-This man page can be generated using ronn - http://rtomayko.github.com/ronn/
+This man page can be generated using ronn - http://rtomayko.github.io/ronn/
 -->
 minisign(1) -- A dead simple tool to sign files and verify signatures.
 ======================================================================
@@ -11,6 +11,8 @@ minisign(1) -- A dead simple tool to sign files and verify signatures.
 `minisign` -S [-H] [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]
 
 `minisign` -V [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file
+
+`minisign` -C [-s seckey]
 
 `minisign` -R -s seckey -p pubkeyfile
 
@@ -54,6 +56,8 @@ These options control the actions of `minisign`.
     Requires the input to be prehashed
   * `-Q`:
     Pretty quiet mode, only print the trusted comment
+  * `-C`:
+    Change the password of an existing secret key
   * `-R`:
     Recreate a public key file from a secret key file
   * `-f`:
