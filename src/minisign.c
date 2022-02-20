@@ -169,6 +169,9 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES], int 
     if (fgets(comment, (int) sizeof comment, fp) == NULL) {
         exit_msg("Error while reading the signature file");
     }
+    if (trim(comment) == 0) {
+        exit_msg("Untrusted signature comment too long");
+    }
     if (strncmp(comment, COMMENT_PREFIX, (sizeof COMMENT_PREFIX) - 1U) != 0) {
         exit_msg(
             "Untrusted signature comment should start with "
@@ -179,7 +182,9 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES], int 
     if (fgets(sig_s, (int) sig_s_size, fp) == NULL) {
         exit_msg("Error while reading the signature file");
     }
-    trim(sig_s);
+    if (trim(sig_s) == 0) {
+        exit_msg("Signature too long");
+    }
     if (fgets(trusted_comment, (int) trusted_comment_maxlen, fp) == NULL) {
         exit_msg("Trusted comment not present");
     }
@@ -192,7 +197,9 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES], int 
     memmove(trusted_comment,
             trusted_comment + sizeof TRUSTED_COMMENT_PREFIX - 1U,
             strlen(trusted_comment + sizeof TRUSTED_COMMENT_PREFIX - 1U) + 1U);
-    trim(trusted_comment);
+    if (trim(trusted_comment) == 0) {
+        exit_msg("Trusted comment too long");
+    }
     global_sig_s_size = B64_MAX_LEN_FROM_BIN_LEN(crypto_sign_BYTES) + 2U;
     global_sig_s      = xmalloc(global_sig_s_size);
     if (fgets(global_sig_s, (int) global_sig_s_size, fp) == NULL) {

@@ -36,7 +36,7 @@ int xfprintf(FILE *fp, const char *format, ...) __attribute__((format(printf, 2,
 
 int xfclose(FILE *fp);
 
-void trim(char *str);
+int trim(char *str);
 
 const char *file_basename(const char *file);
 

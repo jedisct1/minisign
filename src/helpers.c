@@ -151,16 +151,21 @@ xfclose(FILE *fp)
     return 0;
 }
 
-void
+int
 trim(char *str)
 {
     size_t i = strlen(str);
+    int    t = 0;
 
     while (i-- > (size_t) 0U) {
-        if (str[i] == '\n' || str[i] == '\r') {
+        if (str[i] == '\n') {
+            str[i] = 0;
+            t = 1;
+        } else if (str[i] == '\r') {
             str[i] = 0;
         }
     }
+    return t;
 }
 
 const char *
