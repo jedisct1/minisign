@@ -18,9 +18,9 @@
 #include "minisign.h"
 
 #ifndef VERIFY_ONLY
-static const char *getopt_options = "GSVRHhc:flm:oP:p:qQs:t:vx:";
+static const char *getopt_options = "GSVkRHhc:flm:oP:p:qQs:t:vx:";
 #else
-static const char *getopt_options = "VhHm:oP:p:qQvx:";
+static const char *getopt_options = "VkhHm:oP:p:qQvx:";
 #endif
 
 static void usage(void) __attribute__((noreturn));
@@ -48,6 +48,7 @@ usage(void)
         "-S                sign files\n"
 #endif
         "-V                verify that a signature is valid for a given file\n"
+        "-k                print the key_id of the other key file, signature, or signed file parameters\n"
         "-l                sign using the legacy format\n"
         "-m <file>         file to sign/verify\n"
         "-o                combined with -V, output the file content after verification\n"
@@ -783,10 +784,12 @@ main(int argc, char **argv)
     unsigned char opt_seen[16]    = { 0 };
     int           opt_flag;
     int           quiet        = 0;
+    int           count        = 0;
     int           output       = 0;
     int           force        = 0;
     int           allow_legacy = 1;
     int           sign_legacy  = 0;
+    int           sk_file_flag = 0;
     Action        action       = ACTION_NONE;
 
     while ((opt_flag = getopt(argc, argv, getopt_options)) != -1) {
@@ -816,6 +819,12 @@ main(int argc, char **argv)
                 usage();
             }
             action = ACTION_VERIFY;
+            break;
+        case 'k':
+			if (action != ACTION_NONE && action != ACTION_IDENTIFY) {
+                usage();
+            }
+            action = ACTION_IDENTIFY;
             break;
 #ifndef VERIFY_ONLY
         case 'c':
@@ -855,6 +864,7 @@ main(int argc, char **argv)
         case 's':
             free(sk_file);
             sk_file = xstrdup(optarg);
+            sk_file_flag = 1;
             break;
         case 't':
             trusted_comment = optarg;
@@ -924,6 +934,35 @@ main(int argc, char **argv)
         }
         return verify(pubkey_load(pk_file, pubkey_s), message_file, sig_file, quiet, output,
                       allow_legacy);
+    case ACTION_IDENTIFY:
+        if (pk_file != NULL || pubkey_s != NULL) {
+			PubkeyStruct *pubkey_struct = pubkey_load(pk_file, pubkey_s);
+			fprintf(stdout, "%" PRIX64 "\n", le64_load(pubkey_struct->keynum_pk.keynum));
+			count++;
+		}
+#ifndef VERIFY_ONLY
+        if (sk_file_flag) {
+			SeckeyStruct *seckey_struct = seckey_load(sk_file);
+			fprintf(stdout, "%" PRIX64 "\n", le64_load(seckey_struct->keynum_sk.keynum));
+			count++;
+		}
+#endif
+        if (message_file != NULL) {
+			sig_file = append_sig_suffix(message_file);
+		}
+        if (sig_file != NULL) {
+			char           trusted_comment[TRUSTEDCOMMENTMAXBYTES];
+            unsigned char  global_sig[crypto_sign_BYTES];
+            int            hashed;
+
+            SigStruct *sig_struct = sig_load(sig_file, global_sig, &hashed, trusted_comment, sizeof trusted_comment);
+			fprintf(stdout, "%" PRIX64 "\n", le64_load(sig_struct->keynum));
+			count++;
+		}
+        if (count == 0) {
+            usage();
+        }
+        return 0;
     default:
         usage();
     }
