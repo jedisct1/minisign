@@ -65,6 +65,15 @@ Minisign is also available with docker:
 
     $ docker run -i --rm jedisct1/minisign
 
+The image can be verified with the following cosign public key:
+
+```text
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExjZWrlc6c58W7ZzmQnx6mugty99C
+OQTDtJeciX9LF9hEbs1J1fzZHRdRhV4OTqcq0jTW9PXnrSSZlk1fbkE/5w==
+-----END PUBLIC KEY-----
+```
+
 Additional tools, libraries and implementations
 -----------------------------------------------
 
