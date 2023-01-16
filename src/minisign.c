@@ -307,10 +307,8 @@ seckey_load(const char *sk_file, int unencrypted_key)
     char           sk_comment[COMMENTMAXBYTES];
     unsigned char  chk[crypto_generichash_BYTES];
     SeckeyStruct * seckey_struct;
-    FILE *         fp;
-    char *         pwd = xsodium_malloc(PASSWORDMAXBYTES);
-    char *         seckey_s;
-    unsigned char *stream;
+    FILE          *fp;
+    char          *seckey_s;
     size_t         seckey_s_size;
     size_t         seckey_struct_len;
 
@@ -344,32 +342,33 @@ seckey_load(const char *sk_file, int unencrypted_key)
     if (memcmp(seckey_struct->chk_alg, CHKALG, sizeof seckey_struct->chk_alg) != 0) {
         exit_msg("Unsupported checksum function");
     }
-    if (unencrypted_key != 0) {
-        return seckey_struct;
-    }
-    if (get_password(pwd, PASSWORDMAXBYTES, "Password: ") != 0) {
-        exit_msg("get_password()");
-    }
-    printf("Deriving a key from the password and decrypting the secret key... ");
-    fflush(stdout);
-    stream = xsodium_malloc(sizeof seckey_struct->keynum_sk);
-    if (crypto_pwhash_scryptsalsa208sha256(stream, sizeof seckey_struct->keynum_sk, pwd,
-                                           strlen(pwd), seckey_struct->kdf_salt,
-                                           le64_load(seckey_struct->kdf_opslimit_le),
-                                           le64_load(seckey_struct->kdf_memlimit_le)) != 0) {
-        exit_err("Unable to complete key derivation - This probably means out of memory");
-    }
-    sodium_free(pwd);
-    xor_buf((unsigned char *) (void *) &seckey_struct->keynum_sk, stream,
-            sizeof seckey_struct->keynum_sk);
-    sodium_free(stream);
-    puts("done\n");
-    seckey_chk(chk, seckey_struct);
-    if (memcmp(chk, seckey_struct->keynum_sk.chk, sizeof chk) != 0) {
-        exit_msg("Wrong password for that key");
-    }
-    sodium_memzero(chk, sizeof chk);
+    if (unencrypted_key == 0) {
+        char          *pwd = xsodium_malloc(PASSWORDMAXBYTES);
+        unsigned char *stream;
 
+        if (get_password(pwd, PASSWORDMAXBYTES, "Password: ") != 0) {
+            exit_msg("get_password()");
+        }
+        printf("Deriving a key from the password and decrypting the secret key... ");
+        fflush(stdout);
+        stream = xsodium_malloc(sizeof seckey_struct->keynum_sk);
+        if (crypto_pwhash_scryptsalsa208sha256(stream, sizeof seckey_struct->keynum_sk, pwd,
+                                               strlen(pwd), seckey_struct->kdf_salt,
+                                               le64_load(seckey_struct->kdf_opslimit_le),
+                                               le64_load(seckey_struct->kdf_memlimit_le)) != 0) {
+            exit_err("Unable to complete key derivation - This probably means out of memory");
+        }
+        sodium_free(pwd);
+        xor_buf((unsigned char *) (void *) &seckey_struct->keynum_sk, stream,
+                sizeof seckey_struct->keynum_sk);
+        sodium_free(stream);
+        puts("done\n");
+        seckey_chk(chk, seckey_struct);
+        if (memcmp(chk, seckey_struct->keynum_sk.chk, sizeof chk) != 0) {
+            exit_msg("Wrong password for that key");
+        }
+        sodium_memzero(chk, sizeof chk);
+    }
     return seckey_struct;
 }
 #endif
@@ -613,14 +612,9 @@ static int
 generate(const char *pk_file, const char *sk_file, const char *comment, int force,
          int unencrypted_key)
 {
-    char *         pwd           = xsodium_malloc(PASSWORDMAXBYTES);
-    char *         pwd2          = xsodium_malloc(PASSWORDMAXBYTES);
     SeckeyStruct * seckey_struct = xsodium_malloc(sizeof(SeckeyStruct));
-    PubkeyStruct * pubkey_struct = xsodium_malloc(sizeof(PubkeyStruct));
-    unsigned char *stream;
-    FILE *         fp;
-    unsigned long  kdf_memlimit;
-    unsigned long  kdf_opslimit;
+    PubkeyStruct  *pubkey_struct = xsodium_malloc(sizeof(PubkeyStruct));
+    FILE          *fp;
 
     abort_on_existing_key_files(pk_file, sk_file, force);
     randombytes_buf(seckey_struct->keynum_sk.keynum, sizeof seckey_struct->keynum_sk.keynum);
@@ -633,6 +627,12 @@ generate(const char *pk_file, const char *sk_file, const char *comment, int forc
     memcpy(pubkey_struct->sig_alg, SIGALG, sizeof pubkey_struct->sig_alg);
 
     if (unencrypted_key == 0) {
+        char          *pwd  = xsodium_malloc(PASSWORDMAXBYTES);
+        char          *pwd2 = xsodium_malloc(PASSWORDMAXBYTES);
+        unsigned char *stream;
+        unsigned long  kdf_memlimit;
+        unsigned long  kdf_opslimit;
+
         puts("Please enter a password to protect the secret key.\n");
         if (get_password(pwd, PASSWORDMAXBYTES, "Password: ") != 0 ||
             get_password(pwd2, PASSWORDMAXBYTES, "Password (one more time): ") != 0) {
