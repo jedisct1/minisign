@@ -382,7 +382,7 @@ encrypt_key(SeckeyStruct *const seckey_struct)
 }
 
 static SeckeyStruct *
-seckey_load(const char *sk_file, int unencrypted_key)
+seckey_load(const char *sk_file, char *const sk_comment_copy, int unencrypted_key)
 {
     char          sk_comment[COMMENTMAXBYTES];
     unsigned char chk[crypto_generichash_BYTES];
@@ -397,6 +397,9 @@ seckey_load(const char *sk_file, int unencrypted_key)
     }
     if (fgets(sk_comment, (int) sizeof sk_comment, fp) == NULL) {
         exit_msg("Error while loading the secret key file");
+    }
+    if (sk_comment_copy != NULL) {
+        memcpy(sk_comment_copy, sk_comment, sizeof sk_comment);
     }
     sodium_memzero(sk_comment, sizeof sk_comment);
     seckey_s_size = B64_MAX_LEN_FROM_BIN_LEN(sizeof *seckey_struct) + 2U;
@@ -718,7 +721,7 @@ recreate_pk(const char *pk_file, const char *sk_file, int force, int unencrypted
     if (force == 0) {
         abort_on_existing_key_file(pk_file);
     }
-    if ((seckey_struct = seckey_load(sk_file, unencrypted_key)) == NULL) {
+    if ((seckey_struct = seckey_load(sk_file, NULL, unencrypted_key)) == NULL) {
         return -1;
     }
     memcpy(pubkey_struct.sig_alg, seckey_struct->sig_alg, sizeof pubkey_struct.sig_alg);
@@ -917,7 +920,7 @@ main(int argc, char **argv)
             comment = DEFAULT_COMMENT;
         }
         return sign_all(
-                   seckey_load(sk_file, unencrypted_key),
+                   seckey_load(sk_file, NULL, unencrypted_key),
                    ((pk_file != NULL || pubkey_s != NULL) ? pubkey_load(pk_file, pubkey_s) : NULL),
                    message_file, (const char **) &argv[optind], argc - optind, sig_file, comment,
                    trusted_comment, sign_legacy) != 0;
