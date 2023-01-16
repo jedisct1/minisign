@@ -31,13 +31,14 @@ usage(void)
     puts(
         "Usage:\n"
 #ifndef VERIFY_ONLY
-        "minisign -G [-f] [-p pubkey] [-s seckey]\n"
-        "minisign -S [-l] [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m "
+        "minisign -G [-f] [-p pubkeyfile] [-s seckeyfile]\n"
+        "minisign -S [-l] [-x sigfile] [-s seckeyfile] [-c untrusted_comment] [-t trusted_comment] "
+        "-m "
         "file [file ...]\n"
 #endif
         "minisign -V [-H] [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file\n"
 #ifndef VERIFY_ONLY
-        "minisign -R -s seckey -p pubkeyfile\n"
+        "minisign -R [-s seckeyfile] [-p pubkeyfile]\n"
 #endif
         "\n"
 #ifndef VERIFY_ONLY
@@ -54,7 +55,7 @@ usage(void)
         "-p <pubkeyfile>   public key file (default: ./minisign.pub)\n"
         "-P <pubkey>       public key, as a base64 string\n"
 #ifndef VERIFY_ONLY
-        "-s <seckey>       secret key file (default: ~/.minisign/minisign.key)\n"
+        "-s <seckeyfile>   secret key file (default: ~/.minisign/minisign.key)\n"
         "-W                do not encrypt/decrypt the secret key with a password\n"
 #endif
         "-x <sigfile>      signature file (default: <file>.minisig)\n"
