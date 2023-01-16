@@ -677,9 +677,9 @@ generate(const char *pk_file, const char *sk_file, const char *comment, int forc
     FILE         *fp;
 
     abort_on_existing_key_files(pk_file, sk_file, force);
+    memset(seckey_struct, 0, sizeof(SeckeyStruct));
     randombytes_buf(seckey_struct->keynum_sk.keynum, sizeof seckey_struct->keynum_sk.keynum);
     crypto_sign_keypair(pubkey_struct->keynum_pk.pk, seckey_struct->keynum_sk.sk);
-    memset(seckey_struct, 0, sizeof(SeckeyStruct));
     memcpy(seckey_struct->sig_alg, SIGALG, sizeof seckey_struct->sig_alg);
     memcpy(seckey_struct->kdf_alg, unencrypted_key ? KDFNONE : KDFALG,
            sizeof seckey_struct->kdf_alg);
