@@ -71,8 +71,8 @@ message_load_hashed(size_t *message_len, const char *message_file)
 {
     crypto_generichash_state hs;
     unsigned char            buf[65536U];
-    unsigned char *          message;
-    FILE *                   fp;
+    unsigned char           *message;
+    FILE                    *fp;
     size_t                   n;
 
     if ((fp = fopen(message_file, "rb")) == NULL) {
@@ -96,7 +96,7 @@ message_load_hashed(size_t *message_len, const char *message_file)
 static unsigned char *
 message_load(size_t *message_len, const char *message_file, int hashed)
 {
-    FILE *         fp;
+    FILE          *fp;
     unsigned char *message;
     off_t          message_len_;
 
@@ -125,7 +125,7 @@ static int
 output_file(const char *message_file)
 {
     unsigned char buf[65536U];
-    FILE *        fp;
+    FILE         *fp;
     size_t        n;
 
     if ((fp = fopen(message_file, "rb")) == NULL) {
@@ -150,9 +150,9 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES], int 
 {
     char       comment[COMMENTMAXBYTES];
     SigStruct *sig_struct;
-    FILE *     fp;
-    char *     global_sig_s;
-    char *     sig_s;
+    FILE      *fp;
+    char      *global_sig_s;
+    char      *sig_s;
     size_t     global_sig_len;
     size_t     global_sig_s_size;
     size_t     sig_s_size;
@@ -250,8 +250,8 @@ pubkey_load_file(const char *pk_file)
 {
     char          pk_comment[COMMENTMAXBYTES];
     PubkeyStruct *pubkey_struct;
-    FILE *        fp;
-    char *        pubkey_s = NULL;
+    FILE         *fp;
+    char         *pubkey_s = NULL;
     size_t        pubkey_s_size;
 
     if ((fp = fopen(pk_file, "r")) == NULL) {
@@ -304,13 +304,13 @@ seckey_chk(unsigned char chk[crypto_generichash_BYTES], const SeckeyStruct *seck
 static SeckeyStruct *
 seckey_load(const char *sk_file, int unencrypted_key)
 {
-    char           sk_comment[COMMENTMAXBYTES];
-    unsigned char  chk[crypto_generichash_BYTES];
-    SeckeyStruct * seckey_struct;
-    FILE          *fp;
-    char          *seckey_s;
-    size_t         seckey_s_size;
-    size_t         seckey_struct_len;
+    char          sk_comment[COMMENTMAXBYTES];
+    unsigned char chk[crypto_generichash_BYTES];
+    SeckeyStruct *seckey_struct;
+    FILE         *fp;
+    char         *seckey_s;
+    size_t        seckey_s_size;
+    size_t        seckey_struct_len;
 
     if ((fp = fopen(sk_file, "r")) == NULL) {
         exit_err(sk_file);
@@ -379,9 +379,9 @@ verify(PubkeyStruct *pubkey_struct, const char *message_file, const char *sig_fi
 {
     char           trusted_comment[TRUSTEDCOMMENTMAXBYTES];
     unsigned char  global_sig[crypto_sign_BYTES];
-    FILE *         info_fp = stdout;
+    FILE          *info_fp = stdout;
     unsigned char *sig_and_trusted_comment;
-    SigStruct *    sig_struct;
+    SigStruct     *sig_struct;
     unsigned char *message;
     size_t         message_len;
     size_t         trusted_comment_len;
@@ -449,7 +449,7 @@ verify(PubkeyStruct *pubkey_struct, const char *message_file, const char *sig_fi
 static char *
 append_sig_suffix(const char *message_file)
 {
-    char * sig_file;
+    char  *sig_file;
     size_t message_file_len = strlen(message_file);
 
     sig_file = xmalloc(message_file_len + sizeof SIG_SUFFIX);
@@ -463,7 +463,7 @@ append_sig_suffix(const char *message_file)
 static char *
 default_trusted_comment(const char *message_file, int hashed)
 {
-    char * ret;
+    char  *ret;
     time_t ts = time(NULL);
 
     if (asprintf(&ret, "timestamp:%lu\tfile:%s%s", (unsigned long) ts, file_basename(message_file),
@@ -480,10 +480,10 @@ sign(SeckeyStruct *seckey_struct, PubkeyStruct *pubkey_struct, const char *messa
 {
     unsigned char  global_sig[crypto_sign_BYTES];
     SigStruct      sig_struct;
-    FILE *         fp;
+    FILE          *fp;
     unsigned char *message;
     unsigned char *sig_and_trusted_comment;
-    char *         tmp_trusted_comment = NULL;
+    char          *tmp_trusted_comment = NULL;
     size_t         comment_len;
     size_t         trusted_comment_len;
     size_t         message_len;
@@ -612,9 +612,9 @@ static int
 generate(const char *pk_file, const char *sk_file, const char *comment, int force,
          int unencrypted_key)
 {
-    SeckeyStruct * seckey_struct = xsodium_malloc(sizeof(SeckeyStruct));
-    PubkeyStruct  *pubkey_struct = xsodium_malloc(sizeof(PubkeyStruct));
-    FILE          *fp;
+    SeckeyStruct *seckey_struct = xsodium_malloc(sizeof(SeckeyStruct));
+    PubkeyStruct *pubkey_struct = xsodium_malloc(sizeof(PubkeyStruct));
+    FILE         *fp;
 
     abort_on_existing_key_files(pk_file, sk_file, force);
     randombytes_buf(seckey_struct->keynum_sk.keynum, sizeof seckey_struct->keynum_sk.keynum);
@@ -733,8 +733,8 @@ static char *
 sig_config_dir(void)
 {
     const char *config_dir_env;
-    char *      config_dir;
-    char *      home_dir;
+    char       *config_dir;
+    char       *home_dir;
 
     config_dir = NULL;
     if ((config_dir_env = getenv(SIG_DEFAULT_CONFIG_DIR_ENV_VAR)) != NULL) {
@@ -776,18 +776,18 @@ main(int argc, char **argv)
 #ifndef VERIFY_ONLY
     char *sk_file = sig_default_skfile();
 #endif
-    const char *  sig_file        = NULL;
-    const char *  message_file    = NULL;
-    const char *  comment         = NULL;
-    const char *  pubkey_s        = NULL;
-    const char *  trusted_comment = NULL;
+    const char   *sig_file        = NULL;
+    const char   *message_file    = NULL;
+    const char   *comment         = NULL;
+    const char   *pubkey_s        = NULL;
+    const char   *trusted_comment = NULL;
     unsigned char opt_seen[16]    = { 0 };
     int           opt_flag;
-    int           quiet        = 0;
-    int           output       = 0;
-    int           force        = 0;
-    int           allow_legacy = 1;
-    int           sign_legacy  = 0;
+    int           quiet           = 0;
+    int           output          = 0;
+    int           force           = 0;
+    int           allow_legacy    = 1;
+    int           sign_legacy     = 0;
     int           unencrypted_key = 0;
     Action        action          = ACTION_NONE;
 
