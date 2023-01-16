@@ -8,11 +8,11 @@ minisign(1) -- A dead simple tool to sign files and verify signatures.
 
 `minisign` -G [-p pubkey_file] [-s seckey_file] [-W]
 
-`minisign` -R [-s seckey_file] [-W] [-p pubkey_file]
+`minisign` -R [-s seckey_file] [-p pubkey_file]
 
 `minisign` -C [-s seckey_file] [-W]
 
-`minisign` -S [-H] [-x sig_file] [-s seckey_file] [-W] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]
+`minisign` -S [-H] [-x sig_file] [-s seckey_file] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]
 
 `minisign` -V [-x sig_file] [-p pubkey_file | -P pubkey] [-o] [-q] -m file
 
@@ -29,7 +29,7 @@ These options control the actions of `minisign`.
   * `-G`:
     Generate a new key pair
   * `-C`:
-    Change the password of a secret key
+    Change/remove the password of a secret key
   * `-R`:
     Recreate a public key file from a secret key file
   * `-S`:
