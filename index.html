@@ -95,27 +95,30 @@
 
     <pre><code>
 Usage:
-minisign -G [-p pubkey] [-s seckey]
-minisign -S [-l] [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]
-minisign -V [-H] [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file
-minisign -R -s seckey -p pubkeyfile
+minisign -G [-f] [-p pubkey_file] [-s seckey_file] [-W]
+minisign -R [-s seckey_file] [-W] [-p pubkey_file]
+minisign -C [-s seckey_file] [-W]
+minisign -S [-l] [-x sig_file] [-s seckey_file] [-W] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]
+minisign -V [-H] [-x sig_file] [-p pubkey_file | -P pubkey] [-o] [-q] -m file
 
 -G generate a new key pair
--H require input to be prehashed
+-R recreate a public key file from a secret key file
+-C change the password of the secret key
 -S sign files
 -V verify that a signature is valid for a given file
+-H require input to be prehashed
 -l sign using the legacy format
 -m &lt;file&gt; file to sign/verify
 -o combined with -V, output the file content after verification
--p &lt;pubkeyfile&gt; public key file (default: ./minisign.pub)
+-p &lt;pubkey_file&gt; public key file (default: ./minisign.pub)
 -P &lt;pubkey&gt; public key, as a base64 string
--s &lt;seckey&gt; secret key file (default: ~/.minisign/minisign.key)
+-s &lt;seckey_file&gt; secret key file (default: ~/.minisign/minisign.key)
+-W do not encrypt/decrypt the secret key with a password
 -x &lt;sigfile&gt; signature file (default: &lt;file&gt;.minisig)
 -c &lt;comment&gt; add a one-line untrusted comment
 -t &lt;comment&gt; add a one-line trusted comment
 -q quiet mode, suppress output
 -Q pretty quiet mode, only print the trusted comment
--R recreate a public key file from a secret key file
 -f force. Combined with -G, overwrite a previous key pair
 -v display version number
 </code></pre>
@@ -147,7 +150,7 @@ minisign -R -s seckey -p pubkeyfile
     </ul>
 
     <p>Compilation:</p>
-    <pre><code>$ zig build -Drelease-safe</code></pre>
+    <pre><code>$ zig build -Drelease-small</code></pre>
 
     <h3>Using Cmake</h3>
     <p>Dependencies</p>
