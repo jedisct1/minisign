@@ -18,7 +18,7 @@
 #include "minisign.h"
 
 #ifndef VERIFY_ONLY
-static const char *getopt_options = "GSVRHhc:flm:oP:p:qQs:t:vx:";
+static const char *getopt_options = "GSVRHhc:flm:oP:p:qQs:t:vWx:";
 #else
 static const char *getopt_options = "VhHm:oP:p:qQvx:";
 #endif
@@ -55,6 +55,7 @@ usage(void)
         "-P <pubkey>       public key, as a base64 string\n"
 #ifndef VERIFY_ONLY
         "-s <seckey>       secret key file (default: ~/.minisign/minisign.key)\n"
+        "-W                do not encrypt/decrypt the secret key with a password\n"
 #endif
         "-x <sigfile>      signature file (default: <file>.minisig)\n"
 #ifndef VERIFY_ONLY
@@ -307,7 +308,7 @@ seckey_chk(unsigned char chk[crypto_generichash_BYTES], const SeckeyStruct *seck
 
 #ifndef VERIFY_ONLY
 static SeckeyStruct *
-seckey_load(const char *sk_file)
+seckey_load(const char *sk_file, int unencrypted_key)
 {
     char           sk_comment[COMMENTMAXBYTES];
     unsigned char  chk[crypto_generichash_BYTES];
@@ -348,6 +349,9 @@ seckey_load(const char *sk_file)
     }
     if (memcmp(seckey_struct->chk_alg, CHKALG, sizeof seckey_struct->chk_alg) != 0) {
         exit_msg("Unsupported checksum function");
+    }
+    if (unencrypted_key != 0) {
+        return seckey_struct;
     }
     if (get_password(pwd, PASSWORDMAXBYTES, "Password: ") != 0) {
         exit_msg("get_password()");
@@ -612,7 +616,8 @@ write_pk_file(const char *pk_file, const PubkeyStruct *pubkey_struct)
 }
 
 static int
-generate(const char *pk_file, const char *sk_file, const char *comment, int force)
+generate(const char *pk_file, const char *sk_file, const char *comment, int force,
+         int unencrypted_key)
 {
     char *         pwd           = xsodium_malloc(PASSWORDMAXBYTES);
     char *         pwd2          = xsodium_malloc(PASSWORDMAXBYTES);
@@ -633,45 +638,47 @@ generate(const char *pk_file, const char *sk_file, const char *comment, int forc
            sizeof pubkey_struct->keynum_pk.keynum);
     memcpy(pubkey_struct->sig_alg, SIGALG, sizeof pubkey_struct->sig_alg);
 
-    puts("Please enter a password to protect the secret key.\n");
-    if (get_password(pwd, PASSWORDMAXBYTES, "Password: ") != 0 ||
-        get_password(pwd2, PASSWORDMAXBYTES, "Password (one more time): ") != 0) {
-        exit_msg("get_password()");
-    }
-    if (strcmp(pwd, pwd2) != 0) {
-        exit_msg("Passwords don't match");
-    }
-    printf("Deriving a key from the password in order to encrypt the secret key... ");
-    fflush(stdout);
-    stream = xsodium_malloc(sizeof seckey_struct->keynum_sk);
-    randombytes_buf(seckey_struct->kdf_salt, sizeof seckey_struct->kdf_salt);
-    kdf_opslimit = crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE;
-    kdf_memlimit = crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE;
-
-    while (crypto_pwhash_scryptsalsa208sha256(stream, sizeof seckey_struct->keynum_sk, pwd,
-                                              strlen(pwd), seckey_struct->kdf_salt, kdf_opslimit,
-                                              kdf_memlimit) != 0) {
-        kdf_opslimit /= 2;
-        kdf_memlimit /= 2;
-        if (kdf_opslimit < crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_MIN ||
-            kdf_memlimit < crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_MIN) {
-            exit_err("Unable to complete key derivation - More memory would be needed");
+    if (unencrypted_key == 0) {
+        puts("Please enter a password to protect the secret key.\n");
+        if (get_password(pwd, PASSWORDMAXBYTES, "Password: ") != 0 ||
+            get_password(pwd2, PASSWORDMAXBYTES, "Password (one more time): ") != 0) {
+            exit_msg("get_password()");
         }
+        if (strcmp(pwd, pwd2) != 0) {
+            exit_msg("Passwords don't match");
+        }
+        printf("Deriving a key from the password in order to encrypt the secret key... ");
+        fflush(stdout);
+        stream = xsodium_malloc(sizeof seckey_struct->keynum_sk);
+        randombytes_buf(seckey_struct->kdf_salt, sizeof seckey_struct->kdf_salt);
+        kdf_opslimit = crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE;
+        kdf_memlimit = crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE;
+
+        while (crypto_pwhash_scryptsalsa208sha256(stream, sizeof seckey_struct->keynum_sk, pwd,
+                                                  strlen(pwd), seckey_struct->kdf_salt,
+                                                  kdf_opslimit, kdf_memlimit) != 0) {
+            kdf_opslimit /= 2;
+            kdf_memlimit /= 2;
+            if (kdf_opslimit < crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_MIN ||
+                kdf_memlimit < crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_MIN) {
+                exit_err("Unable to complete key derivation - More memory would be needed");
+            }
+        }
+        sodium_free(pwd);
+        sodium_free(pwd2);
+        if (kdf_memlimit < crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE) {
+            fprintf(stderr,
+                    "Warning: due to limited memory the KDF used less "
+                    "memory than the default\n");
+        }
+        le64_store(seckey_struct->kdf_opslimit_le, kdf_opslimit);
+        le64_store(seckey_struct->kdf_memlimit_le, kdf_memlimit);
+        seckey_chk(seckey_struct->keynum_sk.chk, seckey_struct);
+        xor_buf((unsigned char *) (void *) &seckey_struct->keynum_sk, stream,
+                sizeof seckey_struct->keynum_sk);
+        sodium_free(stream);
+        puts("done\n");
     }
-    sodium_free(pwd);
-    sodium_free(pwd2);
-    if (kdf_memlimit < crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE) {
-        fprintf(stderr,
-                "Warning: due to limited memory the KDF used less "
-                "memory than the default\n");
-    }
-    le64_store(seckey_struct->kdf_opslimit_le, kdf_opslimit);
-    le64_store(seckey_struct->kdf_memlimit_le, kdf_memlimit);
-    seckey_chk(seckey_struct->keynum_sk.chk, seckey_struct);
-    xor_buf((unsigned char *) (void *) &seckey_struct->keynum_sk, stream,
-            sizeof seckey_struct->keynum_sk);
-    sodium_free(stream);
-    puts("done\n");
 
     abort_on_existing_key_files(pk_file, sk_file, force);
     if (basedir_create_useronly(sk_file) != 0) {
@@ -699,7 +706,7 @@ generate(const char *pk_file, const char *sk_file, const char *comment, int forc
 }
 
 static int
-recreate_pk(const char *pk_file, const char *sk_file, int force)
+recreate_pk(const char *pk_file, const char *sk_file, int force, int unencrypted_key)
 {
     SeckeyStruct *seckey_struct;
     PubkeyStruct  pubkey_struct;
@@ -707,7 +714,7 @@ recreate_pk(const char *pk_file, const char *sk_file, int force)
     if (force == 0) {
         abort_on_existing_key_file(pk_file);
     }
-    if ((seckey_struct = seckey_load(sk_file)) == NULL) {
+    if ((seckey_struct = seckey_load(sk_file, unencrypted_key)) == NULL) {
         return -1;
     }
     memcpy(pubkey_struct.sig_alg, seckey_struct->sig_alg, sizeof pubkey_struct.sig_alg);
@@ -787,7 +794,8 @@ main(int argc, char **argv)
     int           force        = 0;
     int           allow_legacy = 1;
     int           sign_legacy  = 0;
-    Action        action       = ACTION_NONE;
+    int           unencrypted_key = 0;
+    Action        action          = ACTION_NONE;
 
     while ((opt_flag = getopt(argc, argv, getopt_options)) != -1) {
         switch (opt_flag) {
@@ -859,6 +867,9 @@ main(int argc, char **argv)
         case 't':
             trusted_comment = optarg;
             break;
+        case 'W':
+            unencrypted_key = 1;
+            break;
 #endif
         case 'x':
             sig_file = optarg;
@@ -890,7 +901,7 @@ main(int argc, char **argv)
         if (pk_file == NULL) {
             pk_file = SIG_DEFAULT_PKFILE;
         }
-        return generate(pk_file, sk_file, comment, force) != 0;
+        return generate(pk_file, sk_file, comment, force, unencrypted_key) != 0;
     case ACTION_SIGN:
         if (message_file == NULL) {
             usage();
@@ -902,7 +913,7 @@ main(int argc, char **argv)
             comment = DEFAULT_COMMENT;
         }
         return sign_all(
-                   seckey_load(sk_file),
+                   seckey_load(sk_file, unencrypted_key),
                    ((pk_file != NULL || pubkey_s != NULL) ? pubkey_load(pk_file, pubkey_s) : NULL),
                    message_file, (const char **) &argv[optind], argc - optind, sig_file, comment,
                    trusted_comment, sign_legacy) != 0;
@@ -910,7 +921,7 @@ main(int argc, char **argv)
         if (pk_file == NULL) {
             pk_file = SIG_DEFAULT_PKFILE;
         }
-        return recreate_pk(pk_file, sk_file, force) != 0;
+        return recreate_pk(pk_file, sk_file, force, unencrypted_key) != 0;
 #endif
     case ACTION_VERIFY:
         if (message_file == NULL) {
