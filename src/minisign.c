@@ -32,22 +32,19 @@ usage(void)
         "Usage:\n"
 #ifndef VERIFY_ONLY
         "minisign -G [-f] [-p pubkey_file] [-s seckey_file] [-W]\n"
+        "minisign -R [-s seckey_file] [-W] [-p pubkey_file]\n"
         "minisign -S [-l] [-x sig_file] [-s seckey_file] [-W] [-c untrusted_comment]\n"
         "            [-t trusted_comment] -m file [file ...]\n"
 #endif
         "minisign -V [-H] [-x sig_file] [-p pubkey_file | -P pubkey] [-o] [-q] -m file\n"
-#ifndef VERIFY_ONLY
-        "minisign -R [-s seckey_file] [-W] [-p pubkey_file]\n"
-#endif
         "\n"
 #ifndef VERIFY_ONLY
         "-G                generate a new key pair\n"
-#endif
-        "-H                require input to be prehashed\n"
-#ifndef VERIFY_ONLY
+        "-R                recreate a public key file from a secret key file\n"
         "-S                sign files\n"
 #endif
         "-V                verify that a signature is valid for a given file\n"
+        "-H                require input to be prehashed\n"
         "-l                sign using the legacy format\n"
         "-m <file>         file to sign/verify\n"
         "-o                combined with -V, output the file content after verification\n"
@@ -64,9 +61,6 @@ usage(void)
 #endif
         "-q                quiet mode, suppress output\n"
         "-Q                pretty quiet mode, only print the trusted comment\n"
-#ifndef VERIFY_ONLY
-        "-R                recreate a public key file from a secret key file\n"
-#endif
         "-f                force. Combined with -G, overwrite a previous key pair\n"
         "-v                display version number\n");
     exit(2);

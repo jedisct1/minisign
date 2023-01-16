@@ -8,11 +8,11 @@ minisign(1) -- A dead simple tool to sign files and verify signatures.
 
 `minisign` -G [-p pubkey_file] [-s seckey_file] [-W]
 
+`minisign` -R [-s seckey_file] [-W] [-p pubkey_file]
+
 `minisign` -S [-H] [-x sig_file] [-s seckey_file] [-W] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]
 
 `minisign` -V [-x sig_file] [-p pubkey_file | -P pubkey] [-o] [-q] -m file
-
-`minisign` -R [-s seckey_file] [-W] [-p pubkey_file]
 
 ## DESCRIPTION
 
@@ -26,10 +26,16 @@ These options control the actions of `minisign`.
 
   * `-G`:
     Generate a new key pair
+  * `-R`:
+    Recreate a public key file from a secret key file
   * `-S`:
     Sign files
   * `-V`:
     Verify that a signature is valid for a given file
+  * `-H`:
+    Requires the input to be prehashed
+  * `-l`:
+    Sign using the legacy format
   * `-m <file>`:
     File to sign/verify
   * `-o`:
@@ -40,22 +46,18 @@ These options control the actions of `minisign`.
     Public key, as a base64 string
   * `-s <seckey_file>`:
     Secret key file (default: ~/.minisign/minisign.key)
+  * `-W`:
+    Do not encrypt/decrypt the secret key with a password
   * `-x <sig_file>`:
     Signature file (default: &lt;file&gt;.minisig)
   * `-c <comment>`:
     Add a one-line untrusted comment
   * `-t <comment>`:
     Add a one-line trusted comment
-  * `-l`:
-    Sign using the legacy format
   * `-q`:
     Quiet mode, suppress output
-  * `-H`:
-    Requires the input to be prehashed
   * `-Q`:
     Pretty quiet mode, only print the trusted comment
-  * `-R`:
-    Recreate a public key file from a secret key file
   * `-f`:
     Force. Combined with -G, overwrite a previous key pair
   * `-v`:

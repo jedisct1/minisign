@@ -10,13 +10,13 @@
 \fBminisign\fR \-G [\-p pubkey_file] [\-s seckey_file] [\-W]
 .
 .P
+\fBminisign\fR \-R [\-s seckey_file] [\-W] [\-p pubkey_file]
+.
+.P
 \fBminisign\fR \-S [\-H] [\-x sig_file] [\-s seckey_file] [\-W] [\-c untrusted_comment] [\-t trusted_comment] \-m file [file \.\.\.]
 .
 .P
 \fBminisign\fR \-V [\-x sig_file] [\-p pubkey_file | \-P pubkey] [\-o] [\-q] \-m file
-.
-.P
-\fBminisign\fR \-R [\-s seckey_file] [\-W] [\-p pubkey_file]
 .
 .SH "DESCRIPTION"
 \fBMinisign\fR is a dead simple tool to sign files and verify signatures\.
@@ -32,12 +32,24 @@ These options control the actions of \fBminisign\fR\.
 Generate a new key pair
 .
 .TP
+\fB\-R\fR
+Recreate a public key file from a secret key file
+.
+.TP
 \fB\-S\fR
 Sign files
 .
 .TP
 \fB\-V\fR
 Verify that a signature is valid for a given file
+.
+.TP
+\fB\-H\fR
+Requires the input to be prehashed
+.
+.TP
+\fB\-l\fR
+Sign using the legacy format
 .
 .TP
 \fB\-m <file>\fR
@@ -60,6 +72,10 @@ Public key, as a base64 string
 Secret key file (default: ~/\.minisign/minisign\.key)
 .
 .TP
+\fB\-W\fR
+Do not encrypt/decrypt the secret key with a password
+.
+.TP
 \fB\-x <sig_file>\fR
 Signature file (default: <file>\.minisig)
 .
@@ -72,24 +88,12 @@ Add a one\-line untrusted comment
 Add a one\-line trusted comment
 .
 .TP
-\fB\-l\fR
-Sign using the legacy format
-.
-.TP
 \fB\-q\fR
 Quiet mode, suppress output
 .
 .TP
-\fB\-H\fR
-Requires the input to be prehashed
-.
-.TP
 \fB\-Q\fR
 Pretty quiet mode, only print the trusted comment
-.
-.TP
-\fB\-R\fR
-Recreate a public key file from a secret key file
 .
 .TP
 \fB\-f\fR
