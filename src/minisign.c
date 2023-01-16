@@ -290,7 +290,7 @@ pubkey_load(const char *pk_file, const char *pubkey_s)
 }
 
 static void
-seckey_chk(unsigned char chk[crypto_generichash_BYTES], const SeckeyStruct *seckey_struct)
+seckey_compute_chk(unsigned char chk[crypto_generichash_BYTES], const SeckeyStruct *seckey_struct)
 {
     crypto_generichash_state hs;
 
@@ -304,7 +304,7 @@ seckey_chk(unsigned char chk[crypto_generichash_BYTES], const SeckeyStruct *seck
 
 #ifndef VERIFY_ONLY
 static void
-decrypt_key(SeckeyStruct *const seckey_struct, const unsigned char chk[crypto_generichash_BYTES])
+decrypt_key(SeckeyStruct *const seckey_struct, unsigned char chk[crypto_generichash_BYTES])
 {
     char          *pwd = xsodium_malloc(PASSWORDMAXBYTES);
     unsigned char *stream;
@@ -326,11 +326,11 @@ decrypt_key(SeckeyStruct *const seckey_struct, const unsigned char chk[crypto_ge
             sizeof seckey_struct->keynum_sk);
     sodium_free(stream);
     puts("done\n");
-    seckey_chk(chk, seckey_struct);
-    if (memcmp(chk, seckey_struct->keynum_sk.chk, sizeof chk) != 0) {
+    seckey_compute_chk(chk, seckey_struct);
+    if (memcmp(chk, seckey_struct->keynum_sk.chk, crypto_generichash_BYTES) != 0) {
         exit_msg("Wrong password for that key");
     }
-    sodium_memzero(chk, sizeof chk);
+    sodium_memzero(chk, crypto_generichash_BYTES);
 }
 
 static void
@@ -376,7 +376,7 @@ encrypt_key(SeckeyStruct *const seckey_struct)
     }
     le64_store(seckey_struct->kdf_opslimit_le, kdf_opslimit);
     le64_store(seckey_struct->kdf_memlimit_le, kdf_memlimit);
-    seckey_chk(seckey_struct->keynum_sk.chk, seckey_struct);
+    seckey_compute_chk(seckey_struct->keynum_sk.chk, seckey_struct);
     xor_buf((unsigned char *) (void *) &seckey_struct->keynum_sk, stream,
             sizeof seckey_struct->keynum_sk);
     sodium_free(stream);
