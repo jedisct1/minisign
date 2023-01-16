@@ -96,14 +96,14 @@
     <pre><code>
 Usage:
 minisign -G [-f] [-p pubkey_file] [-s seckey_file] [-W]
-minisign -R [-s seckey_file] [-W] [-p pubkey_file]
+minisign -R [-s seckey_file] [-p pubkey_file]
 minisign -C [-s seckey_file] [-W]
-minisign -S [-l] [-x sig_file] [-s seckey_file] [-W] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]
+minisign -S [-l] [-x sig_file] [-s seckey_file] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]
 minisign -V [-H] [-x sig_file] [-p pubkey_file | -P pubkey] [-o] [-q] -m file
 
 -G generate a new key pair
 -R recreate a public key file from a secret key file
--C change the password of the secret key
+-C change/remove the password of the secret key
 -S sign files
 -V verify that a signature is valid for a given file
 -H require input to be prehashed
