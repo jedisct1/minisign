@@ -1,22 +1,22 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "MINISIGN" "1" "October 2021" "" ""
+.TH "MINISIGN" "1" "January 2023" "" ""
 .
 .SH "NAME"
 \fBminisign\fR \- A dead simple tool to sign files and verify signatures\.
 .
 .SH "SYNOPSIS"
-\fBminisign\fR \-G [\-p pubkey] [\-s seckey]
+\fBminisign\fR \-G [\-p pubkey_file] [\-s seckey_file] [\-W]
 .
 .P
-\fBminisign\fR \-S [\-H] [\-x sigfile] [\-s seckey] [\-c untrusted_comment] [\-t trusted_comment] \-m file [file \.\.\.]
+\fBminisign\fR \-S [\-H] [\-x sig_file] [\-s seckey_file] [\-W] [\-c untrusted_comment] [\-t trusted_comment] \-m file [file \.\.\.]
 .
 .P
-\fBminisign\fR \-V [\-x sigfile] [\-p pubkeyfile | \-P pubkey] [\-o] [\-q] \-m file
+\fBminisign\fR \-V [\-x sig_file] [\-p pubkey_file | \-P pubkey] [\-o] [\-q] \-m file
 .
 .P
-\fBminisign\fR \-R \-s seckey \-p pubkeyfile
+\fBminisign\fR \-R [\-s seckey_file] [\-W] [\-p pubkey_file]
 .
 .SH "DESCRIPTION"
 \fBMinisign\fR is a dead simple tool to sign files and verify signatures\.
@@ -48,7 +48,7 @@ File to sign/verify
 Combined with \-V, output the file content after verification
 .
 .TP
-\fB\-p <pubkeyfile>\fR
+\fB\-p <pubkey_file>\fR
 Public key file (default: \./minisign\.pub)
 .
 .TP
@@ -56,11 +56,11 @@ Public key file (default: \./minisign\.pub)
 Public key, as a base64 string
 .
 .TP
-\fB\-s <seckey>\fR
+\fB\-s <seckey_file>\fR
 Secret key file (default: ~/\.minisign/minisign\.key)
 .
 .TP
-\fB\-x <sigfile>\fR
+\fB\-x <sig_file>\fR
 Signature file (default: <file>\.minisig)
 .
 .TP

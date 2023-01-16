@@ -31,14 +31,13 @@ usage(void)
     puts(
         "Usage:\n"
 #ifndef VERIFY_ONLY
-        "minisign -G [-f] [-p pubkeyfile] [-s seckeyfile]\n"
-        "minisign -S [-l] [-x sigfile] [-s seckeyfile] [-c untrusted_comment] [-t trusted_comment] "
-        "-m "
-        "file [file ...]\n"
+        "minisign -G [-f] [-p pubkey_file] [-s seckey_file] [-W]\n"
+        "minisign -S [-l] [-x sig_file] [-s seckey_file] [-W] [-c untrusted_comment]\n"
+        "            [-t trusted_comment] -m file [file ...]\n"
 #endif
-        "minisign -V [-H] [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file\n"
+        "minisign -V [-H] [-x sig_file] [-p pubkey_file | -P pubkey] [-o] [-q] -m file\n"
 #ifndef VERIFY_ONLY
-        "minisign -R [-s seckeyfile] [-p pubkeyfile]\n"
+        "minisign -R [-s seckey_file] [-W] [-p pubkey_file]\n"
 #endif
         "\n"
 #ifndef VERIFY_ONLY
@@ -52,10 +51,10 @@ usage(void)
         "-l                sign using the legacy format\n"
         "-m <file>         file to sign/verify\n"
         "-o                combined with -V, output the file content after verification\n"
-        "-p <pubkeyfile>   public key file (default: ./minisign.pub)\n"
+        "-p <pubkey_file>  public key file (default: ./minisign.pub)\n"
         "-P <pubkey>       public key, as a base64 string\n"
 #ifndef VERIFY_ONLY
-        "-s <seckeyfile>   secret key file (default: ~/.minisign/minisign.key)\n"
+        "-s <seckey_file>  secret key file (default: ~/.minisign/minisign.key)\n"
         "-W                do not encrypt/decrypt the secret key with a password\n"
 #endif
         "-x <sigfile>      signature file (default: <file>.minisig)\n"

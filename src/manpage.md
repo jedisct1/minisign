@@ -1,18 +1,18 @@
 <!---
-This man page can be generated using ronn - http://rtomayko.github.com/ronn/
+This man page can be generated using ronn - https://rtomayko.github.io/ronn/
 -->
 minisign(1) -- A dead simple tool to sign files and verify signatures.
 ======================================================================
 
 ## SYNOPSIS
 
-`minisign` -G [-p pubkey] [-s seckey]
+`minisign` -G [-p pubkey_file] [-s seckey_file] [-W]
 
-`minisign` -S [-H] [-x sigfile] [-s seckey] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]
+`minisign` -S [-H] [-x sig_file] [-s seckey_file] [-W] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]
 
-`minisign` -V [-x sigfile] [-p pubkeyfile | -P pubkey] [-o] [-q] -m file
+`minisign` -V [-x sig_file] [-p pubkey_file | -P pubkey] [-o] [-q] -m file
 
-`minisign` -R -s seckey -p pubkeyfile
+`minisign` -R [-s seckey_file] [-W] [-p pubkey_file]
 
 ## DESCRIPTION
 
@@ -34,13 +34,13 @@ These options control the actions of `minisign`.
     File to sign/verify
   * `-o`:
     Combined with -V, output the file content after verification
-  * `-p <pubkeyfile>`:
+  * `-p <pubkey_file>`:
     Public key file (default: ./minisign.pub)
   * `-P <pubkey>`:
     Public key, as a base64 string
-  * `-s <seckey>`:
+  * `-s <seckey_file>`:
     Secret key file (default: ~/.minisign/minisign.key)
-  * `-x <sigfile>`:
+  * `-x <sig_file>`:
     Signature file (default: &lt;file&gt;.minisig)
   * `-c <comment>`:
     Add a one-line untrusted comment
