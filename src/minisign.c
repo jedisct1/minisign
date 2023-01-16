@@ -748,7 +748,6 @@ update_password(const char *sk_file, int unencrypted_key)
     SeckeyStruct *seckey_struct;
     char         *sk_comment_line;
     FILE         *fp;
-    size_t        sk_comment_line_len;
 
     if (unencrypted_key != 0) {
         printf("Key encryption for [%s] is going to be removed.\n", sk_file);
