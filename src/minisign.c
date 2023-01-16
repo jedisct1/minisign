@@ -42,7 +42,7 @@ usage(void)
 #ifndef VERIFY_ONLY
         "-G                generate a new key pair\n"
         "-R                recreate a public key file from a secret key file\n"
-        "-C                change the password of the secret key\n"
+        "-C                change/remove the password of the secret key\n"
         "-S                sign files\n"
 #endif
         "-V                verify that a signature is valid for a given file\n"
@@ -750,6 +750,9 @@ update_password(const char *sk_file, int unencrypted_key)
     FILE         *fp;
     size_t        sk_comment_line_len;
 
+    if (unencrypted_key != 0) {
+        printf("Key encryption for [%s] is going to be removed.\n", sk_file);
+    }
     sk_comment_line = xsodium_malloc(COMMENTMAXBYTES);
     if ((seckey_struct = seckey_load(sk_file, sk_comment_line)) == NULL) {
         return -1;
@@ -758,8 +761,6 @@ update_password(const char *sk_file, int unencrypted_key)
            sizeof seckey_struct->kdf_alg);
     if (unencrypted_key == 0) {
         encrypt_key(seckey_struct);
-    } else {
-        printf("You are about to remove key encryption for [%s].\n", sk_file);
     }
     if ((fp = fopen_create_useronly(sk_file)) == NULL) {
         exit_err(sk_file);
@@ -771,8 +772,11 @@ update_password(const char *sk_file, int unencrypted_key)
     xfclose(fp);
     sodium_free(seckey_struct);
 
-    puts("Password updated.");
-
+    if (unencrypted_key == 0) {
+        puts("Password updated.");
+    } else {
+        puts("Password removed.");
+    }
     return 0;
 }
 
