@@ -13,6 +13,9 @@
 \fBminisign\fR \-R [\-s seckey_file] [\-W] [\-p pubkey_file]
 .
 .P
+\fBminisign\fR \-C [\-s seckey_file] [\-W]
+.
+.P
 \fBminisign\fR \-S [\-H] [\-x sig_file] [\-s seckey_file] [\-W] [\-c untrusted_comment] [\-t trusted_comment] \-m file [file \.\.\.]
 .
 .P
@@ -30,6 +33,10 @@ These options control the actions of \fBminisign\fR\.
 .TP
 \fB\-G\fR
 Generate a new key pair
+.
+.TP
+\fB\-C\fR
+Change the password of a secret key
 .
 .TP
 \fB\-R\fR

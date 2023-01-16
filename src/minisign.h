@@ -58,7 +58,8 @@ typedef enum Action_ {
     ACTION_GENERATE,
     ACTION_SIGN,
     ACTION_VERIFY,
-    ACTION_RECREATE_PK
+    ACTION_RECREATE_PK,
+    ACTION_UPDATE_PASSWORD
 } Action;
 
 #endif

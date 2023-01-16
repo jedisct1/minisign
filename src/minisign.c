@@ -18,7 +18,7 @@
 #include "minisign.h"
 
 #ifndef VERIFY_ONLY
-static const char *getopt_options = "GSVRHhc:flm:oP:p:qQs:t:vWx:";
+static const char *getopt_options = "CGSVRHhc:flm:oP:p:qQs:t:vWx:";
 #else
 static const char *getopt_options = "VhHm:oP:p:qQvx:";
 #endif
@@ -33,6 +33,7 @@ usage(void)
 #ifndef VERIFY_ONLY
         "minisign -G [-f] [-p pubkey_file] [-s seckey_file] [-W]\n"
         "minisign -R [-s seckey_file] [-W] [-p pubkey_file]\n"
+        "minisign -C [-s seckey_file] [-W]\n"
         "minisign -S [-l] [-x sig_file] [-s seckey_file] [-W] [-c untrusted_comment]\n"
         "            [-t trusted_comment] -m file [file ...]\n"
 #endif
@@ -41,6 +42,7 @@ usage(void)
 #ifndef VERIFY_ONLY
         "-G                generate a new key pair\n"
         "-R                recreate a public key file from a secret key file\n"
+        "-C                change the password of the secret key\n"
         "-S                sign files\n"
 #endif
         "-V                verify that a signature is valid for a given file\n"
@@ -382,9 +384,9 @@ encrypt_key(SeckeyStruct *const seckey_struct)
 }
 
 static SeckeyStruct *
-seckey_load(const char *sk_file, char *const sk_comment_copy, int unencrypted_key)
+seckey_load(const char *sk_file, char *const sk_comment_line, int unencrypted_key)
 {
-    char          sk_comment[COMMENTMAXBYTES];
+    char          sk_comment_line_buf[COMMENTMAXBYTES];
     unsigned char chk[crypto_generichash_BYTES];
     SeckeyStruct *seckey_struct;
     FILE         *fp;
@@ -395,13 +397,13 @@ seckey_load(const char *sk_file, char *const sk_comment_copy, int unencrypted_ke
     if ((fp = fopen(sk_file, "r")) == NULL) {
         exit_err(sk_file);
     }
-    if (fgets(sk_comment, (int) sizeof sk_comment, fp) == NULL) {
+    if (fgets(sk_comment_line_buf, (int) sizeof sk_comment_line_buf, fp) == NULL) {
         exit_msg("Error while loading the secret key file");
     }
-    if (sk_comment_copy != NULL) {
-        memcpy(sk_comment_copy, sk_comment, sizeof sk_comment);
+    if (sk_comment_line != NULL) {
+        memcpy(sk_comment_line, sk_comment_line_buf, sizeof sk_comment_line_buf);
     }
-    sodium_memzero(sk_comment, sizeof sk_comment);
+    sodium_memzero(sk_comment_line_buf, sizeof sk_comment_line_buf);
     seckey_s_size = B64_MAX_LEN_FROM_BIN_LEN(sizeof *seckey_struct) + 2U;
     seckey_s      = xsodium_malloc(seckey_s_size);
     seckey_struct = xsodium_malloc(sizeof *seckey_struct);
@@ -739,6 +741,39 @@ recreate_pk(const char *pk_file, const char *sk_file, int force, int unencrypted
     return 0;
 }
 
+static int
+update_password(const char *sk_file, int unencrypted_key)
+{
+    SeckeyStruct *seckey_struct;
+    char         *sk_comment_line;
+    FILE         *fp;
+    size_t        sk_comment_line_len;
+
+    sk_comment_line = xsodium_malloc(COMMENTMAXBYTES);
+    if (unencrypted_key == 0) {
+        printf("Enter the current password for [%s].\n", sk_file);
+    } else {
+        printf("Assuming the secret key in [%s] is unencrypted.\n", sk_file);
+    }
+    if ((seckey_struct = seckey_load(sk_file, sk_comment_line, unencrypted_key)) == NULL) {
+        return -1;
+    }
+    encrypt_key(seckey_struct);
+    if ((fp = fopen_create_useronly(sk_file)) == NULL) {
+        exit_err(sk_file);
+    }
+    trim(sk_comment_line);
+    xfprintf(fp, "%s\n", sk_comment_line);
+    sodium_free(sk_comment_line);
+    xfput_b64(fp, (unsigned char *) (void *) seckey_struct, sizeof *seckey_struct);
+    xfclose(fp);
+    sodium_free(seckey_struct);
+
+    puts("Password updated.");
+
+    return 0;
+}
+
 #endif
 
 #ifndef VERIFY_ONLY
@@ -818,6 +853,12 @@ main(int argc, char **argv)
                 usage();
             }
             action = ACTION_SIGN;
+            break;
+        case 'C':
+            if (action != ACTION_NONE && action != ACTION_UPDATE_PASSWORD) {
+                usage();
+            }
+            action = ACTION_UPDATE_PASSWORD;
             break;
         case 'R':
             if (action != ACTION_NONE && action != ACTION_RECREATE_PK) {
@@ -929,6 +970,8 @@ main(int argc, char **argv)
             pk_file = SIG_DEFAULT_PKFILE;
         }
         return recreate_pk(pk_file, sk_file, force, unencrypted_key) != 0;
+    case ACTION_UPDATE_PASSWORD:
+        return update_password(sk_file, unencrypted_key) != 0;
 #endif
     case ACTION_VERIFY:
         if (message_file == NULL) {
