@@ -32,9 +32,9 @@ usage(void)
         "Usage:\n"
 #ifndef VERIFY_ONLY
         "minisign -G [-f] [-p pubkey_file] [-s seckey_file] [-W]\n"
-        "minisign -R [-s seckey_file] [-W] [-p pubkey_file]\n"
+        "minisign -R [-s seckey_file] [-p pubkey_file]\n"
         "minisign -C [-s seckey_file] [-W]\n"
-        "minisign -S [-l] [-x sig_file] [-s seckey_file] [-W] [-c untrusted_comment]\n"
+        "minisign -S [-l] [-x sig_file] [-s seckey_file] [-c untrusted_comment]\n"
         "            [-t trusted_comment] -m file [file ...]\n"
 #endif
         "minisign -V [-H] [-x sig_file] [-p pubkey_file | -P pubkey] [-o] [-q] -m file\n"
@@ -384,7 +384,7 @@ encrypt_key(SeckeyStruct *const seckey_struct)
 }
 
 static SeckeyStruct *
-seckey_load(const char *sk_file, char *const sk_comment_line, int unencrypted_key)
+seckey_load(const char *sk_file, char *const sk_comment_line)
 {
     char          sk_comment_line_buf[COMMENTMAXBYTES];
     unsigned char chk[crypto_generichash_BYTES];
@@ -421,14 +421,13 @@ seckey_load(const char *sk_file, char *const sk_comment_line, int unencrypted_ke
     if (memcmp(seckey_struct->sig_alg, SIGALG, sizeof seckey_struct->sig_alg) != 0) {
         exit_msg("Unsupported signature algorithm");
     }
-    if (memcmp(seckey_struct->kdf_alg, KDFALG, sizeof seckey_struct->kdf_alg) != 0) {
-        exit_msg("Unsupported key derivation function");
-    }
     if (memcmp(seckey_struct->chk_alg, CHKALG, sizeof seckey_struct->chk_alg) != 0) {
         exit_msg("Unsupported checksum function");
     }
-    if (unencrypted_key == 0) {
+    if (memcmp(seckey_struct->kdf_alg, KDFALG, sizeof seckey_struct->kdf_alg) == 0) {
         decrypt_key(seckey_struct, chk);
+    } else if (memcmp(seckey_struct->kdf_alg, KDFNONE, sizeof seckey_struct->kdf_alg) != 0) {
+        exit_msg("Unsupported key derivation function");
     }
     return seckey_struct;
 }
@@ -680,8 +679,10 @@ generate(const char *pk_file, const char *sk_file, const char *comment, int forc
     abort_on_existing_key_files(pk_file, sk_file, force);
     randombytes_buf(seckey_struct->keynum_sk.keynum, sizeof seckey_struct->keynum_sk.keynum);
     crypto_sign_keypair(pubkey_struct->keynum_pk.pk, seckey_struct->keynum_sk.sk);
+    memset(seckey_struct, 0, sizeof(SeckeyStruct));
     memcpy(seckey_struct->sig_alg, SIGALG, sizeof seckey_struct->sig_alg);
-    memcpy(seckey_struct->kdf_alg, KDFALG, sizeof seckey_struct->kdf_alg);
+    memcpy(seckey_struct->kdf_alg, unencrypted_key ? KDFNONE : KDFALG,
+           sizeof seckey_struct->kdf_alg);
     memcpy(seckey_struct->chk_alg, CHKALG, sizeof seckey_struct->chk_alg);
     memcpy(pubkey_struct->keynum_pk.keynum, seckey_struct->keynum_sk.keynum,
            sizeof pubkey_struct->keynum_pk.keynum);
@@ -715,7 +716,7 @@ generate(const char *pk_file, const char *sk_file, const char *comment, int forc
 }
 
 static int
-recreate_pk(const char *pk_file, const char *sk_file, int force, int unencrypted_key)
+recreate_pk(const char *pk_file, const char *sk_file, int force)
 {
     SeckeyStruct *seckey_struct;
     PubkeyStruct  pubkey_struct;
@@ -723,7 +724,7 @@ recreate_pk(const char *pk_file, const char *sk_file, int force, int unencrypted
     if (force == 0) {
         abort_on_existing_key_file(pk_file);
     }
-    if ((seckey_struct = seckey_load(sk_file, NULL, unencrypted_key)) == NULL) {
+    if ((seckey_struct = seckey_load(sk_file, NULL)) == NULL) {
         return -1;
     }
     memcpy(pubkey_struct.sig_alg, seckey_struct->sig_alg, sizeof pubkey_struct.sig_alg);
@@ -750,15 +751,16 @@ update_password(const char *sk_file, int unencrypted_key)
     size_t        sk_comment_line_len;
 
     sk_comment_line = xsodium_malloc(COMMENTMAXBYTES);
-    if (unencrypted_key == 0) {
-        printf("Enter the current password for [%s].\n", sk_file);
-    } else {
-        printf("Assuming the secret key in [%s] is unencrypted.\n", sk_file);
-    }
-    if ((seckey_struct = seckey_load(sk_file, sk_comment_line, unencrypted_key)) == NULL) {
+    if ((seckey_struct = seckey_load(sk_file, sk_comment_line)) == NULL) {
         return -1;
     }
-    encrypt_key(seckey_struct);
+    memcpy(seckey_struct->kdf_alg, unencrypted_key ? KDFNONE : KDFALG,
+           sizeof seckey_struct->kdf_alg);
+    if (unencrypted_key == 0) {
+        encrypt_key(seckey_struct);
+    } else {
+        printf("You are about to remove key encryption for [%s].\n", sk_file);
+    }
     if ((fp = fopen_create_useronly(sk_file)) == NULL) {
         exit_err(sk_file);
     }
@@ -961,7 +963,7 @@ main(int argc, char **argv)
             comment = DEFAULT_COMMENT;
         }
         return sign_all(
-                   seckey_load(sk_file, NULL, unencrypted_key),
+                   seckey_load(sk_file, NULL),
                    ((pk_file != NULL || pubkey_s != NULL) ? pubkey_load(pk_file, pubkey_s) : NULL),
                    message_file, (const char **) &argv[optind], argc - optind, sig_file, comment,
                    trusted_comment, sign_legacy) != 0;
@@ -969,7 +971,7 @@ main(int argc, char **argv)
         if (pk_file == NULL) {
             pk_file = SIG_DEFAULT_PKFILE;
         }
-        return recreate_pk(pk_file, sk_file, force, unencrypted_key) != 0;
+        return recreate_pk(pk_file, sk_file, force) != 0;
     case ACTION_UPDATE_PASSWORD:
         return update_password(sk_file, unencrypted_key) != 0;
 #endif

@@ -9,6 +9,7 @@
 #define SIGALG                         "Ed"
 #define SIGALG_HASHED                  "ED"
 #define KDFALG                         "Sc"
+#define KDFNONE                        "\0\0"
 #define CHKALG                         "B2"
 #define COMMENT_PREFIX                 "untrusted comment: "
 #define DEFAULT_COMMENT                "signature from minisign secret key"
