@@ -301,6 +301,86 @@ seckey_chk(unsigned char chk[crypto_generichash_BYTES], const SeckeyStruct *seck
 }
 
 #ifndef VERIFY_ONLY
+static void
+decrypt_key(SeckeyStruct *const seckey_struct, const unsigned char chk[crypto_generichash_BYTES])
+{
+    char          *pwd = xsodium_malloc(PASSWORDMAXBYTES);
+    unsigned char *stream;
+
+    if (get_password(pwd, PASSWORDMAXBYTES, "Password: ") != 0) {
+        exit_msg("get_password()");
+    }
+    printf("Deriving a key from the password and decrypting the secret key... ");
+    fflush(stdout);
+    stream = xsodium_malloc(sizeof seckey_struct->keynum_sk);
+    if (crypto_pwhash_scryptsalsa208sha256(stream, sizeof seckey_struct->keynum_sk, pwd,
+                                           strlen(pwd), seckey_struct->kdf_salt,
+                                           le64_load(seckey_struct->kdf_opslimit_le),
+                                           le64_load(seckey_struct->kdf_memlimit_le)) != 0) {
+        exit_err("Unable to complete key derivation - This probably means out of memory");
+    }
+    sodium_free(pwd);
+    xor_buf((unsigned char *) (void *) &seckey_struct->keynum_sk, stream,
+            sizeof seckey_struct->keynum_sk);
+    sodium_free(stream);
+    puts("done\n");
+    seckey_chk(chk, seckey_struct);
+    if (memcmp(chk, seckey_struct->keynum_sk.chk, sizeof chk) != 0) {
+        exit_msg("Wrong password for that key");
+    }
+    sodium_memzero(chk, sizeof chk);
+}
+
+static void
+encrypt_key(SeckeyStruct *const seckey_struct)
+{
+    char          *pwd  = xsodium_malloc(PASSWORDMAXBYTES);
+    char          *pwd2 = xsodium_malloc(PASSWORDMAXBYTES);
+    unsigned char *stream;
+    unsigned long  kdf_memlimit;
+    unsigned long  kdf_opslimit;
+
+    puts("Please enter a password to protect the secret key.\n");
+    if (get_password(pwd, PASSWORDMAXBYTES, "Password: ") != 0 ||
+        get_password(pwd2, PASSWORDMAXBYTES, "Password (one more time): ") != 0) {
+        exit_msg("get_password()");
+    }
+    if (strcmp(pwd, pwd2) != 0) {
+        exit_msg("Passwords don't match");
+    }
+    printf("Deriving a key from the password in order to encrypt the secret key... ");
+    fflush(stdout);
+    stream = xsodium_malloc(sizeof seckey_struct->keynum_sk);
+    randombytes_buf(seckey_struct->kdf_salt, sizeof seckey_struct->kdf_salt);
+    kdf_opslimit = crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE;
+    kdf_memlimit = crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE;
+
+    while (crypto_pwhash_scryptsalsa208sha256(stream, sizeof seckey_struct->keynum_sk, pwd,
+                                              strlen(pwd), seckey_struct->kdf_salt, kdf_opslimit,
+                                              kdf_memlimit) != 0) {
+        kdf_opslimit /= 2;
+        kdf_memlimit /= 2;
+        if (kdf_opslimit < crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_MIN ||
+            kdf_memlimit < crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_MIN) {
+            exit_err("Unable to complete key derivation - More memory would be needed");
+        }
+    }
+    sodium_free(pwd);
+    sodium_free(pwd2);
+    if (kdf_memlimit < crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE) {
+        fprintf(stderr,
+                "Warning: due to limited memory the KDF used less "
+                "memory than the default\n");
+    }
+    le64_store(seckey_struct->kdf_opslimit_le, kdf_opslimit);
+    le64_store(seckey_struct->kdf_memlimit_le, kdf_memlimit);
+    seckey_chk(seckey_struct->keynum_sk.chk, seckey_struct);
+    xor_buf((unsigned char *) (void *) &seckey_struct->keynum_sk, stream,
+            sizeof seckey_struct->keynum_sk);
+    sodium_free(stream);
+    puts("done\n");
+}
+
 static SeckeyStruct *
 seckey_load(const char *sk_file, int unencrypted_key)
 {
@@ -343,31 +423,7 @@ seckey_load(const char *sk_file, int unencrypted_key)
         exit_msg("Unsupported checksum function");
     }
     if (unencrypted_key == 0) {
-        char          *pwd = xsodium_malloc(PASSWORDMAXBYTES);
-        unsigned char *stream;
-
-        if (get_password(pwd, PASSWORDMAXBYTES, "Password: ") != 0) {
-            exit_msg("get_password()");
-        }
-        printf("Deriving a key from the password and decrypting the secret key... ");
-        fflush(stdout);
-        stream = xsodium_malloc(sizeof seckey_struct->keynum_sk);
-        if (crypto_pwhash_scryptsalsa208sha256(stream, sizeof seckey_struct->keynum_sk, pwd,
-                                               strlen(pwd), seckey_struct->kdf_salt,
-                                               le64_load(seckey_struct->kdf_opslimit_le),
-                                               le64_load(seckey_struct->kdf_memlimit_le)) != 0) {
-            exit_err("Unable to complete key derivation - This probably means out of memory");
-        }
-        sodium_free(pwd);
-        xor_buf((unsigned char *) (void *) &seckey_struct->keynum_sk, stream,
-                sizeof seckey_struct->keynum_sk);
-        sodium_free(stream);
-        puts("done\n");
-        seckey_chk(chk, seckey_struct);
-        if (memcmp(chk, seckey_struct->keynum_sk.chk, sizeof chk) != 0) {
-            exit_msg("Wrong password for that key");
-        }
-        sodium_memzero(chk, sizeof chk);
+        decrypt_key(seckey_struct, chk);
     }
     return seckey_struct;
 }
@@ -625,55 +681,9 @@ generate(const char *pk_file, const char *sk_file, const char *comment, int forc
     memcpy(pubkey_struct->keynum_pk.keynum, seckey_struct->keynum_sk.keynum,
            sizeof pubkey_struct->keynum_pk.keynum);
     memcpy(pubkey_struct->sig_alg, SIGALG, sizeof pubkey_struct->sig_alg);
-
     if (unencrypted_key == 0) {
-        char          *pwd  = xsodium_malloc(PASSWORDMAXBYTES);
-        char          *pwd2 = xsodium_malloc(PASSWORDMAXBYTES);
-        unsigned char *stream;
-        unsigned long  kdf_memlimit;
-        unsigned long  kdf_opslimit;
-
-        puts("Please enter a password to protect the secret key.\n");
-        if (get_password(pwd, PASSWORDMAXBYTES, "Password: ") != 0 ||
-            get_password(pwd2, PASSWORDMAXBYTES, "Password (one more time): ") != 0) {
-            exit_msg("get_password()");
-        }
-        if (strcmp(pwd, pwd2) != 0) {
-            exit_msg("Passwords don't match");
-        }
-        printf("Deriving a key from the password in order to encrypt the secret key... ");
-        fflush(stdout);
-        stream = xsodium_malloc(sizeof seckey_struct->keynum_sk);
-        randombytes_buf(seckey_struct->kdf_salt, sizeof seckey_struct->kdf_salt);
-        kdf_opslimit = crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE;
-        kdf_memlimit = crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE;
-
-        while (crypto_pwhash_scryptsalsa208sha256(stream, sizeof seckey_struct->keynum_sk, pwd,
-                                                  strlen(pwd), seckey_struct->kdf_salt,
-                                                  kdf_opslimit, kdf_memlimit) != 0) {
-            kdf_opslimit /= 2;
-            kdf_memlimit /= 2;
-            if (kdf_opslimit < crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_MIN ||
-                kdf_memlimit < crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_MIN) {
-                exit_err("Unable to complete key derivation - More memory would be needed");
-            }
-        }
-        sodium_free(pwd);
-        sodium_free(pwd2);
-        if (kdf_memlimit < crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE) {
-            fprintf(stderr,
-                    "Warning: due to limited memory the KDF used less "
-                    "memory than the default\n");
-        }
-        le64_store(seckey_struct->kdf_opslimit_le, kdf_opslimit);
-        le64_store(seckey_struct->kdf_memlimit_le, kdf_memlimit);
-        seckey_chk(seckey_struct->keynum_sk.chk, seckey_struct);
-        xor_buf((unsigned char *) (void *) &seckey_struct->keynum_sk, stream,
-                sizeof seckey_struct->keynum_sk);
-        sodium_free(stream);
-        puts("done\n");
+        encrypt_key(seckey_struct);
     }
-
     abort_on_existing_key_files(pk_file, sk_file, force);
     if (basedir_create_useronly(sk_file) != 0) {
         fprintf(stderr, "Warning: you may have to create the parent directory\n");
