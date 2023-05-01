@@ -46,7 +46,8 @@ add_executable(minisign
                src/base64.c
                src/get_line.c
                src/helpers.c
-               src/minisign.c)
+               src/minisign.c
+               src/cli.c)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBSODIUM libsodium)
