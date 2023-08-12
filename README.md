@@ -24,7 +24,7 @@ Dependencies:
 
 Compilation:
 
-    $ zig build -Drelease-safe
+    $ zig build -Drelease
 
 ## Using cmake and gcc or clang:
 
