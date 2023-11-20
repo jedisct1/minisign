@@ -18,7 +18,12 @@ pub fn build(b: *std.build.Builder) !void {
     minisign.addSystemIncludePath(.{ .path = "/opt/homebrew/include" });
     minisign.addSystemIncludePath(.{ .path = "/usr/local/include" });
     minisign.defineCMacro("_GNU_SOURCE", "1");
-    minisign.addCSourceFiles(&.{ "src/base64.c", "src/get_line.c", "src/helpers.c", "src/minisign.c" }, &.{});
+    const source_files = &.{ "src/base64.c", "src/get_line.c", "src/helpers.c", "src/minisign.c" };
+    if (@hasDecl(std.Build.Step.Compile, "AddCSourceFilesOptions")) {
+        minisign.addCSourceFiles(.{ .files = source_files });
+    } else {
+        minisign.addCSourceFiles(source_files, &.{});
+    }
 
     b.installArtifact(minisign);
 }
