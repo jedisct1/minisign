@@ -1,6 +1,5 @@
 
 #include <assert.h>
-#include <inttypes.h>
 #include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -461,9 +460,9 @@ verify(PubkeyStruct *pubkey_struct, const char *message_file, const char *sig_fi
     if (memcmp(sig_struct->keynum, pubkey_struct->keynum_pk.keynum, sizeof sig_struct->keynum) !=
         0) {
         fprintf(stderr,
-                "Signature key id in %s is %" PRIX64
+                "Signature key id in %s is " KEYNUM_FMT
                 "\n"
-                "but the key id in the public key is %" PRIX64 "\n",
+                "but the key id in the public key is " KEYNUM_FMT "\n",
                 sig_file, le64_load(sig_struct->keynum),
                 le64_load(pubkey_struct->keynum_pk.keynum));
         exit(1);
@@ -662,7 +661,7 @@ write_pk_file(const char *pk_file, const PubkeyStruct *pubkey_struct)
     if ((fp = fopen(pk_file, "w")) == NULL) {
         exit_err(pk_file);
     }
-    xfprintf(fp, COMMENT_PREFIX "minisign public key %" PRIX64 "\n",
+    xfprintf(fp, COMMENT_PREFIX "minisign public key " KEYNUM_FMT "\n",
              le64_load(pubkey_struct->keynum_pk.keynum));
     xfput_b64(fp, (const unsigned char *) (const void *) pubkey_struct, sizeof *pubkey_struct);
     xfclose(fp);

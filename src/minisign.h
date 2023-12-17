@@ -2,6 +2,8 @@
 #ifndef MINISIGN_H
 #define MINISIGN_H 1
 
+#include <inttypes.h>
+
 #define COMMENTMAXBYTES                1024
 #define KEYNUMBYTES                    8
 #define PASSWORDMAXBYTES               1024
@@ -11,6 +13,7 @@
 #define KDFALG                         "Sc"
 #define KDFNONE                        "\0\0"
 #define CHKALG                         "B2"
+#define KEYNUM_FMT                     "%016" PRIX64
 #define COMMENT_PREFIX                 "untrusted comment: "
 #define DEFAULT_COMMENT                "signature from minisign secret key"
 #define SECRETKEY_DEFAULT_COMMENT      "minisign encrypted secret key"
