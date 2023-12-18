@@ -102,6 +102,8 @@ WAPM.
 * [minisign-php](https://github.com/soatok/minisign-php) is a PHP implementation.
 * [py-minisign](https://github.com/x13a/py-minisign) is a Python
 implementation.
+* [minisign](https://hexdocs.pm/minisign/Minisign.html) is an Elixir implementation
+  (verification only)
 
 Signature determinism
 ---------------------
