@@ -289,6 +289,7 @@ pubkey_load(const char *pk_file, const char *pubkey_s)
     exit_msg("A public key is required");
 }
 
+#ifndef VERIFY_ONLY
 static void
 seckey_compute_chk(unsigned char chk[crypto_generichash_BYTES], const SeckeyStruct *seckey_struct)
 {
@@ -302,7 +303,6 @@ seckey_compute_chk(unsigned char chk[crypto_generichash_BYTES], const SeckeyStru
     crypto_generichash_final(&hs, chk, sizeof seckey_struct->keynum_sk.chk);
 }
 
-#ifndef VERIFY_ONLY
 static void
 decrypt_key(SeckeyStruct *const seckey_struct, unsigned char chk[crypto_generichash_BYTES])
 {
@@ -831,17 +831,25 @@ main(int argc, char **argv)
 #endif
     const char   *sig_file        = NULL;
     const char   *message_file    = NULL;
+#ifndef VERIFY_ONLY
     const char   *comment         = NULL;
+#endif
     const char   *pubkey_s        = NULL;
+#ifndef VERIFY_ONLY
     const char   *trusted_comment = NULL;
+#endif
     unsigned char opt_seen[16]    = { 0 };
     int           opt_flag;
     int           quiet           = 0;
     int           output          = 0;
+#ifndef VERIFY_ONLY
     int           force           = 0;
+#endif
     int           allow_legacy    = 1;
+#ifndef VERIFY_ONLY
     int           sign_legacy     = 0;
     int           unencrypted_key = 0;
+#endif
     Action        action          = ACTION_NONE;
 
     while ((opt_flag = getopt(argc, argv, getopt_options)) != -1) {
@@ -891,9 +899,11 @@ main(int argc, char **argv)
         case 'H':
             allow_legacy = 0;
             break;
+#ifndef VERIFY_ONLY
         case 'l':
             sign_legacy = 1;
             break;
+#endif
         case 'm':
             message_file = optarg;
             break;
