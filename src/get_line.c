@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)) || defined(__HAIKU__)
@@ -109,10 +110,22 @@ get_password(char *pwd, size_t max_len, const char *prompt)
 {
     int ret;
 
-    disable_echo();
-    ret = get_line(pwd, max_len, prompt);
-    enable_echo();
-
+    char* env_var_pwd = getenv("MINISIGN_PASSWORD");
+    if (env_var_pwd != NULL) {
+        size_t env_var_pwd_len = strlen(env_var_pwd);
+        if (env_var_pwd_len >= max_len) {
+            fprintf(stderr, "MINISIGN_PASSWORD environment variable value\
+               exceeds maximum allowed length\n");
+            return -1;
+        } else {
+            strcpy(pwd, env_var_pwd);
+            return 0;
+        }
+    } else {
+        disable_echo();
+        ret = get_line(pwd, max_len, prompt);
+        enable_echo();
+    }
     return ret;
 }
 
