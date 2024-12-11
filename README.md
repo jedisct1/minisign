@@ -65,6 +65,13 @@ Minisign is also available with docker:
 
     $ docker run -i --rm jedisct1/minisign
 
+For example, verifying a signature using the docker image can be done
+with:
+
+    $ docker run -v .:/minisign -e HOME=/minisign -w /minisign \
+      -it --rm jedisct1/minisign \
+      -Vm file_to_verify -p minisign.pub
+
 The image can be verified with the following cosign public key:
 
 ```text
