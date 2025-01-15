@@ -25,17 +25,19 @@ Dependencies:
 
 Compilation with libsodium, dynamically linked (libsodium will need to be installed on the system for the command to run):
 
-    $ zig build -Drelease
+    $ zig build -Doptimize=ReleaseSmall
 
 Compilation with libsodium, statically linked (libsodium will only be needed for compilation):
 
-    $ zig build -Drelease -Dstatic
+    $ zig build -Doptimize=ReleaseSmall -Dstatic
 
 Compilation without libsodium, no dependencies required:
 
-    $ zig build -Drelease -Dwithout-libsodium
+    $ zig build -Doptimize=ReleaseSmall -Dwithout-libsodium
 
 The resulting binary can be found in `zig-out/bin/minisign`.
+
+In all these examples, `ReleaseFast` can be replaced with `ReleaseSmall` to favor speed over size.
 
 ## Building with cmake and gcc or clang:
 
