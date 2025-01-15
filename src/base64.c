@@ -52,7 +52,7 @@ b64_to_bin(unsigned char *const bin, const char *b64, size_t bin_maxlen, size_t 
         REV64_NONE, REV64_NONE, REV64_NONE, REV64_NONE
     };
     const unsigned char *b64_u = (const unsigned char *) b64;
-    unsigned char *      bin_w = bin;
+    unsigned char       *bin_w = bin;
     unsigned char        mask  = 0U;
     unsigned char        t0 = 0, t1 = 0, t2 = 0, t3 = 0;
     uint32_t             t = 0;

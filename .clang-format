@@ -94,7 +94,7 @@ IncludeIsMainSourceRegex: ""
 IndentCaseLabels: false
 IndentCaseBlocks: false
 IndentGotoLabels: true
-IndentPPDirectives: None
+IndentPPDirectives: AfterHash
 IndentExternBlock: AfterExternBlock
 IndentRequires: false
 IndentWidth: 4
