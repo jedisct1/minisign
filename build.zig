@@ -1,3 +1,4 @@
+const builtin = @import("builtin");
 const std = @import("std");
 
 pub fn build(b: *std.Build) !void {
@@ -15,21 +16,38 @@ pub fn build(b: *std.Build) !void {
     });
     minisign.linkLibC();
     if (use_libzodium) {
-        const libzodium_mod = b.createModule(.{
-            .root_source_file = b.path("src/libzodium/libzodium.zig"),
-            .target = target,
-            .optimize = optimize,
-        });
-        const libzodium = b.addStaticLibrary(.{
-            .name = "zodium",
-            .root_module = libzodium_mod,
-            .strip = true,
-        });
+        var libzodium = lib: {
+            if (builtin.zig_version.major == 0 and builtin.zig_version.minor < 13) {
+                @compileError("Building requires Zig 0.13.0 or later");
+            }
+            if (builtin.zig_version.major == 0 and builtin.zig_version.minor == 13) {
+                break :lib b.addStaticLibrary(.{
+                    .name = "zodium",
+                    .strip = true,
+                    .root_source_file = b.path("src/libzodium/libzodium.zig"),
+                    .target = target,
+                    .optimize = optimize,
+                });
+            } else {
+                const libzodium_mod = b.createModule(.{
+                    .root_source_file = b.path("src/libzodium/libzodium.zig"),
+                    .target = target,
+                    .optimize = optimize,
+                });
+                break :lib b.addStaticLibrary(.{
+                    .name = "zodium",
+                    .root_module = libzodium_mod,
+                    .strip = true,
+                });
+            }
+        };
         libzodium.linkLibC();
         b.installArtifact(libzodium);
         minisign.root_module.addCMacro("LIBZODIUM", "1");
         minisign.linkLibrary(libzodium);
     } else {
+        minisign.addLibraryPath(.{ .cwd_relative = "/opt/homebrew/lib" });
+        minisign.addLibraryPath(.{ .cwd_relative = "/usr/local/lib" });
         minisign.root_module.linkSystemLibrary(
             "sodium",
             .{

@@ -75,7 +75,7 @@ export fn crypto_generichash_final(
 }
 
 export fn crypto_sign_keypair(pk: [*c]u8, sk: [*c]u8) callconv(.C) c_int {
-    const kp = Ed25519.KeyPair.generate();
+    const kp = if (std.meta.hasFn(Ed25519.KeyPair, "generate")) Ed25519.KeyPair.generate() else (Ed25519.KeyPair.create(null) catch return -1);
     pk[0..32].* = kp.public_key.toBytes();
     sk[0..64].* = kp.secret_key.toBytes();
     return 0;
