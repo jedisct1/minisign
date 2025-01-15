@@ -1,0 +1,12 @@
+.{
+    .name = "minisign",
+    .version = "0.12.0",
+    .paths = .{
+        "LICEMSE",
+        "README.md",
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "share",
+    },
+}
