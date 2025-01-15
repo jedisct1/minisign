@@ -16,7 +16,7 @@ public key:
 Compilation / installation
 --------------------------
 
-## Using [Zig](https://ziglang.org):
+## Building with Zig
 
 Dependencies:
 
@@ -31,13 +31,13 @@ Compilation with libsodium, statically linked (libsodium will only be needed for
 
     $ zig build -Drelease -Dstatic
 
-Compilation without libsodium, no dependencies:
+Compilation without libsodium, no dependencies required:
 
     $ zig build -Drelease -Dwithout_libsodium
 
 The resulting binary can be found in `zig-out/bin/minisign`.
 
-## Using cmake and gcc or clang:
+## Building with cmake and gcc or clang:
 
 Dependencies:
 
