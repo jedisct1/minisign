@@ -20,17 +20,24 @@ Compilation / installation
 
 Dependencies:
 
-* [libsodium](https://libsodium.org/)
+* [libsodium](https://libsodium.org/) (*optional*)
+* [zig](https://ziglang.org)
 
-Compilation:
+Compilation with libsodium:
 
     $ zig build -Drelease
+
+Compilation without libsodium:
+
+    $ zig build -Drelease -Dwithout_libsodium
 
 The resulting binary can be found in `zig-out/bin/minisign`.
 
 ## Using cmake and gcc or clang:
 
-* [libsodium](https://libsodium.org/)
+Dependencies:
+
+* [libsodium](https://libsodium.org/) (*required*)
 * cmake
 * pkg-config
 * gcc or clang

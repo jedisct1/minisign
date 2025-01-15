@@ -10,7 +10,11 @@
 #include <time.h>
 #include <unistd.h>
 
-#include <sodium.h>
+#ifdef LIBZODIUM
+#    include "zodium.h"
+#else
+#    include <sodium.h>
+#endif
 
 #include "base64.h"
 #include "get_line.h"
@@ -829,28 +833,28 @@ main(int argc, char **argv)
 #ifndef VERIFY_ONLY
     char *sk_file = sig_default_skfile();
 #endif
-    const char   *sig_file        = NULL;
-    const char   *message_file    = NULL;
+    const char *sig_file     = NULL;
+    const char *message_file = NULL;
 #ifndef VERIFY_ONLY
-    const char   *comment         = NULL;
+    const char *comment = NULL;
 #endif
-    const char   *pubkey_s        = NULL;
+    const char *pubkey_s = NULL;
 #ifndef VERIFY_ONLY
-    const char   *trusted_comment = NULL;
+    const char *trusted_comment = NULL;
 #endif
-    unsigned char opt_seen[16]    = { 0 };
+    unsigned char opt_seen[16] = { 0 };
     int           opt_flag;
-    int           quiet           = 0;
-    int           output          = 0;
+    int           quiet  = 0;
+    int           output = 0;
 #ifndef VERIFY_ONLY
-    int           force           = 0;
+    int force = 0;
 #endif
-    int           allow_legacy    = 1;
+    int allow_legacy = 1;
 #ifndef VERIFY_ONLY
-    int           sign_legacy     = 0;
-    int           unencrypted_key = 0;
+    int sign_legacy     = 0;
+    int unencrypted_key = 0;
 #endif
-    Action        action          = ACTION_NONE;
+    Action action = ACTION_NONE;
 
     while ((opt_flag = getopt(argc, argv, getopt_options)) != -1) {
         switch (opt_flag) {
