@@ -33,7 +33,7 @@ Compilation with libsodium, statically linked (libsodium will only be needed for
 
 Compilation without libsodium, no dependencies required:
 
-    $ zig build -Drelease -Dwithout_libsodium
+    $ zig build -Drelease -Dwithout-libsodium
 
 The resulting binary can be found in `zig-out/bin/minisign`.
 
