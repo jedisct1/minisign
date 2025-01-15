@@ -64,6 +64,8 @@ or:
 
     $ cmake -D BUILD_STATIC_EXECUTABLES=1 ..
 
+## Pre-built packages
+
 Minisign is also available in Homebrew:
 
     $ brew install minisign
