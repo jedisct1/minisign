@@ -26,6 +26,8 @@ Compilation:
 
     $ zig build -Drelease
 
+The resulting binary can be found in `zig-out/bin/minisign`.
+
 ## Using cmake and gcc or clang:
 
 * [libsodium](https://libsodium.org/)
