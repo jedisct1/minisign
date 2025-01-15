@@ -5,6 +5,7 @@ pub fn build(b: *std.Build) !void {
     const optimize = b.standardOptimizeOption(.{ .preferred_optimize_mode = .ReleaseSmall });
 
     const use_libzodium = b.option(bool, "without_libsodium", "Use the zig standard library instead of libsodium") orelse false;
+    const use_static_linking = b.option(bool, "static", "Statically link the binary") orelse false;
 
     const minisign = b.addExecutable(.{
         .name = "minisign",
@@ -31,7 +32,10 @@ pub fn build(b: *std.Build) !void {
     } else {
         minisign.root_module.linkSystemLibrary(
             "sodium",
-            .{ .use_pkg_config = .yes },
+            .{
+                .use_pkg_config = .yes,
+                .preferred_link_mode = if (use_static_linking) .static else .dynamic,
+            },
         );
     }
     minisign.addIncludePath(b.path("src"));

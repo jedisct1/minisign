@@ -23,11 +23,15 @@ Dependencies:
 * [libsodium](https://libsodium.org/) (*optional*)
 * [zig](https://ziglang.org)
 
-Compilation with libsodium:
+Compilation with libsodium, dynamically linked (libsodium will need to be installed on the system for the command to run):
 
     $ zig build -Drelease
 
-Compilation without libsodium:
+Compilation with libsodium, statically linked (libsodium will only be needed for compilation):
+
+    $ zig build -Drelease -Dstatic
+
+Compilation without libsodium, no dependencies:
 
     $ zig build -Drelease -Dwithout_libsodium
 
