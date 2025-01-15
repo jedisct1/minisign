@@ -11,10 +11,10 @@ pub fn build(b: *std.Build) !void {
         .strip = true,
     });
     minisign.linkLibC();
-    minisign.addLibraryPath(.{ .cwd_relative = "/opt/homebrew/lib" });
-    minisign.addLibraryPath(.{ .cwd_relative = "/usr/local/lib" });
-    minisign.linkSystemLibrary("sodium");
-
+    minisign.root_module.linkSystemLibrary(
+        "sodium",
+        .{ .use_pkg_config = .yes },
+    );
     minisign.addIncludePath(b.path("src"));
     minisign.addSystemIncludePath(.{ .cwd_relative = "/opt/homebrew/include" });
     minisign.addSystemIncludePath(.{ .cwd_relative = "/usr/local/include" });
