@@ -16,7 +16,7 @@ pub fn build(b: *std.Build) !void {
     minisign.linkLibC();
     if (use_libzodium) {
         const libzodium_mod = b.createModule(.{
-            .root_source_file = b.path("src/libzodium.zig"),
+            .root_source_file = b.path("src/libzodium/libzodium.zig"),
             .target = target,
             .optimize = optimize,
         });

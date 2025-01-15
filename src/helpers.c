@@ -15,7 +15,7 @@
 #include <string.h>
 
 #ifdef LIBZODIUM
-#    include "zodium.h"
+#    include "libzodium/sodium.h"
 #else
 #    include <sodium.h>
 #endif
