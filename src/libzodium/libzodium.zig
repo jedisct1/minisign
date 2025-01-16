@@ -34,8 +34,8 @@ export fn crypto_pwhash_scryptsalsa208sha256(
 ) callconv(.C) c_int {
     crypto.pwhash.scrypt.kdf(
         std.heap.c_allocator,
-        out[0..outlen],
-        passwd[0..passwdlen],
+        out[0..@intCast(outlen)],
+        passwd[0..@intCast(passwdlen)],
         salt[0..32],
         crypto.pwhash.scrypt.Params.fromLimits(opslimit, memlimit),
     ) catch return -1;
@@ -59,7 +59,7 @@ export fn crypto_generichash_update(
     in: [*c]const u8,
     inlen: c_ulonglong,
 ) c_int {
-    state.*.update(in[0..inlen]);
+    state.*.update(in[0..@intCast(inlen)]);
     return 0;
 }
 
@@ -92,7 +92,7 @@ export fn crypto_sign_detached(
     const kp = Ed25519.KeyPair.fromSecretKey(sk) catch return -1;
     var noise: [Ed25519.noise_length]u8 = undefined;
     crypto.random.bytes(&noise);
-    const s = kp.sign(m[0..mlen], noise) catch return -1;
+    const s = kp.sign(m[0..@intCast(mlen)], noise) catch return -1;
     sig_bytes[0..64].* = s.toBytes();
     return 0;
 }
@@ -105,7 +105,7 @@ export fn crypto_sign_verify_detached(
 ) callconv(.C) c_int {
     const pk = Ed25519.PublicKey.fromBytes(pk_bytes[0..32].*) catch return -1;
     const sig = Ed25519.Signature.fromBytes(sig_bytes[0..64].*);
-    sig.verify(m[0..mlen], pk) catch return 1;
+    sig.verify(m[0..@intCast(mlen)], pk) catch return 1;
     return 0;
 }
 
