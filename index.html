@@ -1,99 +1,177 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en-us">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Minisign by Frank Denis</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="stylesheets/normalize.css"
+            media="screen"
+        />
+        <link
+            href="https://fonts.googleapis.com/css?family=Open+Sans:400,700"
+            rel="stylesheet"
+            type="text/css"
+        />
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="stylesheets/stylesheet.css"
+            media="screen"
+        />
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="stylesheets/github-light.css"
+            media="screen"
+        />
+    </head>
 
-<head>
-  <meta charset="UTF-8">
-  <title>Minisign by Frank Denis</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
-  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
-  <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-  <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
-</head>
+    <body>
+        <section class="page-header">
+            <h1 class="project-name">Minisign</h1>
+            <h2 class="project-tagline">
+                A dead simple tool to sign files and verify signatures.
+            </h2>
+            <a href="https://github.com/jedisct1/minisign" class="btn"
+                >View on GitHub</a
+            >
+            <a
+                href="https://github.com/jedisct1/minisign/tarball/master"
+                class="btn"
+                >Download source code</a
+            >
+            <a
+                href="https://github.com/jedisct1/minisign/releases/download/0.12/minisign-0.12-macos.zip"
+                class="btn"
+                >Download OSX binary</a
+            >
+            <a
+                href="https://github.com/jedisct1/minisign/releases/download/0.12/minisign-0.12-linux.tar.gz"
+                class="btn"
+                >Download Linux binary</a
+            >
+            <a href="https://wapm.io/package/jedisct1/minisign" class="btn"
+                >Download WebAssembly binary</a
+            >
+            <a
+                href="https://github.com/jedisct1/minisign/releases/download/0.12/minisign-0.12-win64.zip"
+                class="btn"
+                >Download Windows binary</a
+            >
+        </section>
 
-<body>
-  <section class="page-header">
-    <h1 class="project-name">Minisign</h1>
-    <h2 class="project-tagline">A dead simple tool to sign files and verify signatures.</h2>
-    <a href="https://github.com/jedisct1/minisign" class="btn">View on GitHub</a>
-    <a href="https://github.com/jedisct1/minisign/tarball/master" class="btn">Download source code</a>
-    <a href="https://github.com/jedisct1/minisign/releases/download/0.11/minisign-0.11-macos.zip" class="btn">Download
-      OSX binary</a>
-    <a href="https://github.com/jedisct1/minisign/releases/download/0.11/minisign-0.11-linux.tar.gz"
-      class="btn">Download Linux binary</a>
-    <a href="https://wapm.io/package/jedisct1/minisign" class="btn">Download WebAssembly binary</a>
-    <a href="https://github.com/jedisct1/minisign/releases/download/0.11/minisign-0.11-win64.zip" class="btn">Download
-      Windows binary</a>
-  </section>
+        <section class="main-content">
+            <h1>
+                <a
+                    id="minisign"
+                    class="anchor"
+                    href="#minisign"
+                    aria-hidden="true"
+                    ><span class="octicon octicon-link"></span></a
+                >Minisign
+            </h1>
 
-  <section class="main-content">
-    <h1>
-      <a id="minisign" class="anchor" href="#minisign" aria-hidden="true"><span
-          class="octicon octicon-link"></span></a>Minisign
-    </h1>
+            <p>
+                Minisign is a dead simple tool to sign files and verify
+                signatures.
+            </p>
 
-    <p>Minisign is a dead simple tool to sign files and verify signatures.</p>
+            <p>
+                It is portable, lightweight, and uses the highly secure
+                <a href="https://ed25519.cr.yp.to/" target="blank">Ed25519</a>
+                public-key signature system.
+            </p>
 
-    <p>It is portable, lightweight, and uses the highly secure
-      <a href="https://ed25519.cr.yp.to/" target="blank">Ed25519</a> public-key signature system.
-    </p>
+            <h2>
+                <a
+                    id="creating-a-key-pair"
+                    class="anchor"
+                    href="#creating-a-key-pair"
+                    aria-hidden="true"
+                    ><span class="octicon octicon-link"></span></a
+                >Creating a key pair
+            </h2>
 
-    <h2>
-      <a id="creating-a-key-pair" class="anchor" href="#creating-a-key-pair" aria-hidden="true"><span
-          class="octicon octicon-link"></span></a>Creating a key pair
-    </h2>
-
-    <pre><code>$ minisign -G
+            <pre><code>$ minisign -G
 </code></pre>
 
-    <p>The public key is printed and put into the <code>minisign.pub</code> file. The secret key
-      is encrypted and saved as a file named <code>~/.minisign/minisign.key</code>.</p>
+            <p>
+                The public key is printed and put into the
+                <code>minisign.pub</code> file. The secret key is encrypted and
+                saved as a file named <code>~/.minisign/minisign.key</code>.
+            </p>
 
-    <h2>
-      <a id="signing-a-file" class="anchor" href="#signing-a-file" aria-hidden="true"><span
-          class="octicon octicon-link"></span></a>Signing a file
-    </h2>
+            <h2>
+                <a
+                    id="signing-a-file"
+                    class="anchor"
+                    href="#signing-a-file"
+                    aria-hidden="true"
+                    ><span class="octicon octicon-link"></span></a
+                >Signing a file
+            </h2>
 
-    <pre><code>$ minisign -Sm myfile.txt
+            <pre><code>$ minisign -Sm myfile.txt
 </code></pre>
 
-    <p>Or to include a comment in the signature, that will be verified and
-      displayed when verifying the file:</p>
+            <p>
+                Or to include a comment in the signature, that will be verified
+                and displayed when verifying the file:
+            </p>
 
-    <pre><code>$ minisign -Sm myfile.txt -t 'This comment will be signed as well'
+            <pre><code>$ minisign -Sm myfile.txt -t 'This comment will be signed as well'
 </code></pre>
 
-    <p>The signature is put into <code>myfile.txt.minisig</code>.</p>
+            <p>The signature is put into <code>myfile.txt.minisig</code>.</p>
 
-    <p>Starting with version 0.8, multiple files can also be signed at once:</p>
+            <p>
+                Starting with version 0.8, multiple files can also be signed at
+                once:
+            </p>
 
-    <pre><code>$ minisign -Sm file1.txt file2.txt *.jpg
+            <pre><code>$ minisign -Sm file1.txt file2.txt *.jpg
 </code></pre>
 
-    <h2>
-      <a id="verifying-a-file" class="anchor" href="#verifying-a-file" aria-hidden="true"><span
-          class="octicon octicon-link"></span></a>Verifying a file
-    </h2>
+            <h2>
+                <a
+                    id="verifying-a-file"
+                    class="anchor"
+                    href="#verifying-a-file"
+                    aria-hidden="true"
+                    ><span class="octicon octicon-link"></span></a
+                >Verifying a file
+            </h2>
 
-    <pre><code>$ minisign -Vm myfile.txt -P RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3
+            <pre><code>$ minisign -Vm myfile.txt -P RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3
 </code></pre>
 
-    <p>or</p>
+            <p>or</p>
 
-    <pre><code>$ minisign -Vm myfile.txt -p signature.pub
+            <pre><code>$ minisign -Vm myfile.txt -p signature.pub
 </code></pre>
 
-    <p>This requires the signature <code>myfile.txt.minisig</code> to be present in the same
-      directory.</p>
+            <p>
+                This requires the signature <code>myfile.txt.minisig</code> to
+                be present in the same directory.
+            </p>
 
-    <p>The public key can either reside in a file (<code>./minisign.pub</code> by default) or be
-      directly specified on the command line.</p>
+            <p>
+                The public key can either reside in a file (<code
+                    >./minisign.pub</code
+                >
+                by default) or be directly specified on the command line.
+            </p>
 
-    <h2>
-      <a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage
-    </h2>
+            <h2>
+                <a id="usage" class="anchor" href="#usage" aria-hidden="true"
+                    ><span class="octicon octicon-link"></span></a
+                >Usage
+            </h2>
 
-    <pre><code>
+            <pre><code>
 Usage:
 minisign -G [-f] [-p pubkey_file] [-s seckey_file] [-W]
 minisign -R [-s seckey_file] [-p pubkey_file]
@@ -123,186 +201,245 @@ minisign -V [-H] [-x sig_file] [-p pubkey_file | -P pubkey] [-o] [-q] -m file
 -v display version number
 </code></pre>
 
-    <h2>
-      <a id="trusted-comments" class="anchor" href="#trusted-comments" aria-hidden="true"><span
-          class="octicon octicon-link"></span></a>Trusted comments
-    </h2>
+            <h2>
+                <a
+                    id="trusted-comments"
+                    class="anchor"
+                    href="#trusted-comments"
+                    aria-hidden="true"
+                    ><span class="octicon octicon-link"></span></a
+                >Trusted comments
+            </h2>
 
-    <p>Signature files include an untrusted comment line that can be freely
-      modified, even after signature creation.</p>
+            <p>
+                Signature files include an untrusted comment line that can be
+                freely modified, even after signature creation.
+            </p>
 
-    <p>They also include a second comment line, that cannot be modified
-      without the secret key.</p>
+            <p>
+                They also include a second comment line, that cannot be modified
+                without the secret key.
+            </p>
 
-    <p>Trusted comments can be used to add instructions or application-specific
-      metadata (intended file name, timestamps, resource identifiers,
-      version numbers to prevent downgrade attacks).</p>
+            <p>
+                Trusted comments can be used to add instructions or
+                application-specific metadata (intended file name, timestamps,
+                resource identifiers, version numbers to prevent downgrade
+                attacks).
+            </p>
 
-    <h2>
-      <a id="compilation--installation" class="anchor" href="#compilation--installation" aria-hidden="true"><span
-          class="octicon octicon-link"></span></a>Compilation / installation
-    </h2>
+            <h2>
+                <a
+                    id="compilation--installation"
+                    class="anchor"
+                    href="#compilation--installation"
+                    aria-hidden="true"
+                    ><span class="octicon octicon-link"></span></a
+                >Compilation / installation
+            </h2>
 
-    <h3>Using Zig</h3>
-    <p>Dependencies:</p>
-    <ul>
-      <li><a href="http://doc.libsodium.org/">libsodium</a></li>
-    </ul>
+            <h3>Using Zig</h3>
+            <p>Dependencies:</p>
+            <ul>
+                <li><a href="http://doc.libsodium.org/">libsodium</a></li>
+            </ul>
 
-    <p>Compilation:</p>
-    <pre><code>$ zig build -Drelease-small</code></pre>
+            <p>Compilation:</p>
+            <pre><code>$ zig build -Drelease-small</code></pre>
 
-    <h3>Using Cmake</h3>
-    <p>Dependencies</p>
-    <ul>
-      <li><a href="http://doc.libsodium.org/">libsodium</a></li>
-      <li>cmake</li>
-      <li>make</li>
-      <li>pkg-config</li>
-      <li>a C compilation toolchain</li>
-    </ul>
+            <h3>Using Cmake</h3>
+            <p>Dependencies</p>
+            <ul>
+                <li><a href="http://doc.libsodium.org/">libsodium</a></li>
+                <li>cmake</li>
+                <li>make</li>
+                <li>pkg-config</li>
+                <li>a C compilation toolchain</li>
+            </ul>
 
-    <p>Compilation:</p>
+            <p>Compilation:</p>
 
-    <pre><code>$ mkdir build
+            <pre><code>$ mkdir build
 $ cd build
 $ cmake ..
 $ make
 # make install</code></pre>
 
-    <h2>
-      <a id="pre-hashing" class="anchor" href="#pre-hashing" aria-hidden="true"><span
-          class="octicon octicon-link"></span></a>Pre-hashing
-    </h2>
+            <h2>
+                <a
+                    id="pre-hashing"
+                    class="anchor"
+                    href="#pre-hashing"
+                    aria-hidden="true"
+                    ><span class="octicon octicon-link"></span></a
+                >Pre-hashing
+            </h2>
 
-    <p>By default, files are signed and verified with very low memory requirements, by pre-hashing the content.</p>
+            <p>
+                By default, files are signed and verified with very low memory
+                requirements, by pre-hashing the content.
+            </p>
 
-    <p>Signatures that are not pre-hashed can be rejected with the -H switch. Support for these legacy signatures will
-      eventually be removed.</p>
+            <p>
+                Signatures that are not pre-hashed can be rejected with the -H
+                switch. Support for these legacy signatures will eventually be
+                removed.
+            </p>
 
-    <h2>
-      <a id="signature-format" class="anchor" href="#signature-format" aria-hidden="true"><span
-          class="octicon octicon-link"></span></a>Signature format
-    </h2>
+            <h2>
+                <a
+                    id="signature-format"
+                    class="anchor"
+                    href="#signature-format"
+                    aria-hidden="true"
+                    ><span class="octicon octicon-link"></span></a
+                >Signature format
+            </h2>
 
-    <pre><code>untrusted comment: &lt;arbitrary text&gt;
+            <pre><code>untrusted comment: &lt;arbitrary text&gt;
 base64(&lt;signature_algorithm&gt; || &lt;key_id&gt; || &lt;signature&gt;)
 trusted_comment: &lt;arbitrary text&gt;
 base64(&lt;global_signature&gt;)
 </code></pre>
 
-    <ul>
-      <li>
-        <code>signature_algorithm</code>: <code>Ed</code> (legacy) or <code>ED</code> (hashed)
-      </li>
-      <li>
-        <code>key_id</code>: 8 random bytes, matching the public key
-      </li>
-      <li>
-        <code>signature</code> (legacy): <code>ed25519(&lt;file data&gt;)</code>
-      </li>
-      <li>
-        <code>signature</code> (prehashed): <code>ed25519(Blake2b-512(&lt;file data&gt;))</code>
-      </li>
-      <li>
-        <code>global_signature</code>: <code>ed25519(&lt;signature&gt; || &lt;trusted_comment&gt;)</code>
-      </li>
-    </ul>
+            <ul>
+                <li>
+                    <code>signature_algorithm</code>: <code>Ed</code> (legacy)
+                    or <code>ED</code> (hashed)
+                </li>
+                <li>
+                    <code>key_id</code>: 8 random bytes, matching the public key
+                </li>
+                <li>
+                    <code>signature</code> (legacy):
+                    <code>ed25519(&lt;file data&gt;)</code>
+                </li>
+                <li>
+                    <code>signature</code> (prehashed):
+                    <code>ed25519(Blake2b-512(&lt;file data&gt;))</code>
+                </li>
+                <li>
+                    <code>global_signature</code>:
+                    <code
+                        >ed25519(&lt;signature&gt; ||
+                        &lt;trusted_comment&gt;)</code
+                    >
+                </li>
+            </ul>
 
-    <p>New implementations must use the hashed signature format; support for the legacy one is optional and should not
-      be done by default.</p>
+            <p>
+                New implementations must use the hashed signature format;
+                support for the legacy one is optional and should not be done by
+                default.
+            </p>
 
-    <h2>
-      <a id="public-key-format" class="anchor" href="#public-key-format" aria-hidden="true"><span
-          class="octicon octicon-link"></span></a>Public key format
-    </h2>
+            <h2>
+                <a
+                    id="public-key-format"
+                    class="anchor"
+                    href="#public-key-format"
+                    aria-hidden="true"
+                    ><span class="octicon octicon-link"></span></a
+                >Public key format
+            </h2>
 
-    <pre><code>untrusted comment: &lt;arbitrary text&gt;
+            <pre><code>untrusted comment: &lt;arbitrary text&gt;
 base64(&lt;signature_algorithm&gt; || &lt;key_id&gt; || &lt;public_key&gt;)
 </code></pre>
 
-    <ul>
-      <li>
-        <code>signature_algorithm</code>: <code>Ed</code>
-      </li>
-      <li>
-        <code>key_id</code>: 8 random bytes
-      </li>
-      <li>
-        <code>public_key</code>: Ed25519 public key
-      </li>
-    </ul>
+            <ul>
+                <li><code>signature_algorithm</code>: <code>Ed</code></li>
+                <li><code>key_id</code>: 8 random bytes</li>
+                <li><code>public_key</code>: Ed25519 public key</li>
+            </ul>
 
-    <h2>
-      <a id="secret-key-format" class="anchor" href="#secret-key-format" aria-hidden="true"><span
-          class="octicon octicon-link"></span></a>Secret key format
-    </h2>
+            <h2>
+                <a
+                    id="secret-key-format"
+                    class="anchor"
+                    href="#secret-key-format"
+                    aria-hidden="true"
+                    ><span class="octicon octicon-link"></span></a
+                >Secret key format
+            </h2>
 
-    <pre><code>untrusted comment: &lt;arbitrary text&gt;
+            <pre><code>untrusted comment: &lt;arbitrary text&gt;
 base64(&lt;signature_algorithm&gt; || &lt;kdf_algorithm&gt; || &lt;cksum_algorithm&gt; ||
        &lt;kdf_salt&gt; || &lt;kdf_opslimit&gt; || &lt;kdf_memlimit&gt; || &lt;keynum_sk&gt;)
 </code></pre>
 
-    <ul>
-      <li>
-        <code>signature_algorithm</code>: <code>Ed</code>
-      </li>
-      <li>
-        <code>kdf_algorithm</code>: <code>Sc</code>
-      </li>
-      <li>
-        <code>cksum_algorithm</code>: <code>B2</code>
-      </li>
-      <li>
-        <code>kdf_salt</code>: 32 random bytes
-      </li>
-      <li>
-        <code>kdf_opslimit</code>: <code>crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE</code>
-      </li>
-      <li>
-        <code>kdf_memlimit</code>: <code>crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE</code>
-      </li>
-      <li>
-        <code>keynum_sk</code>:
-        <code>&lt;kdf_output&gt; ^ (&lt;key_id&gt; || &lt;secret_key&gt; || &lt;public_key&gt; || &lt;checksum&gt;)</code>,
-        104 bytes
-      </li>
-      <li>
-        <code>key_id</code>: 8 random bytes
-      </li>
-      <li>
-        <code>secret_key</code>: Ed25519 secret key
-      </li>
-      <li>
-        <code>public_key</code>: Ed25519 public key
-      </li>
-      <li>
-        <code>checksum</code>:
-        <code>Blake2b-256(&lt;signature_algorithm&gt; || &lt;key_id&gt; || &lt;secret_key&gt; || &lt;public_key&gt;)</code>,
-        32 bytes
-      </li>
-    </ul>
+            <ul>
+                <li><code>signature_algorithm</code>: <code>Ed</code></li>
+                <li><code>kdf_algorithm</code>: <code>Sc</code></li>
+                <li><code>cksum_algorithm</code>: <code>B2</code></li>
+                <li><code>kdf_salt</code>: 32 random bytes</li>
+                <li>
+                    <code>kdf_opslimit</code>:
+                    <code
+                        >crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE</code
+                    >
+                </li>
+                <li>
+                    <code>kdf_memlimit</code>:
+                    <code
+                        >crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE</code
+                    >
+                </li>
+                <li>
+                    <code>keynum_sk</code>:
+                    <code
+                        >&lt;kdf_output&gt; ^ (&lt;key_id&gt; ||
+                        &lt;secret_key&gt; || &lt;public_key&gt; ||
+                        &lt;checksum&gt;)</code
+                    >, 104 bytes
+                </li>
+                <li><code>key_id</code>: 8 random bytes</li>
+                <li><code>secret_key</code>: Ed25519 secret key</li>
+                <li><code>public_key</code>: Ed25519 public key</li>
+                <li>
+                    <code>checksum</code>:
+                    <code
+                        >Blake2b-256(&lt;signature_algorithm&gt; ||
+                        &lt;key_id&gt; || &lt;secret_key&gt; ||
+                        &lt;public_key&gt;)</code
+                    >, 32 bytes
+                </li>
+            </ul>
 
-    <h2>
-      <a id="encryption" class="anchor" href="#encryption" aria-hidden="true"><span
-          class="octicon octicon-link"></span></a>Encryption
-    </h2>
+            <h2>
+                <a
+                    id="encryption"
+                    class="anchor"
+                    href="#encryption"
+                    aria-hidden="true"
+                    ><span class="octicon octicon-link"></span></a
+                >Encryption
+            </h2>
 
-    Looking for an equally simple tool for file and stream encryption? Check out <a
-      href="https://github.com/jedisct1/encpipe">Encpipe</a> and <a href="https://github.com/FiloSottile/age">Age</a>.
+            Looking for an equally simple tool for file and stream encryption?
+            Check out
+            <a href="https://github.com/jedisct1/encpipe">Encpipe</a> and
+            <a href="https://github.com/FiloSottile/age">Age</a>.
 
-    <footer class="site-footer">
-      <span class="site-footer-owner"><a href="https://github.com/jedisct1/minisign">Minisign</a> is maintained by <a
-          href="https://github.com/jedisct1">jedisct1</a>.</span>
+            <footer class="site-footer">
+                <span class="site-footer-owner"
+                    ><a href="https://github.com/jedisct1/minisign">Minisign</a>
+                    is maintained by
+                    <a href="https://github.com/jedisct1">jedisct1</a>.</span
+                >
 
-      <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a>
-        using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a
-          href="https://twitter.com/jasonlong">Jason Long</a>.</span>
-    </footer>
-
-  </section>
-
-
-</body>
-
+                <span class="site-footer-credits"
+                    >This page was generated by
+                    <a href="https://pages.github.com">GitHub Pages</a> using
+                    the
+                    <a href="https://github.com/jasonlong/cayman-theme"
+                        >Cayman theme</a
+                    >
+                    by
+                    <a href="https://twitter.com/jasonlong">Jason Long</a
+                    >.</span
+                >
+            </footer>
+        </section>
+    </body>
 </html>
