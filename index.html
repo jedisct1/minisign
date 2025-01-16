@@ -63,7 +63,7 @@
             >
         </section>
 
-        <section class="main-content">
+        < class="main-content">
             <h1>
                 <a
                     id="minisign"
@@ -241,11 +241,14 @@ minisign -V [-H] [-x sig_file] [-p pubkey_file | -P pubkey] [-o] [-q] -m file
             <h3>Using Zig</h3>
             <p>Dependencies:</p>
             <ul>
-                <li><a href="http://doc.libsodium.org/">libsodium</a></li>
+                <li><a href="http://doc.libsodium.org/">libsodium</a> (optional)</li>
             </ul>
 
             <p>Compilation:</p>
-            <pre><code>$ zig build -Drelease-small</code></pre>
+            <ul>
+                <li>With libsodium: <pre><code>$ zig build -Doptimize=ReleaseSmall</code></pre></li>
+                <li>Without libsodium: <pre><code>$ zig build -Doptimize=ReleaseSmall -Dwithout-libsodium</code></pre></li>
+            </ul>
 
             <h3>Using Cmake</h3>
             <p>Dependencies</p>
