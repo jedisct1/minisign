@@ -46,12 +46,21 @@ pub fn build(b: *std.Build) !void {
         minisign.root_module.addCMacro("LIBZODIUM", "1");
         minisign.linkLibrary(libzodium);
     } else {
+        var override_pkgconfig = false;
+        if (std.posix.getenv("LIBSODIUM_INCLUDE_PATH")) |path| {
+            minisign.addSystemIncludePath(.{ .cwd_relative = path });
+            override_pkgconfig = true;
+        }
+        if (std.posix.getenv("LIBSODIUM_LIB_PATH")) |path| {
+            minisign.addLibraryPath(.{ .cwd_relative = path });
+            override_pkgconfig = true;
+        }
         minisign.addLibraryPath(.{ .cwd_relative = "/opt/homebrew/lib" });
         minisign.addLibraryPath(.{ .cwd_relative = "/usr/local/lib" });
         minisign.root_module.linkSystemLibrary(
             "sodium",
             .{
-                .use_pkg_config = .yes,
+                .use_pkg_config = if (override_pkgconfig) .no else .yes,
                 .preferred_link_mode = if (use_static_linking) .static else .dynamic,
             },
         );
