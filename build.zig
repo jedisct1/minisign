@@ -4,6 +4,7 @@ const std = @import("std");
 pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
+    const native_os = @import("builtin").os.tag;
 
     const use_libzodium = b.option(bool, "without-libsodium", "Use the zig standard library instead of libsodium") orelse false;
     const use_static_linking = b.option(bool, "static", "Statically link the binary") orelse false;
@@ -55,8 +56,11 @@ pub fn build(b: *std.Build) !void {
             minisign.addLibraryPath(.{ .cwd_relative = path });
             override_pkgconfig = true;
         }
-        minisign.addLibraryPath(.{ .cwd_relative = "/opt/homebrew/lib" });
-        minisign.addLibraryPath(.{ .cwd_relative = "/usr/local/lib" });
+        switch (native_os) {
+            .linux => minisign.addLibraryPath(.{ .cwd_relative = "/usr/local/lib" }),
+            .macos => minisign.addLibraryPath(.{ .cwd_relative = "/opt/homebrew/lib" }),
+            else => {},
+        }
         minisign.root_module.linkSystemLibrary(
             "sodium",
             .{
