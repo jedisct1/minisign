@@ -55,8 +55,12 @@ pub fn build(b: *std.Build) !void {
             minisign.addLibraryPath(.{ .cwd_relative = path });
             override_pkgconfig = true;
         }
-        minisign.addLibraryPath(.{ .cwd_relative = "/opt/homebrew/lib" });
-        minisign.addLibraryPath(.{ .cwd_relative = "/usr/local/lib" });
+        minisign.addSystemIncludePath(.{ .cwd_relative = "/opt/homebrew/include" });
+        minisign.addSystemIncludePath(.{ .cwd_relative = "/usr/local/include" });
+        for ([_][]const u8{ "/opt/homebrew/lib", "/usr/local/lib" }) |path| {
+            std.fs.accessAbsolute(path, .{}) catch continue;
+            minisign.addLibraryPath(.{ .cwd_relative = path });
+        }
         minisign.root_module.linkSystemLibrary(
             "sodium",
             .{
@@ -66,8 +70,7 @@ pub fn build(b: *std.Build) !void {
         );
     }
     minisign.addIncludePath(b.path("src"));
-    minisign.addSystemIncludePath(.{ .cwd_relative = "/opt/homebrew/include" });
-    minisign.addSystemIncludePath(.{ .cwd_relative = "/usr/local/include" });
+
     minisign.root_module.addCMacro("_GNU_SOURCE", "1");
     const source_files = &.{ "src/base64.c", "src/get_line.c", "src/helpers.c", "src/minisign.c" };
     minisign.addCSourceFiles(.{ .files = source_files });
