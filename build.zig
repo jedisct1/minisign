@@ -59,8 +59,11 @@ pub fn build(b: *std.Build) !void {
             minisign.addLibraryPath(.{ .cwd_relative = path });
             override_pkgconfig = true;
         }
-        minisign.addSystemIncludePath(.{ .cwd_relative = "/opt/homebrew/include" });
-        minisign.addSystemIncludePath(.{ .cwd_relative = "/usr/local/include" });
+
+        for ([_][]const u8{ "/opt/homebrew/include", "/usr/local/include" }) |path| {
+            std.fs.accessAbsolute(path, .{}) catch continue;
+            minisign.addSystemIncludePath(.{ .cwd_relative = path });
+        }
         for ([_][]const u8{ "/opt/homebrew/lib", "/usr/local/lib" }) |path| {
             std.fs.accessAbsolute(path, .{}) catch continue;
             minisign.addLibraryPath(.{ .cwd_relative = path });
