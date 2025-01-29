@@ -14,6 +14,10 @@ pub fn build(b: *std.Build) !void {
         .optimize = optimize,
         .strip = true,
     });
+
+    // fix Mach-O relocation
+    minisign.headerpad_max_install_names = true;
+
     minisign.linkLibC();
     if (use_libzodium) {
         var libzodium = lib: {
