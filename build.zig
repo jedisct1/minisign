@@ -65,6 +65,7 @@ pub fn build(b: *std.Build) !void {
             std.fs.accessAbsolute(path, .{}) catch continue;
             minisign.addLibraryPath(.{ .cwd_relative = path });
         }
+        minisign.headerpad_max_install_names = true; // required to compile using Homebrew, see https://github.com/jedisct1/minisign/pull/155
         minisign.root_module.linkSystemLibrary(
             "sodium",
             .{
