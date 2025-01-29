@@ -61,6 +61,13 @@ pub fn build(b: *std.Build) !void {
         }
         minisign.addSystemIncludePath(.{ .cwd_relative = "/opt/homebrew/include" });
         minisign.addSystemIncludePath(.{ .cwd_relative = "/usr/local/include" });
+
+        // add linuxbrew library/include paths
+        if (target.result.os.tag == .linux) {
+            minisign.addIncludePath(.{ .cwd_relative = "/home/linuxbrew/.linuxbrew/include" });
+            minisign.addLibraryPath(.{ .cwd_relative = "/home/linuxbrew/.linuxbrew/lib" });
+        }
+
         for ([_][]const u8{ "/opt/homebrew/lib", "/usr/local/lib" }) |path| {
             std.fs.accessAbsolute(path, .{}) catch continue;
             minisign.addLibraryPath(.{ .cwd_relative = path });
