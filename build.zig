@@ -15,35 +15,26 @@ pub fn build(b: *std.Build) !void {
         .strip = true,
     });
 
+    if (builtin.zig_version.major == 0 and builtin.zig_version.minor < 14) {
+        @compileError("Building requires Zig 0.14.0 or later");
+    }
+
     // fix Mach-O relocation
     minisign.headerpad_max_install_names = true;
 
     minisign.linkLibC();
     if (use_libzodium) {
         var libzodium = lib: {
-            if (builtin.zig_version.major == 0 and builtin.zig_version.minor < 13) {
-                @compileError("Building requires Zig 0.13.0 or later");
-            }
-            if (builtin.zig_version.major == 0 and builtin.zig_version.minor == 13) {
-                break :lib b.addStaticLibrary(.{
-                    .name = "zodium",
-                    .strip = true,
-                    .root_source_file = b.path("src/libzodium/libzodium.zig"),
-                    .target = target,
-                    .optimize = optimize,
-                });
-            } else {
-                const libzodium_mod = b.createModule(.{
-                    .root_source_file = b.path("src/libzodium/libzodium.zig"),
-                    .target = target,
-                    .optimize = optimize,
-                });
-                break :lib b.addStaticLibrary(.{
-                    .name = "zodium",
-                    .root_module = libzodium_mod,
-                    .strip = true,
-                });
-            }
+            const libzodium_mod = b.createModule(.{
+                .root_source_file = b.path("src/libzodium/libzodium.zig"),
+                .target = target,
+                .optimize = optimize,
+            });
+            break :lib b.addStaticLibrary(.{
+                .name = "zodium",
+                .root_module = libzodium_mod,
+                .strip = true,
+            });
         };
         libzodium.linkLibC();
         b.installArtifact(libzodium);
