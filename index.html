@@ -228,6 +228,16 @@ minisign -V [-H] [-x sig_file] [-p pubkey_file | -P pubkey] [-o] [-q] -m file
                 attacks).
             </p>
 
+            <p>
+                OpenBSD's <a href="https://man.openbsd.org/signify">signify(1)</a>
+                is conceptually similar to minisign.  Minisign creates signatures
+                that can be verified by signify, but signatures created by signify
+                <b>cannot</b> be verified by minisign because minisign expects
+                the trusted comment section to be present.  Trusted comments are
+                important to describe what has been signed in addition to the fact
+                that something has been signed.
+            </p>
+
             <h2>
                 <a
                     id="compilation--installation"
