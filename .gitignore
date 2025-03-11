@@ -23,5 +23,5 @@ CMakeFiles
 Makefile
 cmake_install.cmake
 minisign
-zig-cache
+.zig-cache
 zig-out
