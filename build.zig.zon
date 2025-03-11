@@ -1,6 +1,7 @@
 .{
-    .name = "minisign",
+    .name = .minisign,
     .version = "0.12.0",
+    .fingerprint = 0x280456c1fd373c55,
     .paths = .{
         "LICEMSE",
         "README.md",
