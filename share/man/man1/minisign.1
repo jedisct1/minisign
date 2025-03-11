@@ -152,7 +152,7 @@ This requires the signature \fBmyfile\.txt\.minisig\fR to be present in the same
 .P
 The public key can either reside in a file (\fB\./minisign\.pub\fR by default) or be directly specified on the command line\.
 .
-.SH "Notes"
+.SH "NOTES"
 Signature files include an untrusted comment line that can be freely modified, even after signature creation\.
 .
 .P
@@ -160,6 +160,9 @@ They also include a second comment line, that cannot be modified without the sec
 .
 .P
 Trusted comments can be used to add instructions or application\-specific metadata (intended file name, timestamps, resource identifiers, version numbers to prevent downgrade attacks)\.
+.
+.P
+OpenBSD's signify(1) is conceptually similar to Minisign\.  Minisign creates signatures that can be verified by signify, but signatures created by signify \fBcannot\fR be verified with minisign because minisign expects the trusted comment section to be present\. Trusted comments are important to describe what has been signed in addition to the fact that something has been signed\.
 .
 .SH "AUTHOR"
 Frank Denis (github [at] pureftpd [dot] org)
