@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "MINISIGN" "1" "August 2024" "" ""
+.TH "MINISIGN" "1" "March 2025" "" ""
 .
 .SH "NAME"
 \fBminisign\fR \- A dead simple tool to sign files and verify signatures\.
@@ -153,16 +153,16 @@ This requires the signature \fBmyfile\.txt\.minisig\fR to be present in the same
 The public key can either reside in a file (\fB\./minisign\.pub\fR by default) or be directly specified on the command line\.
 .
 .SH "NOTES"
-Signature files include an untrusted comment line that can be freely modified, even after signature creation\.
+Signature files include an untrusted comment line that can be freely modified even after the signature is created\.
 .
 .P
-They also include a second comment line, that cannot be modified without the secret key\.
+They also include a second comment line that cannot be modified without the secret key\.
 .
 .P
-Trusted comments can be used to add instructions or application\-specific metadata (intended file name, timestamps, resource identifiers, version numbers to prevent downgrade attacks)\.
+Trusted comments can be used to add instructions or application\-specific metadata such as the intended file name, timestamps, resource identifiers, or version numbers to prevent downgrade attacks\.
 .
 .P
-OpenBSD's signify(1) is conceptually similar to Minisign\.  Minisign creates signatures that can be verified by signify, but signatures created by signify \fBcannot\fR be verified with minisign because minisign expects the trusted comment section to be present\. Trusted comments are important to describe what has been signed in addition to the fact that something has been signed\.
+OpenBSD\'s \fBsignify(1)\fR is conceptually similar to Minisign\. Minisign creates signatures that can be verified by \fBsignify\fR; however, signatures created by \fBsignify\fR cannot be verified with Minisign because Minisign expects a trusted comment section to be present\. Trusted comments are crucial for describing what has been signed, in addition to merely confirming that a signature exists\.
 .
 .SH "AUTHOR"
 Frank Denis (github [at] pureftpd [dot] org)

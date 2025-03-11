@@ -100,11 +100,13 @@ The public key can either reside in a file (`./minisign.pub` by default) or be d
 
 ## NOTES
 
-Signature files include an untrusted comment line that can be freely modified, even after signature creation.
+Signature files include an untrusted comment line that can be freely modified even after the signature is created.
 
-They also include a second comment line, that cannot be modified without the secret key.
+They also include a second comment line that cannot be modified without the secret key.
 
-Trusted comments can be used to add instructions or application-specific metadata (intended file name, timestamps, resource identifiers, version numbers to prevent downgrade attacks).
+Trusted comments can be used to add instructions or application-specific metadata such as the intended file name, timestamps, resource identifiers, or version numbers to prevent downgrade attacks.
+
+OpenBSD's `signify(1)` is conceptually similar to Minisign. Minisign creates signatures that can be verified by `signify`; however, signatures created by `signify` cannot be verified with Minisign because Minisign expects a trusted comment section to be present. Trusted comments are crucial for describing what has been signed, in addition to merely confirming that a signature exists.
 
 ## AUTHOR
 
