@@ -1,8 +1,8 @@
 <!---
 This man page can be generated using ronn - https://rtomayko.github.io/ronn/
 -->
-minisign(1) -- A dead simple tool to sign files and verify signatures.
-======================================================================
+
+# minisign(1) -- A dead simple tool to sign files and verify signatures.
 
 ## SYNOPSIS
 
@@ -26,47 +26,46 @@ It is portable, lightweight, and uses the highly secure [Ed25519](http://ed25519
 
 These options control the actions of `minisign`.
 
-  * `-G`:
-    Generate a new key pair
-  * `-C`:
-    Change/remove the password of a secret key
-  * `-R`:
-    Recreate a public key file from a secret key file
-  * `-S`:
-    Sign files
-  * `-V`:
-    Verify that a signature is valid for a given file
-  * `-H`:
-    Requires the input to be prehashed
-  * `-l`:
-    Sign using the legacy format
-  * `-m <file>`:
-    File to sign/verify
-  * `-o`:
-    Combined with -V, output the file content after verification
-  * `-p <pubkey_file>`:
-    Public key file (default: ./minisign.pub)
-  * `-P <pubkey>`:
-    Public key, as a base64 string
-  * `-s <seckey_file>`:
-    Secret key file (default: ~/.minisign/minisign.key)
-  * `-W`:
-    Do not encrypt/decrypt the secret key with a password
-  * `-x <sig_file>`:
-    Signature file (default: &lt;file&gt;.minisig)
-  * `-c <comment>`:
-    Add a one-line untrusted comment
-  * `-t <comment>`:
-    Add a one-line trusted comment
-  * `-q`:
-    Quiet mode, suppress output
-  * `-Q`:
-    Pretty quiet mode, only print the trusted comment
-  * `-f`:
-    Force. Combined with -G, overwrite a previous key pair
-  * `-v`:
-    Display version number
-
+- `-G`:
+  Generate a new key pair
+- `-C`:
+  Change/remove the password of a secret key
+- `-R`:
+  Recreate a public key file from a secret key file
+- `-S`:
+  Sign files
+- `-V`:
+  Verify that a signature is valid for a given file
+- `-H`:
+  Requires the input to be prehashed
+- `-l`:
+  Sign using the legacy format
+- `-m <file>`:
+  File to sign/verify
+- `-o`:
+  Combined with -V, output the file content after verification
+- `-p <pubkey_file>`:
+  Public key file (default: ./minisign.pub)
+- `-P <pubkey>`:
+  Public key, as a base64 string
+- `-s <seckey_file>`:
+  Secret key file (default: ~/.minisign/minisign.key)
+- `-W`:
+  Do not encrypt/decrypt the secret key with a password
+- `-x <sig_file>`:
+  Signature file (default: &lt;file&gt;.minisig)
+- `-c <comment>`:
+  Add a one-line untrusted comment
+- `-t <comment>`:
+  Add a one-line trusted comment
+- `-q`:
+  Quiet mode, suppress output
+- `-Q`:
+  Pretty quiet mode, only print the trusted comment
+- `-f`:
+  Force. Combined with -G, overwrite a previous key pair
+- `-v`:
+  Display version number
 
 ## EXAMPLES
 
@@ -79,7 +78,7 @@ The public key is printed and put into the `minisign.pub` file. The secret key i
 Signing files
 
 $ `minisign` -Sm myfile.txt
-$ `minisign` -Sm myfile.txt myfile2.txt *.c
+$ `minisign` -Sm myfile.txt myfile2.txt \*.c
 
 Or to include a comment in the signature, that will be verified and displayed when verifying the file:
 
@@ -89,7 +88,7 @@ The secret key is loaded from `${MINISIGN_CONFIG_DIR}/minisign.key`, `~/.minisig
 
 Verifying a file
 
-$ `minisign` -Vm myfile.txt -P  &lt;pubkey&gt;
+$ `minisign` -Vm myfile.txt -P &lt;pubkey&gt;
 
 or
 
@@ -99,7 +98,7 @@ This requires the signature `myfile.txt.minisig` to be present in the same direc
 
 The public key can either reside in a file (`./minisign.pub` by default) or be directly specified on the command line.
 
-## Notes
+## NOTES
 
 Signature files include an untrusted comment line that can be freely modified, even after signature creation.
 
