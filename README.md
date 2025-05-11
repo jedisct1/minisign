@@ -2,7 +2,6 @@
 
 ![CodeQL scan](https://github.com/jedisct1/minisign/workflows/CodeQL%20scan/badge.svg)
 ![Release](https://img.shields.io/github/v/release/jedisct1/minisign)
-![License](https://img.shields.io/github/license/jedisct1/minisign)
 
 A dead simple tool to sign files and verify signatures.
 
@@ -11,6 +10,7 @@ A dead simple tool to sign files and verify signatures.
 - [Minisign](#minisign)
   - [Table of Contents](#table-of-contents)
   - [Overview](#overview)
+  - [Documentation](#documentation)
   - [Installation](#installation)
     - [Pre-built Packages](#pre-built-packages)
     - [Building with Zig](#building-with-zig)
@@ -24,7 +24,6 @@ A dead simple tool to sign files and verify signatures.
   - [Compatibility with Signify](#compatibility-with-signify)
   - [Signature Determinism](#signature-determinism)
   - [Additional Tools, Libraries and Implementations](#additional-tools-libraries-and-implementations)
-  - [Documentation](#documentation)
 
 ## Overview
 
@@ -36,6 +35,10 @@ Minisign is a tool to sign files and verify signatures. It's designed to be:
 - Cross-platform
 
 Minisign uses the [Ed25519](https://ed25519.cr.yp.to/) public-key signature system with small and fast signatures.
+
+## Documentation
+
+For comprehensive documentation, please refer to the [Minisign documentation](https://jedisct1.github.io/minisign/) website or the included man page.
 
 ## Installation
 
@@ -209,6 +212,3 @@ Other implementations can choose to use non-deterministic signatures by default.
 - [py-minisign](https://github.com/x13a/py-minisign) - Python implementation
 - [minisign](https://hexdocs.pm/minisign/Minisign.html) - Elixir implementation (verification only)
 
-## Documentation
-
-For comprehensive documentation, please refer to the [Minisign documentation](https://jedisct1.github.io/minisign/) website or the included man page.
