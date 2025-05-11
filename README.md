@@ -1,91 +1,178 @@
-![CodeQL scan](https://github.com/jedisct1/minisign/workflows/CodeQL%20scan/badge.svg)
-
 # Minisign
 
-Minisign is a dead simple tool to sign files and verify signatures.
+![CodeQL scan](https://github.com/jedisct1/minisign/workflows/CodeQL%20scan/badge.svg)
+![Release](https://img.shields.io/github/v/release/jedisct1/minisign)
+![License](https://img.shields.io/github/license/jedisct1/minisign)
 
-For more information, please refer to the
-[Minisign documentation](https://jedisct1.github.io/minisign/)
+A dead simple tool to sign files and verify signatures.
 
-Tarballs and pre-compiled binaries can be verified with the following
-public key:
+## Table of Contents
 
-    RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3
+- [Minisign](#minisign)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Installation](#installation)
+    - [Pre-built Packages](#pre-built-packages)
+    - [Building with Zig](#building-with-zig)
+    - [Building with cmake and gcc or clang](#building-with-cmake-and-gcc-or-clang)
+  - [Usage](#usage)
+    - [Generating a Key Pair](#generating-a-key-pair)
+    - [Signing Files](#signing-files)
+    - [Verifying Signatures](#verifying-signatures)
+  - [Verification of Official Releases](#verification-of-official-releases)
+  - [Docker](#docker)
+  - [Compatibility with Signify](#compatibility-with-signify)
+  - [Signature Determinism](#signature-determinism)
+  - [Additional Tools, Libraries and Implementations](#additional-tools-libraries-and-implementations)
+  - [Documentation](#documentation)
 
-## Compilation / installation
+## Overview
 
-## Building with Zig
+Minisign is a tool to sign files and verify signatures. It's designed to be:
 
-Dependencies:
+- Simple to use
+- Secure (based on modern cryptography)
+- Minimal (focused on doing one thing well)
+- Cross-platform
 
-- [libsodium](https://libsodium.org/) (_optional_)
-- [zig](https://ziglang.org)
+Minisign uses the [Ed25519](https://ed25519.cr.yp.to/) public-key signature system with small and fast signatures.
 
-Compilation with libsodium, dynamically linked (libsodium will need to be installed on the system for the command to run):
+## Installation
 
-    $ zig build -Doptimize=ReleaseSmall
+### Pre-built Packages
 
-Compilation with libsodium, statically linked (libsodium will only be needed for compilation):
+Minisign is available in various package managers:
 
-    $ zig build -Doptimize=ReleaseSmall -Dstatic
+| Platform             | Command                  |
+| -------------------- | ------------------------ |
+| macOS (Homebrew)     | `brew install minisign`  |
+| Windows (Scoop)      | `scoop install minisign` |
+| Windows (Chocolatey) | `choco install minisign` |
 
-Compilation without libsodium, no dependencies required:
+### Building with Zig
 
-    $ zig build -Doptimize=ReleaseSmall -Dwithout-libsodium
+**Dependencies:**
+
+- [libsodium](https://libsodium.org/) (optional)
+- [zig](https://ziglang.org) (version 0.14.0 or later)
+
+**Compilation options:**
+
+1. With libsodium, dynamically linked:
+
+```sh
+zig build -Doptimize=ReleaseSmall
+```
+
+2. With libsodium, statically linked:
+3. 
+```sh 
+zig build -Doptimize=ReleaseSmall -Dstatic
+```
+
+1. Without libsodium (no dependencies required):
+
+```sh
+zig build -Doptimize=ReleaseSmall -Dwithout-libsodium
+```
 
 The resulting binary can be found in `zig-out/bin/minisign`.
 
-In all these examples, `ReleaseFast` can be replaced with `ReleaseSmall` to favor speed over size.
+For faster execution at the cost of larger binary size, you can replace `ReleaseSmall` with `ReleaseFast` in any of the above commands.
 
-## Building with cmake and gcc or clang:
+### Building with cmake and gcc or clang
 
-Dependencies:
+**Dependencies:**
 
-- [libsodium](https://libsodium.org/) (_required_)
+- [libsodium](https://libsodium.org/) (required)
 - cmake
 - pkg-config
 - gcc or clang
 
-Compilation:
+**Compilation:**
 
-    $ mkdir build
-    $ cd build
-    $ cmake ..
-    $ make
-    # make install
+```sh
+mkdir build
+cd build
+cmake ..
+make
+make install  # with appropriate permissions
+```
 
-Alternative configuration for static binaries:
+**Alternative configuration for static binaries:**
 
-    $ cmake -D STATIC_LIBSODIUM=1 ..
+```sh
+cmake -D STATIC_LIBSODIUM=1 ..
+```
 
 or:
 
-    $ cmake -D BUILD_STATIC_EXECUTABLES=1 ..
+```sh
+cmake -D BUILD_STATIC_EXECUTABLES=1 ..
+```
 
-## Pre-built packages
+## Usage
 
-Minisign is also available in Homebrew:
+### Generating a Key Pair
 
-    $ brew install minisign
+```sh
+minisign -G
+```
 
-Minisign is also available in Scoop on Windows:
+This creates:
 
-    $ scoop install minisign
+- A public key (`minisign.pub` by default)
+- A password-protected secret key (`minisign.key` by default)
 
-Minisign is also available in chocolatey on Windows:
+### Signing Files
 
-    $ choco install minisign
+```sh
+minisign -S -m file.txt
+```
 
-Minisign is also available with docker:
+This creates a signature file named `file.txt.minisig`.
 
-    $ docker run -i --rm jedisct1/minisign
+To add a trusted comment that will be verified:
 
-For example, verifying a signature using the docker image can be done
-with:
+```sh
+minisign -S -m file.txt -t "Trusted comment here"
+```
 
-    $ docker run -v .:/minisign -e HOME=/minisign -w /minisign \
-      -it --rm jedisct1/minisign \
-      -Vm file_to_verify -p minisign.pub
+### Verifying Signatures
+
+```sh
+minisign -Vm file.txt -p minisign.pub
+```
+
+or with a public key directly:
+
+```sh
+minisign -Vm file.txt -P RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3
+```
+
+## Verification of Official Releases
+
+Tarballs and pre-compiled binaries from the project can be verified with the following public key:
+
+```text
+RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3
+```
+
+## Docker
+
+Minisign is available as a Docker image:
+
+```sh
+docker run -i --rm jedisct1/minisign
+```
+
+Example of verifying a signature using the Docker image:
+
+```sh
+docker run -v .:/minisign -e HOME=/minisign -w /minisign \
+  -it --rm jedisct1/minisign \
+  -Vm file_to_verify -p minisign.pub
+```
 
 The image can be verified with the following cosign public key:
 
@@ -96,42 +183,32 @@ OQTDtJeciX9LF9hEbs1J1fzZHRdRhV4OTqcq0jTW9PXnrSSZlk1fbkE/5w==
 -----END PUBLIC KEY-----
 ```
 
-## Additional tools, libraries and implementations
+## Compatibility with Signify
 
-- [minizign](https://github.com/jedisct1/zig-minisign) is a compact
-  implementation in Zig, that can also use ssh-encoded keys.
-- [minisign-misc](https://github.com/JayBrown/minisign-misc) is a very
-  nice set of workflows and scripts for macOS to verify and sign files
-  with minisign.
-- [go-minisign](https://github.com/jedisct1/go-minisign) is a small module
-  in Go to verify Minisign signatures.
-- [rust-minisign](https://github.com/jedisct1/rust-minisign) is a Minisign
-  library written in pure Rust, that can be embedded in other applications.
-- [rsign2](https://github.com/jedisct1/rsign2) is a reimplementation of
-  the command-line tool in Rust.
-- [minisign (go)](https://github.com/aead/minisign) is a rewrite of Minisign
-  in the Go language. It reimplements the CLI but can also be used as a library.
-- [minisign-verify](https://github.com/jedisct1/rust-minisign-verify) is
-  a small Rust crate to verify Minisign signatures.
-- [minisign-net](https://github.com/bitbeans/minisign-net) is a .NET library
-  to handle and create Minisign signatures.
-- [minisign](https://github.com/chm-diederichs/minisign) a Javascript
-  implementation.
-- WebAssembly implementations of [rsign2](https://wapm.io/package/jedisct1/rsign2)
-  and [minisign-cli](https://wapm.io/package/jedisct1/minisign) are available on
-  WAPM.
-- [minisign-php](https://github.com/soatok/minisign-php) is a PHP implementation.
-- [py-minisign](https://github.com/x13a/py-minisign) is a Python
-  implementation.
-- [minisign](https://hexdocs.pm/minisign/Minisign.html) is an Elixir implementation
-  (verification only)
+Minisign is compatible with [signify](https://www.openbsd.org/papers/bsdcan-signify.html), the OpenBSD signing tool. Signatures created with signify can be verified with minisign, and vice versa.
 
-## Signature determinism
+## Signature Determinism
 
-This implementation uses deterministic signatures, unless libsodium
-was compiled with the `ED25519_NONDETERMINISTIC` macro defined. This
-adds random noise to the computation of EdDSA nonces.
+This implementation uses deterministic signatures, unless libsodium was compiled with the `ED25519_NONDETERMINISTIC` macro defined. This adds random noise to the computation of EdDSA nonces.
 
-Other implementations can choose to use non-deterministic signatures
-by default. They will remain fully interoperable with implementations
-using deterministic signatures.
+Other implementations can choose to use non-deterministic signatures by default. They will remain fully interoperable with implementations using deterministic signatures.
+
+## Additional Tools, Libraries and Implementations
+
+- [minizign](https://github.com/jedisct1/zig-minisign) - Compact implementation in Zig that can also use ssh-encoded keys
+- [minisign-misc](https://github.com/JayBrown/minisign-misc) - Set of workflows and scripts for macOS to verify and sign files
+- [go-minisign](https://github.com/jedisct1/go-minisign) - Go module to verify Minisign signatures
+- [rust-minisign](https://github.com/jedisct1/rust-minisign) - Minisign library in pure Rust
+- [rsign2](https://github.com/jedisct1/rsign2) - Reimplementation of the command-line tool in Rust
+- [minisign (go)](https://github.com/aead/minisign) - Rewrite in Go language (CLI and library)
+- [minisign-verify](https://github.com/jedisct1/rust-minisign-verify) - Small Rust crate to verify Minisign signatures
+- [minisign-net](https://github.com/bitbeans/minisign-net) - .NET library for Minisign signatures
+- [minisign](https://github.com/chm-diederichs/minisign) - Javascript implementation
+- WebAssembly implementations: [rsign2](https://wapm.io/package/jedisct1/rsign2) and [minisign-cli](https://wapm.io/package/jedisct1/minisign) on WAPM
+- [minisign-php](https://github.com/soatok/minisign-php) - PHP implementation
+- [py-minisign](https://github.com/x13a/py-minisign) - Python implementation
+- [minisign](https://hexdocs.pm/minisign/Minisign.html) - Elixir implementation (verification only)
+
+## Documentation
+
+For comprehensive documentation, please refer to the [Minisign documentation](https://jedisct1.github.io/minisign/) website or the included man page.
