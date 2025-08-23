@@ -3,23 +3,23 @@ const crypto = std.crypto;
 const mem = std.mem;
 const Ed25519 = crypto.sign.Ed25519;
 
-export fn sodium_init() callconv(.C) c_int {
+export fn sodium_init() callconv(.c) c_int {
     return 0;
 }
 
-export fn sodium_memzero(pnt: [*c]u8, len: usize) callconv(.C) void {
-    crypto.utils.secureZero(u8, pnt[0..len]);
+export fn sodium_memzero(pnt: [*c]u8, len: usize) callconv(.c) void {
+    crypto.secureZero(u8, pnt[0..len]);
 }
 
-export fn randombytes_buf(pnt: [*c]u8, len: usize) callconv(.C) void {
+export fn randombytes_buf(pnt: [*c]u8, len: usize) callconv(.c) void {
     crypto.random.bytes(pnt[0..len]);
 }
 
-export fn sodium_malloc(len: usize) callconv(.C) ?*anyopaque {
+export fn sodium_malloc(len: usize) callconv(.c) ?*anyopaque {
     return std.c.malloc(len);
 }
 
-export fn sodium_free(pnt: ?*anyopaque) callconv(.C) void {
+export fn sodium_free(pnt: ?*anyopaque) callconv(.c) void {
     return std.c.free(pnt);
 }
 
@@ -31,7 +31,7 @@ export fn crypto_pwhash_scryptsalsa208sha256(
     salt: [*c]const u8,
     opslimit: c_ulonglong,
     memlimit: usize,
-) callconv(.C) c_int {
+) callconv(.c) c_int {
     crypto.pwhash.scrypt.kdf(
         std.heap.c_allocator,
         out[0..@intCast(outlen)],
@@ -74,7 +74,7 @@ export fn crypto_generichash_final(
     return 0;
 }
 
-export fn crypto_sign_keypair(pk: [*c]u8, sk: [*c]u8) callconv(.C) c_int {
+export fn crypto_sign_keypair(pk: [*c]u8, sk: [*c]u8) callconv(.c) c_int {
     const kp = if (std.meta.hasFn(Ed25519.KeyPair, "generate")) Ed25519.KeyPair.generate() else (Ed25519.KeyPair.create(null) catch return -1);
     pk[0..32].* = kp.public_key.toBytes();
     sk[0..64].* = kp.secret_key.toBytes();
@@ -87,7 +87,7 @@ export fn crypto_sign_detached(
     m: [*c]const u8,
     mlen: c_ulonglong,
     sk_bytes: [*c]const u8,
-) callconv(.C) c_int {
+) callconv(.c) c_int {
     const sk = Ed25519.SecretKey.fromBytes(sk_bytes[0..64].*) catch return -1;
     const kp = Ed25519.KeyPair.fromSecretKey(sk) catch return -1;
     var noise: [Ed25519.noise_length]u8 = undefined;
@@ -102,7 +102,7 @@ export fn crypto_sign_verify_detached(
     m: [*c]const u8,
     mlen: c_ulonglong,
     pk_bytes: [*c]const u8,
-) callconv(.C) c_int {
+) callconv(.c) c_int {
     const pk = Ed25519.PublicKey.fromBytes(pk_bytes[0..32].*) catch return -1;
     const sig = Ed25519.Signature.fromBytes(sig_bytes[0..64].*);
     sig.verify(m[0..@intCast(mlen)], pk) catch return 1;
@@ -114,7 +114,7 @@ export fn sodium_bin2hex(
     hex_maxlen: usize,
     bin: [*c]const u8,
     bin_len: usize,
-) callconv(.C) [*c]u8 {
-    _ = std.fmt.bufPrint(hex[0..hex_maxlen], "{s}", .{std.fmt.fmtSliceHexLower(bin[0..bin_len])}) catch return null;
+) callconv(.c) [*c]u8 {
+    _ = std.fmt.bufPrint(hex[0..hex_maxlen], "{x}", .{bin[0..bin_len]}) catch return null;
     return hex;
 }

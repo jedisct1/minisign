@@ -10,13 +10,14 @@ pub fn build(b: *std.Build) !void {
 
     const minisign = b.addExecutable(.{
         .name = "minisign",
-        .target = target,
-        .optimize = optimize,
-        .strip = true,
+        .root_module = b.createModule(.{
+            .target = target,
+            .optimize = optimize,
+        }),
     });
 
-    if (builtin.zig_version.major == 0 and builtin.zig_version.minor < 14) {
-        @compileError("Building requires Zig 0.14.0 or later");
+    if (builtin.zig_version.major == 0 and builtin.zig_version.minor < 15) {
+        @compileError("Building requires Zig 0.15.1 or later");
     }
 
     // fix Mach-O relocation
@@ -25,15 +26,13 @@ pub fn build(b: *std.Build) !void {
     minisign.linkLibC();
     if (use_libzodium) {
         var libzodium = lib: {
-            const libzodium_mod = b.createModule(.{
-                .root_source_file = b.path("src/libzodium/libzodium.zig"),
-                .target = target,
-                .optimize = optimize,
-            });
-            break :lib b.addStaticLibrary(.{
+            break :lib b.addLibrary(.{
                 .name = "zodium",
-                .root_module = libzodium_mod,
-                .strip = true,
+                .root_module = b.createModule(.{
+                    .root_source_file = b.path("src/libzodium/libzodium.zig"),
+                    .target = target,
+                    .optimize = optimize,
+                }),
             });
         };
         libzodium.linkLibC();
