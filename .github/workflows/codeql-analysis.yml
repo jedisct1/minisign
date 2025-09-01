@@ -13,7 +13,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v5
       with:
         fetch-depth: 2
 
@@ -21,12 +21,12 @@ jobs:
       if: ${{ github.event_name == 'pull_request' }}
 
     - run: sudo apt-get install -qy libsodium-dev
-      
+
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v1
 
     - name: Autobuild
       uses: github/codeql-action/autobuild@v1
-      
+
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
