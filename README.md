@@ -61,23 +61,23 @@ Minisign is available in various package managers:
 
 **Compilation options:**
 
-1. With libsodium, dynamically linked:
+1.  With libsodium, dynamically linked:
 
-```sh
-zig build -Doptimize=ReleaseSmall
-```
+    ```sh
+    zig build -Doptimize=ReleaseSmall
+    ```
 
-2. With libsodium, statically linked:
-3. 
-```sh 
-zig build -Doptimize=ReleaseSmall -Dstatic
-```
+2.  With libsodium, statically linked:
 
-1. Without libsodium (no dependencies required):
+    ```sh
+    zig build -Doptimize=ReleaseSmall -Dstatic
+    ```
 
-```sh
-zig build -Doptimize=ReleaseSmall -Dwithout-libsodium
-```
+3.  Without libsodium (no dependencies required):
+
+    ```sh
+    zig build -Doptimize=ReleaseSmall -Dwithout-libsodium
+    ```
 
 The resulting binary can be found in `zig-out/bin/minisign`.
 
