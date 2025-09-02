@@ -178,11 +178,12 @@ docker run -i --rm -v .:/minisign jedisct1/minisign \
 
 ```sh
 docker run -i --rm -v .:/minisign jedisct1/minisign \
-  -s minisign.key -S -m python-*.pkg
+  -s minisign.key -S -m files_to_sign
 ```
 
-`-s minisign.key` will create / use the private key, the public key will be `minisign.pub` accordingly.
-Attention: Create a backup and do not commit or share your generated private key file `minisign.key`.
+`-s minisign.key` creates and uses the secret key; the public key will be named `minisign.pub`.
+
+Important: create a backup and do not commit or share your generated private key file `minisign.key`.
 
 Example of verifying a signature using the Docker image:
 
