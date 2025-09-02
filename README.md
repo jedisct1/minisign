@@ -42,7 +42,7 @@ For comprehensive documentation, please refer to the [Minisign documentation](ht
 
 ## Installation
 
-### Pre-built Packages
+### Prebuilt Packages
 
 Minisign is available in various package managers:
 
@@ -83,14 +83,14 @@ The resulting binary can be found in `zig-out/bin/minisign`.
 
 For faster execution at the cost of larger binary size, you can replace `ReleaseSmall` with `ReleaseFast` in any of the above commands.
 
-### Building with cmake and gcc or clang
+### Building with CMake and GCC or Clang
 
 **Dependencies:**
 
 - [libsodium](https://libsodium.org/) (required)
-- cmake
+- CMake
 - pkg-config
-- gcc or clang
+- GCC or Clang
 
 **Compilation:**
 
@@ -155,7 +155,7 @@ minisign -Vm file.txt -P RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO
 
 ## Verification of Official Releases
 
-Tarballs and pre-compiled binaries from the project can be verified with the following public key:
+Tarballs and precompiled binaries from the project can be verified with the following public key:
 
 ```text
 RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3
@@ -215,7 +215,7 @@ Other implementations can choose to use non-deterministic signatures by default.
 
 ## Additional Tools, Libraries and Implementations
 
-- [minizign](https://github.com/jedisct1/zig-minisign) - Compact implementation in Zig that can also use ssh-encoded keys
+- [minizign](https://github.com/jedisct1/zig-minisign) - Compact implementation in Zig that can also use SSH-encoded keys
 - [minisign-misc](https://github.com/JayBrown/minisign-misc) - Set of workflows and scripts for macOS to verify and sign files
 - [go-minisign](https://github.com/jedisct1/go-minisign) - Go module to verify Minisign signatures
 - [rust-minisign](https://github.com/jedisct1/rust-minisign) - Minisign library in pure Rust
@@ -223,7 +223,7 @@ Other implementations can choose to use non-deterministic signatures by default.
 - [minisign (go)](https://github.com/aead/minisign) - Rewrite in Go language (CLI and library)
 - [minisign-verify](https://github.com/jedisct1/rust-minisign-verify) - Small Rust crate to verify Minisign signatures
 - [minisign-net](https://github.com/bitbeans/minisign-net) - .NET library for Minisign signatures
-- [minisign](https://github.com/chm-diederichs/minisign) - Javascript implementation
+- [minisign](https://github.com/chm-diederichs/minisign) - JavaScript implementation
 - WebAssembly implementations: [rsign2](https://wapm.io/package/jedisct1/rsign2) and [minisign-cli](https://wapm.io/package/jedisct1/minisign) on WAPM
 - [minisign-php](https://github.com/soatok/minisign-php) - PHP implementation
 - [py-minisign](https://github.com/x13a/py-minisign) - Python implementation
