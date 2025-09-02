@@ -9,13 +9,12 @@ COPY . .
 RUN mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_STATIC_EXECUTABLES=1 .. && make -j$(nproc)
 RUN upx --lzma build/minisign ||:
 
-WORKDIR /copy/etc
+WORKDIR /staging/etc
 RUN echo "_minisign:x:65534:" > group \
  && echo "_minisign:x:65534:65534:minisign:/dev/null:/etc" > passwd
 
-
 FROM scratch
-COPY --from=build /copy/ /
+COPY --from=build /staging/ /
 COPY --from=build /usr/src/minisign/build/minisign /usr/bin/catatonit /usr/bin/
 USER 65534:65534
 WORKDIR /minisign
