@@ -18,5 +18,5 @@ FROM scratch
 COPY --from=build /copy/ /
 COPY --from=build /usr/src/minisign/build/minisign /usr/bin/catatonit /usr/bin/
 USER 65534:65534
-WORKDIR /host
+WORKDIR /minisign
 ENTRYPOINT ["/usr/bin/catatonit", "--", "/usr/bin/minisign"]
