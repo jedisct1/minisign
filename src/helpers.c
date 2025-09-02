@@ -242,9 +242,6 @@ get_home_dir(void)
     if ((dir = getenv("USERPROFILE")) != NULL) {
         return xstrdup(dir);
     }
-    if ((dir = getenv("USERPROFILE")) != NULL) {
-        return xstrdup(dir);
-    }
     if ((hd = getenv("HOMEDRIVE")) != NULL && (hp = getenv("HOMEPATH")) != NULL) {
         if (asprintf(&dir, "%s%s", hd, hp) < 0) {
             exit_err("asprintf()");
