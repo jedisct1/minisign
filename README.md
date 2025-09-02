@@ -73,7 +73,7 @@ zig build -Doptimize=ReleaseSmall
 zig build -Doptimize=ReleaseSmall -Dstatic
 ```
 
-1. Without libsodium (no dependencies required):
+3. Without libsodium (no dependencies required):
 
 ```sh
 zig build -Doptimize=ReleaseSmall -Dwithout-libsodium
@@ -169,13 +169,22 @@ Minisign is available as a Docker image:
 docker run -i --rm jedisct1/minisign
 ```
 
+Example of generating a key for the first time and then signing a local file:
+
+```sh
+docker run -i --rm -v .:/host jedisct1/minisign -s minisign.key -G
+docker run -i --rm -v .:/host jedisct1/minisign -s minisign.key -S -m python-3.14*.pkg
+```
+`-s minisign.key` will create / use the private key, the public key will be `minisign.pub` accordingly.
+Attention: Create a backup and do not commit or share your generated private key file `minisign.key`.
+
 Example of verifying a signature using the Docker image:
 
 ```sh
-docker run -v .:/minisign -e HOME=/minisign -w /minisign \
-  -it --rm jedisct1/minisign \
-  -Vm file_to_verify -p minisign.pub
+docker run -i --rm -v .:/host jedisct1/minisign -Vm file_to_verify -p minisign.pub
 ```
+
+`-p minisign.pub` may be omitted if the default name has been generated.
 
 The image can be verified with the following cosign public key:
 
@@ -211,4 +220,3 @@ Other implementations can choose to use non-deterministic signatures by default.
 - [minisign-php](https://github.com/soatok/minisign-php) - PHP implementation
 - [py-minisign](https://github.com/x13a/py-minisign) - Python implementation
 - [minisign](https://hexdocs.pm/minisign/Minisign.html) - Elixir implementation (verification only)
-
