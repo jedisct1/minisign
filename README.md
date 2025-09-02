@@ -68,7 +68,7 @@ zig build -Doptimize=ReleaseSmall
 ```
 
 2. With libsodium, statically linked:
-3. 
+
 ```sh 
 zig build -Doptimize=ReleaseSmall -Dstatic
 ```
