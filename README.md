@@ -57,7 +57,7 @@ Minisign is available in various package managers:
 **Dependencies:**
 
 - [libsodium](https://libsodium.org/) (optional)
-- [zig](https://ziglang.org) (version 0.14.0 or later)
+- [zig](https://ziglang.org) (version 0.15.1 or later)
 
 **Compilation options:**
 
