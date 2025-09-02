@@ -84,6 +84,8 @@ enable_echo(void)
 int
 get_line(char *line, size_t max_len, const char *prompt)
 {
+    int truncated;
+
     memset(line, 0, max_len);
     if (max_len < 2U || max_len > INT_MAX) {
         return -1;
@@ -93,9 +95,10 @@ get_line(char *line, size_t max_len, const char *prompt)
     if (fgets(line, (int) max_len, stdin) == NULL) {
         return -1;
     }
+    truncated = (strchr(line, '\n') == NULL && !feof(stdin));
     trim(line);
-    if (strlen(line) >= max_len) {
-        fprintf(stderr, "(truncated to %u characters)\n", (unsigned int) max_len);
+    if (truncated) {
+        fprintf(stderr, "(truncated to %u characters)\n", (unsigned int) max_len - 1);
     } else if (*line == 0) {
         fprintf(stderr, "(empty)\n");
     } else {
