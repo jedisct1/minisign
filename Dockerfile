@@ -10,8 +10,8 @@ RUN mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_STATI
 RUN upx --lzma build/minisign ||:
 
 WORKDIR /copy/etc
-RUN echo "nogroup:x:65534:" > group \
- && echo "nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin" > passwd
+RUN echo "_minisign:x:65534:" > group \
+ && echo "_minisign:x:65534:65534:minisign:/dev/null:/etc" > passwd
 
 
 FROM scratch
