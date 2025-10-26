@@ -42,34 +42,37 @@ export fn crypto_pwhash_scryptsalsa208sha256(
     return 0;
 }
 
-const crypto_generichash_state = crypto.hash.blake2.Blake2b512;
+const Blake2bState = crypto.hash.blake2.Blake2b512;
+fn blake2bState(state_ptr: *anyopaque) *Blake2bState {
+    return @ptrFromInt(mem.alignForward(usize, @intFromPtr(state_ptr), @alignOf(Blake2bState)));
+}
 
 export fn crypto_generichash_init(
-    state: *crypto_generichash_state,
+    state: *anyopaque,
     _: [*c]const u8,
     _: usize,
     outlen: usize,
 ) c_int {
-    state.* = crypto.hash.blake2.Blake2b512.init(.{ .expected_out_bits = outlen * 8 });
+    blake2bState(state).* = crypto.hash.blake2.Blake2b512.init(.{ .expected_out_bits = outlen * 8 });
     return 0;
 }
 
 export fn crypto_generichash_update(
-    state: *crypto_generichash_state,
+    state: *anyopaque,
     in: [*c]const u8,
     inlen: c_ulonglong,
 ) c_int {
-    state.*.update(in[0..@intCast(inlen)]);
+    blake2bState(state).update(in[0..@intCast(inlen)]);
     return 0;
 }
 
 export fn crypto_generichash_final(
-    state: *crypto_generichash_state,
+    state: *anyopaque,
     out: [*c]u8,
     outlen: usize,
 ) c_int {
     var h: [64]u8 = undefined;
-    state.*.final(&h);
+    blake2bState(state).final(&h);
     @memcpy(out[0..outlen], h[0..outlen]);
     return 0;
 }
