@@ -30,7 +30,7 @@ __attribute__((nonnull));
 
 typedef struct crypto_generichash_state {
     unsigned char opaque[512];
-} crypto_generichash_state;
+} __attribute__((aligned(16))) crypto_generichash_state;
 
 #define crypto_generichash_BYTES_MAX 64U
 #define crypto_generichash_BYTES     32U
