@@ -13,6 +13,7 @@ pub fn build(b: *std.Build) !void {
         .root_module = b.createModule(.{
             .target = target,
             .optimize = optimize,
+            .link_libc = true,
         }),
     });
 
@@ -23,45 +24,44 @@ pub fn build(b: *std.Build) !void {
     // fix Mach-O relocation
     minisign.headerpad_max_install_names = true;
 
-    minisign.linkLibC();
     if (use_libzodium) {
-        var libzodium = lib: {
+        const libzodium = lib: {
             break :lib b.addLibrary(.{
                 .name = "zodium",
                 .root_module = b.createModule(.{
                     .root_source_file = b.path("src/libzodium/libzodium.zig"),
                     .target = target,
                     .optimize = optimize,
+                    .link_libc = true,
                 }),
             });
         };
-        libzodium.linkLibC();
         b.installArtifact(libzodium);
         minisign.root_module.addCMacro("LIBZODIUM", "1");
-        minisign.linkLibrary(libzodium);
+        minisign.root_module.linkLibrary(libzodium);
     } else {
         var override_pkgconfig = false;
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
         defer arena.deinit();
         const allocator = arena.allocator();
         if (std.process.getEnvVarOwned(allocator, "LIBSODIUM_INCLUDE_PATH")) |path| {
-            minisign.addSystemIncludePath(.{ .cwd_relative = path });
+            minisign.root_module.addSystemIncludePath(.{ .cwd_relative = path });
             allocator.free(path);
             override_pkgconfig = true;
         } else |_| {}
         if (std.process.getEnvVarOwned(allocator, "LIBSODIUM_LIB_PATH")) |path| {
-            minisign.addLibraryPath(.{ .cwd_relative = path });
+            minisign.root_module.addLibraryPath(.{ .cwd_relative = path });
             allocator.free(path);
             override_pkgconfig = true;
         } else |_| {}
 
         for ([_][]const u8{ "/opt/homebrew/include", "/home/linuxbrew/.linuxbrew/include", "/usr/local/include" }) |path| {
             std.fs.accessAbsolute(path, .{}) catch continue;
-            minisign.addSystemIncludePath(.{ .cwd_relative = path });
+            minisign.root_module.addSystemIncludePath(.{ .cwd_relative = path });
         }
         for ([_][]const u8{ "/opt/homebrew/lib", "/home/linuxbrew/.linuxbrew/lib", "/usr/local/lib" }) |path| {
             std.fs.accessAbsolute(path, .{}) catch continue;
-            minisign.addLibraryPath(.{ .cwd_relative = path });
+            minisign.root_module.addLibraryPath(.{ .cwd_relative = path });
         }
         if (!use_static_linking) {
             minisign.headerpad_max_install_names = true; // required to compile using Homebrew, see https://github.com/jedisct1/minisign/pull/155
@@ -74,11 +74,11 @@ pub fn build(b: *std.Build) !void {
             },
         );
     }
-    minisign.addIncludePath(b.path("src"));
+    minisign.root_module.addIncludePath(b.path("src"));
 
     minisign.root_module.addCMacro("_GNU_SOURCE", "1");
     const source_files = &.{ "src/base64.c", "src/get_line.c", "src/helpers.c", "src/minisign.c" };
-    minisign.addCSourceFiles(.{ .files = source_files });
+    minisign.root_module.addCSourceFiles(.{ .files = source_files });
 
     b.installArtifact(minisign);
 }
