@@ -55,13 +55,13 @@ pub fn build(b: *std.Build) !void {
             override_pkgconfig = true;
         } else |_| {}
 
-        for ([_][]const u8{ "/opt/homebrew/include", "/home/linuxbrew/.linuxbrew/include", "/usr/local/include" }) |path| {
-            std.fs.accessAbsolute(path, .{}) catch continue;
-            minisign.root_module.addSystemIncludePath(.{ .cwd_relative = path });
+        for ([_][]const u8{ "/opt/homebrew/include", "/home/linuxbrew/.linuxbrew/include", "/usr/local/include" }) |p| {
+            std.Io.Dir.accessAbsolute(b.graph.io, p, .{}) catch continue;
+            minisign.root_module.addSystemIncludePath(.{ .cwd_relative = p });
         }
-        for ([_][]const u8{ "/opt/homebrew/lib", "/home/linuxbrew/.linuxbrew/lib", "/usr/local/lib" }) |path| {
-            std.fs.accessAbsolute(path, .{}) catch continue;
-            minisign.root_module.addLibraryPath(.{ .cwd_relative = path });
+        for ([_][]const u8{ "/opt/homebrew/lib", "/home/linuxbrew/.linuxbrew/lib", "/usr/local/lib" }) |p| {
+            std.Io.Dir.accessAbsolute(b.graph.io, p, .{}) catch continue;
+            minisign.root_module.addLibraryPath(.{ .cwd_relative = p });
         }
         if (!use_static_linking) {
             minisign.headerpad_max_install_names = true; // required to compile using Homebrew, see https://github.com/jedisct1/minisign/pull/155
