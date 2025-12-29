@@ -6,15 +6,15 @@ This man page can be generated using ronn - https://rtomayko.github.io/ronn/
 
 ## SYNOPSIS
 
-`minisign` -G [-p pubkey_file] [-s seckey_file] [-W]
+`minisign` -G [-f] [-p pubkey_file] [-s seckey_file] [-W]
 
 `minisign` -R [-s seckey_file] [-p pubkey_file]
 
 `minisign` -C [-s seckey_file] [-W]
 
-`minisign` -S [-H] [-x sig_file] [-s seckey_file] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]
+`minisign` -S [-l] [-x sig_file] [-s seckey_file] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]
 
-`minisign` -V [-x sig_file] [-p pubkey_file | -P pubkey] [-o] [-q] -m file
+`minisign` -V [-H] [-x sig_file] [-p pubkey_file | -P pubkey] [-o] [-q] -m file
 
 ## DESCRIPTION
 
@@ -37,7 +37,7 @@ These options control the actions of `minisign`.
 - `-V`:
   Verify that a signature is valid for a given file
 - `-H`:
-  Requires the input to be prehashed
+  Combined with -V, requires the signature to be prehashed
 - `-l`:
   Sign using the legacy format
 - `-m <file>`:
