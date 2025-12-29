@@ -72,6 +72,58 @@ usage(void)
     exit(2);
 }
 
+static int
+is_printable(const char *str)
+{
+    const unsigned char *p = (const unsigned char *) (const void *) str;
+
+    while (*p != 0U) {
+        const unsigned char c = *p++;
+
+        if (c == '\t') {
+            continue;
+        } else if (c >= 0x20U && c <= 0x7eU) {
+            continue;
+        } else if (c < 0x20U || c == 0x7fU) {
+            return 0;
+        } else {
+            size_t   need;
+            size_t   i;
+            uint32_t cp;
+
+            if (c >= 0xc2U && c <= 0xdfU) {
+                need = 1U;
+            } else if (c >= 0xe0U && c <= 0xefU) {
+                need = 2U;
+            } else if (c >= 0xf0U && c <= 0xf4U) {
+                need = 3U;
+            } else {
+                return 0;
+            }
+            for (i = 1U; i <= need; i++) {
+                const unsigned char cc = p[i - 1U];
+
+                if (cc == 0U || (cc & 0xc0U) != 0x80U) {
+                    return 0;
+                }
+            }
+            if ((c == 0xe0U && p[0] < 0xa0U) || (c == 0xedU && p[0] > 0x9fU) ||
+                (c == 0xf0U && p[0] < 0x90U) || (c == 0xf4U && p[0] > 0x8fU)) {
+                return 0;
+            }
+            cp = (uint32_t) (c & (need == 1U ? 0x1fU : need == 2U ? 0x0fU : 0x07U));
+            for (i = 1U; i <= need; i++) {
+                cp = (cp << 6) | (uint32_t) (p[i - 1U] & 0x3fU);
+            }
+            if (cp <= 0x1fU || (cp >= 0x7fU && cp <= 0x9fU)) {
+                return 0;
+            }
+            p += need;
+        }
+    }
+    return 1;
+}
+
 static unsigned char *
 message_load_hashed(size_t *message_len, const char *message_file)
 {
@@ -200,6 +252,9 @@ sig_load(const char *sig_file, unsigned char global_sig[crypto_sign_BYTES], int 
             strlen(trusted_comment + sizeof TRUSTED_COMMENT_PREFIX - 1U) + 1U);
     if (trim(trusted_comment) == 0) {
         exit_msg("Trusted comment too long");
+    }
+    if (is_printable(trusted_comment) == 0) {
+        exit_msg("Signature file contains unprintable characters");
     }
     global_sig_s_size = B64_MAX_LEN_FROM_BIN_LEN(crypto_sign_BYTES) + 2U;
     global_sig_s      = xmalloc(global_sig_s_size);
