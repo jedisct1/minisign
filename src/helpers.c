@@ -158,16 +158,21 @@ xfclose(FILE *fp)
 int
 trim(char *str)
 {
-    size_t i = strlen(str);
-    int    t = 0;
+    size_t len = strlen(str);
+    int    t   = 0;
 
-    while (i-- > (size_t) 0U) {
-        if (str[i] == '\n') {
-            str[i] = 0;
-            t      = 1;
-        } else if (str[i] == '\r') {
-            str[i] = 0;
-        }
+    if (len == 0U) {
+        return 0;
+    }
+    if (str[len - 1U] == '\n') {
+        str[--len] = 0;
+        t          = 1;
+    }
+    if (len > 0U && str[len - 1U] == '\r') {
+        str[--len] = 0;
+    }
+    if (memchr(str, '\r', len) != NULL) {
+        return 0;
     }
     return t;
 }
