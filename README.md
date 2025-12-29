@@ -12,9 +12,9 @@ A dead simple tool to sign files and verify signatures.
   - [Overview](#overview)
   - [Documentation](#documentation)
   - [Installation](#installation)
-    - [Pre-built Packages](#pre-built-packages)
+    - [Prebuilt Packages](#prebuilt-packages)
     - [Building with Zig](#building-with-zig)
-    - [Building with cmake and gcc or clang](#building-with-cmake-and-gcc-or-clang)
+    - [Building with CMake and GCC or Clang](#building-with-cmake-and-gcc-or-clang)
   - [Usage](#usage)
     - [Generating a Key Pair](#generating-a-key-pair)
     - [Signing Files](#signing-files)
@@ -215,7 +215,9 @@ Other implementations can choose to use non-deterministic signatures by default.
 
 ## Additional Tools, Libraries and Implementations
 
-- [minizign](https://github.com/jedisct1/zig-minisign) - Compact implementation in Zig that can also use SSH-encoded keys
+[minizign](https://github.com/jedisct1/zig-minisign) is now the recommended implementation. This is where new features are going to be implemented.
+
+Other tools and libraries:
 - [minisign-misc](https://github.com/JayBrown/minisign-misc) - Set of workflows and scripts for macOS to verify and sign files
 - [go-minisign](https://github.com/jedisct1/go-minisign) - Go module to verify Minisign signatures
 - [rust-minisign](https://github.com/jedisct1/rust-minisign) - Minisign library in pure Rust
