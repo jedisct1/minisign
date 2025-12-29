@@ -1002,7 +1002,7 @@ main(int argc, char **argv)
         case '?':
             usage();
         }
-        if (opt_flag > 0 && opt_flag <= (int) sizeof opt_seen / 8) {
+        if (opt_flag > 0 && opt_flag < (int) sizeof opt_seen * 8) {
             if ((opt_seen[opt_flag / 8] & (1U << (opt_flag & 7))) != 0) {
                 fprintf(stderr, "Duplicate option: -- %c\n\n", opt_flag);
                 usage();
