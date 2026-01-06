@@ -41,19 +41,14 @@ pub fn build(b: *std.Build) !void {
         minisign.root_module.linkLibrary(libzodium);
     } else {
         var override_pkgconfig = false;
-        var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-        defer arena.deinit();
-        const allocator = arena.allocator();
-        if (std.process.getEnvVarOwned(allocator, "LIBSODIUM_INCLUDE_PATH")) |path| {
+        if (b.graph.environ_map.get("LIBSODIUM_INCLUDE_PATH")) |path| {
             minisign.root_module.addSystemIncludePath(.{ .cwd_relative = path });
-            allocator.free(path);
             override_pkgconfig = true;
-        } else |_| {}
-        if (std.process.getEnvVarOwned(allocator, "LIBSODIUM_LIB_PATH")) |path| {
+        }
+        if (b.graph.environ_map.get("LIBSODIUM_LIB_PATH")) |path| {
             minisign.root_module.addLibraryPath(.{ .cwd_relative = path });
-            allocator.free(path);
             override_pkgconfig = true;
-        } else |_| {}
+        }
 
         for ([_][]const u8{ "/opt/homebrew/include", "/home/linuxbrew/.linuxbrew/include", "/usr/local/include" }) |p| {
             std.Io.Dir.accessAbsolute(b.graph.io, p, .{}) catch continue;
