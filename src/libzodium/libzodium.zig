@@ -2,6 +2,15 @@ const std = @import("std");
 const crypto = std.crypto;
 const mem = std.mem;
 const Ed25519 = crypto.sign.Ed25519;
+const Io = std.Io;
+
+fn getIo() Io {
+    return Io.Threaded.global_single_threaded.io();
+}
+
+fn secureRandom(buf: []u8) void {
+    getIo().randomSecure(buf) catch @panic("CSPRNG unavailable");
+}
 
 export fn sodium_init() callconv(.c) c_int {
     return 0;
@@ -12,7 +21,7 @@ export fn sodium_memzero(pnt: [*c]u8, len: usize) callconv(.c) void {
 }
 
 export fn randombytes_buf(pnt: [*c]u8, len: usize) callconv(.c) void {
-    crypto.random.bytes(pnt[0..len]);
+    secureRandom(pnt[0..len]);
 }
 
 export fn sodium_malloc(len: usize) callconv(.c) ?*anyopaque {
@@ -78,10 +87,18 @@ export fn crypto_generichash_final(
 }
 
 export fn crypto_sign_keypair(pk: [*c]u8, sk: [*c]u8) callconv(.c) c_int {
-    const kp = if (std.meta.hasFn(Ed25519.KeyPair, "generate")) Ed25519.KeyPair.generate() else (Ed25519.KeyPair.create(null) catch return -1);
-    pk[0..32].* = kp.public_key.toBytes();
-    sk[0..64].* = kp.secret_key.toBytes();
-    return 0;
+    var seed: [Ed25519.KeyPair.seed_length]u8 = undefined;
+    while (true) {
+        secureRandom(&seed);
+        const kp = Ed25519.KeyPair.generateDeterministic(seed) catch {
+            @branchHint(.unlikely);
+            continue;
+        };
+        crypto.secureZero(u8, &seed);
+        pk[0..32].* = kp.public_key.toBytes();
+        sk[0..64].* = kp.secret_key.toBytes();
+        return 0;
+    }
 }
 
 export fn crypto_sign_detached(
@@ -94,7 +111,7 @@ export fn crypto_sign_detached(
     const sk = Ed25519.SecretKey.fromBytes(sk_bytes[0..64].*) catch return -1;
     const kp = Ed25519.KeyPair.fromSecretKey(sk) catch return -1;
     var noise: [Ed25519.noise_length]u8 = undefined;
-    crypto.random.bytes(&noise);
+    secureRandom(&noise);
     const s = kp.sign(m[0..@intCast(mlen)], noise) catch return -1;
     sig_bytes[0..64].* = s.toBytes();
     return 0;
