@@ -14,7 +14,7 @@ This man page can be generated using ronn - https://rtomayko.github.io/ronn/
 
 `minisign` -S [-l] [-x sig_file] [-s seckey_file] [-c untrusted_comment] [-t trusted_comment] -m file [file ...]
 
-`minisign` -V [-H] [-x sig_file] [-p pubkey_file | -P pubkey] [-o] [-q] -m file
+`minisign` -V [-H] [-x sig_file] [-p pubkey_file | -P pubkey] [-o] [-q] [-Q] -m file
 
 ## DESCRIPTION
 
@@ -92,7 +92,7 @@ $ `minisign` -Vm myfile.txt -P &lt;pubkey&gt;
 
 or
 
-$ `minisign` -Vm myfile.txt -p signature.pub
+$ `minisign` -Vm myfile.txt -p minisign.pub
 
 This requires the signature `myfile.txt.minisig` to be present in the same directory.
 

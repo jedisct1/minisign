@@ -19,7 +19,7 @@
 \fBminisign\fR \-S [\-l] [\-x sig_file] [\-s seckey_file] [\-c untrusted_comment] [\-t trusted_comment] \-m file [file \.\.\.]
 .
 .P
-\fBminisign\fR \-V [\-H] [\-x sig_file] [\-p pubkey_file | \-P pubkey] [\-o] [\-q] \-m file
+\fBminisign\fR \-V [\-H] [\-x sig_file] [\-p pubkey_file | \-P pubkey] [\-o] [\-q] [\-Q] \-m file
 .
 .SH "DESCRIPTION"
 \fBMinisign\fR is a dead simple tool to sign files and verify signatures\.
@@ -144,7 +144,7 @@ $ \fBminisign\fR \-Vm myfile\.txt \-P <pubkey>
 or
 .
 .P
-$ \fBminisign\fR \-Vm myfile\.txt \-p signature\.pub
+$ \fBminisign\fR \-Vm myfile\.txt \-p minisign\.pub
 .
 .P
 This requires the signature \fBmyfile\.txt\.minisig\fR to be present in the same directory\.
