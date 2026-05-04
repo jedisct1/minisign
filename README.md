@@ -230,3 +230,4 @@ Other tools and libraries:
 - [minisign-php](https://github.com/soatok/minisign-php) - PHP implementation
 - [py-minisign](https://github.com/x13a/py-minisign) - Python implementation
 - [minisign](https://hexdocs.pm/minisign/Minisign.html) - Elixir implementation (verification only)
+- [minisign-java](https://github.com/linux-china/minisign-java) - Java implementation
