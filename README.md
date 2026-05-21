@@ -5,6 +5,8 @@
 
 A dead simple tool to sign files and verify signatures.
 
+*[minizign](https://github.com/jedisct1/zig-minisign) is now the recommended implementation. This is where new features are going to be implemented.*
+
 ## Table of Contents
 
 - [Minisign](#minisign)
@@ -214,8 +216,6 @@ This implementation uses deterministic signatures, unless libsodium was compiled
 Other implementations can choose to use non-deterministic signatures by default. They will remain fully interoperable with implementations using deterministic signatures.
 
 ## Additional Tools, Libraries and Implementations
-
-[minizign](https://github.com/jedisct1/zig-minisign) is now the recommended implementation. This is where new features are going to be implemented.
 
 Other tools and libraries:
 - [minisign-misc](https://github.com/JayBrown/minisign-misc) - Set of workflows and scripts for macOS to verify and sign files
