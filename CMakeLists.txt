@@ -61,6 +61,12 @@ endif()
 
 find_path(SODIUM_INCLUDE_DIR sodium.h HINTS ${LIBSODIUM_INCLUDE_DIRS} /usr/local/include /opt/local/include /opt/include)
 find_library(SODIUM_LIBRARY NAMES sodium HINTS ${LIBSODIUM_LIBRARY_DIRS} /usr/local/lib /opt/local/lib /opt/lib)
+if(NOT SODIUM_INCLUDE_DIR)
+  message(SEND_ERROR "Could not find libsodium headers (sodium.h). Install libsodium or set SODIUM_INCLUDE_DIR.")
+endif()
+if(NOT SODIUM_LIBRARY)
+  message(SEND_ERROR "Could not find libsodium library. Install libsodium or set SODIUM_LIBRARY.")
+endif()
 
 if(STATIC_LIBSODIUM)
   set(LIBSODIUM_CFLAGS_OTHER ${LIBSODIUM_STATIC_CFLAGS_OTHER})
